@@ -2,15 +2,14 @@
 project: SCM-EDMF ocean
 author: M. Perrot / F. Lemarié 
 ---
+Modifications:
+20/02/24: M. Perrot: remove .nc writting and save t,u,v_history timeseries
 #--------------------------------------------------------------------------------
 Single column oceanic model (SCM) with Eddy-Diffusion/Mass-Flux (EDMF) closure.
 #--------------------------------------------------------------------------------
 General comments : 
-In /src 	Python scripts to generate the figures 
-		(the name of the script corresponds to the name of the figure)
-In /figures	The image files 
-In /data	output files from LES simulations, initial and surface boundary conditions for the asicsmed experiment, and in-situ data from LION buoy
-#-------------------------------------------------------------------------------- 	
+In /data	output files from LES simulations
+#--------------------------------------------------------------------------------
 Ref: Perrot, M. & Lemarié, F. : Energetically consistent Eddy-Diffusivity Mass-Flux schemes for Atmospheric and Oceanic Convection. submitted to JAMES (2024)   
 #--------------------------------------------------------------------------------
 Wrapping of fortran code with f2py
@@ -20,39 +19,7 @@ Wrapping of fortran code with f2py
         make
         if the compilation is successfull you should have 3 .so files in the F2PY directory : scmmfc.so  scmoce.so  scmtke.so
 
-Note : the wrapping of Fortran code is necessary to generate Figures 4,5,6,7,8 
 #--------------------------------------------------------------------------------
 Optional : you can generate the documentation of the fortran code using FORD
 	cd library
   	ford scm_edmf.md -d ./fortran_src/ 
-#--------------------------------------------------------------------------------
-Figure 2 :  
-	cd src/ 
-	python3 FC500_steady_plume.py
-	=> creating a png file in figures/FC500_steady_plume.png
-#--------- 
-Figure 3 :
-	cd src/
-	python3 LES_diags_FC500.py
-        => creating a png file in figures/LES_diags_FC500.png
-#---------
-Figure 4 :
- 	cd src/ 
-        python3 FC50072h_profile_LES_vs_EDMF.py
-	=> creating a png file in figures/FC50072h_profile_LES_vs_EDMF.png
-#---------
-Figure 5 :
-	cd src/
-        python3 W005_C500_NO_COR72h_profile_LES_vs_EDMF.py
-	=> creating a png file in figures/W005_C500_NO_COR72h_profile_LES_vs_EDMF.png	
-#---------
-Figure 6 :
-        cd src/ 
-        python3 W005_C500_engy_budgets.py
-	=> creating a png file in figures/W005_C500_engy_budgets.png
-#---------
-Figure 7 & 8 :
-      	cd src/
-	python3 scm_driver_asicsmed.py
-	=> creating two pdf files in figures/
-#---------
