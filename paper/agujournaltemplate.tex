@@ -316,7 +316,30 @@ The imposed surface plume fraction $a_p(z=0)=\underline{a_p^0}$ and plume vertic
 
 \blu{Is the constraint exposed in appendix of the paper is related to the dicsretization, or is it possible to get the continuous analog?}
 
-Constraints on $C_\epsilon$ and $C_\delta$ can be derived from constraints on $a_p$. In order to ensure that $a_p \leq 1$, we write 
+Constraints on $C_\epsilon$ and $C_\delta$ can be derived from the physical constrain $0\leq a_p \leq 1$. A sufficient condition to ensure that $a_p \leq 1$ at any depth is to impose $\partial_z a_p \geq 0$. It would imply that $a_p(z) \leq a_p(z=0)$ for any $z \leq 0$. Rewriting the $a_p$ equation as
+%
+\begin{eqnarray*}
+    \partial_z a_p = a_p \delta_0 + 
+    \begin{cases}
+        (1-C_\epsilon) a_p \frac{\partial_z w_p}{-w_p} \text{ if } \partial_z w_p \geq 0
+        \\
+        (1-C_\delta) a_p \frac{\partial_z w_p}{-w_p} \text{ if } \partial_z w_p < 0             
+    \end{cases}
+\end{eqnarray*}
+%
+Recalling that $w_p<0$, sufficient conditions to have $\partial_z a_p \geq0$ are $C_\epsilon \leq 1$, $C_\delta \geq 1$ and $\delta_0 \geq 0$. Next we rewrite the $a_p$ equation as
+%
+\begin{eqnarray*}
+    a_p = \partial_z a_p \parenthese{ \delta_0 +  
+    \begin{cases}
+        (1-C_\epsilon)\frac{\partial_z w_p}{-w_p} \text{ if } \partial_z w_p \geq 0
+        \\
+        (1-C_\delta)  \frac{\partial_z w_p}{-w_p} \text{ if } \partial_z w_p < 0              \end{cases}
+    }
+\end{eqnarray*}
+%
+We deduce that sufficient conditions to impose $a_p\geq 0$ when $\partial_z a_p \geq 0$ are once again $C_\epsilon \leq 1$, $C_\delta \geq 1$ and $\delta_0 \geq 0$. \blu{la condition $C_\delta < 2$ vient de la dicsrétisation avec $\Delta z E = 1/2 (a^p_+ + a^p_-) C_\epsilon (\delta_z w^p)^+$. C'est plus une contrainte numérique que physique...}. 
+
 
 
 \section{Bayesian estimation method}
