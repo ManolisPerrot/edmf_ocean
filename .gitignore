@@ -1,2 +1,12 @@
 *.nc
 *.so
+*.aux
+*.fdb_latexmk
+*.fls
+*.log
+*.synctex.gz
+*.bbl
+*.blg
+*.xml
+*.pdf
+*.zip
