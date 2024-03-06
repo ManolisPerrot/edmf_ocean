@@ -340,6 +340,20 @@ Recalling that $w_p<0$, sufficient conditions to have $\partial_z a_p \geq0$ are
 %
 We deduce that sufficient conditions to impose $a_p\geq 0$ when $\partial_z a_p \geq 0$ are once again $C_\epsilon \leq 1$, $C_\delta \geq 1$ and $\delta_0 \geq 0$. \blu{la condition $C_\delta < 2$ vient de la dicsrétisation avec $\Delta z E = 1/2 (a^p_+ + a^p_-) C_\epsilon (\delta_z w^p)^+$. C'est plus une contrainte numérique que physique...}. 
 
+\subsection{$C_u$}
+%
+In this subsection, we provide global energy budgets to highlight the role of mass-flux terms in bulk energy 
+exchange as well as sinks/sources at boundaries. Let us introduce the vertical average 
+$\an{ X }_z = 1/H\int_{- H}^0 X  \, \dd z$, and the boundary operator
+$\sbra{X}_{- H}^0 = 1/ H (X(z=0) - X(z=-H) )$. Then after some algebra we have
+%
+\begin{eqnarray*}
+    \partial_t \an{ E_k }_z &=& - \an{  K_u (\partial_z \overline{\bm u}_h)^2  }_z - \an{ \frac{E + D}{2 (1-C_u) } (\bm u_{h,p} - \overline{\bm u}_h)^2 }_z 
+\\
+ &&  - \sbra{ \overline{\bm u}_h \cdot \overline{w'\bm u_h' } }_{- H}^0- \sbra{ \frac{a_p w_p}{2 (1- C_u)} (\bm u_{h,p} - \overline{\bm u}_h)^2  }_{- H}^0
+\end{eqnarray*}
+%
+Since the term $- \an{ \frac{E + D}{2 (1-C_u) } (\bm u_{h,p} - \overline{\bm u}_h)^2 }_z $ is associated to a transfer from mean kinetic energy to TKE due to entrainent and detrainment processes, it should remain negative. Thus it implies that $C_u < 1$. \blu{\cite{wuEffectsVerticalWind1994} indique en fait que $C_u$ et $C_v$ dépendent de la géométrie de l'écoulement. Typiquement pour des rouleaux selon $x$ $C_u < 2$ et $C_v=0$...}
 
 
 \section{Bayesian estimation method}
