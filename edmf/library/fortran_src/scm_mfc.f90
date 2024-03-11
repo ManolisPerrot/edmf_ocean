@@ -638,7 +638,7 @@ CONTAINS
     LOGICAL                                :: found = .false.
     !=======================================================================
     ! initialize plume properties with surface values
-    a_p(N) = mf_params(nparams-1) ; a_p(0:N-1       ) = 0.
+    a_p(N) = mf_params(8) ; a_p(0:N-1       ) = 0.
     w_p(N) = wp0                  ; w_p(0:N-1       ) = 0.
     u_p(N) = up0                  ; u_p(0:N-1       ) = 0.
     v_p(N) = up0                  ; v_p(0:N-1       ) = 0.
@@ -655,7 +655,7 @@ CONTAINS
     ! unpack parameters
     cent  = mf_params(1); cdet = mf_params(2); aa = mf_params(3)
     bb    = mf_params(4); bp = mf_params(5)
-    Cu    = mf_params(6); Cv = mf_params(7); delta0 = mf_params(nparams)
+    Cu    = mf_params(6); Cv = mf_params(7); delta0 = mf_params(9)
     !=======================================================================
     DO k=N,1,-1
       !! Compute \( B^{\rm p}_{k} \) \[ B^{\rm p}_{k} = - \frac{g}{\rho_0} \left( \rho^{\rm p}_{k+1/2} - \overline{\rho}_k \right) \]
@@ -789,15 +789,16 @@ CONTAINS
     REAL(8)                                :: mxld(0:N), imxld0(1:N)
     REAL(8)                                :: lup, ldwn, epsilon, dtke, rn2
     !=======================================================================
-    ! unpack parameters (mf_params  = [Cent,Cdet,wp_a,wp_b,wp_bp,up_c,vp_c,bc_ap]
+    ! unpack parameters (mf_params  = [Cent,Cdet,wp_a,wp_b,wp_bp,up_c,vp_c,bc_ap,delta0,wpmin]
     beta1 = mf_params(1); aa     = mf_params(3)
     bb    = mf_params(4); bp     = mf_params(5)
     Cu    = mf_params(6); Cv     = mf_params(7)
-    beta2 = mf_params(2); delta0 = mf_params(nparams) 
+    beta2 = mf_params(2); delta0 = mf_params(9) 
+    wpmin = mf_params(10)
     !hello
     !=======================================================================
     ! initialize plume properties with surface values
-    a_p(N) = mf_params(nparams-1) ; a_p(0:N-1       ) = 0.
+    a_p(N) = mf_params(8)         ; a_p(0:N-1       ) = 0.
     w_p(N) = wp0                  ; w_p(0:N-1       ) = 0.
     u_p(N) = (1.-Cu)*up0          ; u_p(0:N-1       ) = 0.
     v_p(N) = (1.-Cv)*vp0          ; v_p(0:N-1       ) = 0.
