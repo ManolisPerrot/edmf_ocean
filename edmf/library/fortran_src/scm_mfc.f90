@@ -793,7 +793,8 @@ CONTAINS
     beta1 = mf_params(1); aa     = mf_params(3)
     bb    = mf_params(4); bp     = mf_params(5)
     Cu    = mf_params(6); Cv     = mf_params(7)
-    beta2 = mf_params(2); delta0 = mf_params(nparams)
+    beta2 = mf_params(2); delta0 = mf_params(nparams) 
+    !hello
     !=======================================================================
     ! initialize plume properties with surface values
     a_p(N) = mf_params(nparams-1) ; a_p(0:N-1       ) = 0.
