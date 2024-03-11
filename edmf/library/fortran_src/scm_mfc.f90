@@ -788,6 +788,8 @@ CONTAINS
     LOGICAL                                :: found    = .false.
     REAL(8)                                :: mxld(0:N), imxld0(1:N)
     REAL(8)                                :: lup, ldwn, epsilon, dtke, rn2
+    REAL(8)                                :: wpmin
+
     !=======================================================================
     ! unpack parameters (mf_params  = [Cent,Cdet,wp_a,wp_b,wp_bp,up_c,vp_c,bc_ap,delta0,wpmin]
     beta1 = mf_params(1); aa     = mf_params(3)
