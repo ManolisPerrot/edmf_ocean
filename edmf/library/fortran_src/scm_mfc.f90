@@ -40,7 +40,7 @@ CONTAINS
     REAL(8), INTENT(  OUT)         :: up0                  !! zonal plume velocity at the surface [m/s]
     REAL(8), INTENT(  OUT)         :: vp0                  !! meridional plume velocity at the surface [m/s]
     REAL(8), INTENT(  OUT)         :: tp0(1:ntra+1)        !! tracer plume properties
-    REAL(8), INTENT(  OUT)         :: wpmin                !! minimum vertical velociy
+    REAL(8), INTENT(IN   )         :: wpmin                !! minimum vertical velociy
     ! local variables
     INTEGER                        :: itrc
     REAL(8)                        :: cff
