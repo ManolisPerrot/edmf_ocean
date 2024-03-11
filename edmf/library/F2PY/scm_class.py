@@ -445,11 +445,16 @@ class SCM:
                                     self.alpha , self.beta, self.MF_small_ap,self.zinv ,
                                     self.nz , self.ntraMF , len(self.mf_params)  )
         if self.mass_flux_entr=='R10':
+          # non-dimensional delta_0 and wp_bp
+          self.mf_params[4] = self.mf_params[4]/self.zinv 
+          self.mf_params[7] = self.mf_params[7]/self.zinv
           self.ap,self.up,self.vp,self.wp,self.tp,self.Bp,self.ent,self.det, self.epsPlume = scm_mfc.mass_flux_r10(
+#          self.ap,self.up,self.vp,self.wp,self.tp,self.Bp,self.ent,self.det, self.zinv = scm_mfc.mass_flux_r10(
                                     u_mean, v_mean, t_mean, self.tke_n, self.z_w, self.Hz,
                                     tp0   , up0   , vp0   , wp0     , self.mf_params,
                                     self.alpha , self.beta, self.MF_small_ap, self.lineos, self.zinv ,
                                     self.nz , self.ntraMF , len(self.mf_params)   )
+          #print(self.zinv)
 #
 
 
