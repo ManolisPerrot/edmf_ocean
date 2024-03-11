@@ -34,7 +34,7 @@ class SCM:
                         tke_sfc_dirichlet = True , eddy_diff_tke_const = 'NEMO',
                         Cent  = 0.55  , Cdet = -1 , wp_a =  1 , wp_b  = 1   ,
                         wp_bp = 0.0002, up_c = 0.5, vp_c = 0.5, bc_ap = 0.1 ,
-                        delta_bkg = 0.,  entr_scheme = 'P09'  ):
+                        delta_bkg = 0., wpmin=1.e-08,  entr_scheme = 'P09'  ):
         """[summary]
         Args:
             nz: Number of grid points. Defaults to 100.
@@ -113,7 +113,7 @@ class SCM:
         self.MF_tra      = mass_flux_tra  ; self.MF_dyn          = mass_flux_dyn
         self.MF_tke      = mass_flux_tke  ; self.MF_tke_trplCorr = mass_flux_tke_trplCorr
         self.mass_flux_entr = entr_scheme ; self.MF_small_ap     = mass_flux_small_ap
-        self.mf_params  = np.array([Cent,Cdet,wp_a,wp_b,wp_bp,up_c,vp_c,bc_ap,delta_bkg])
+        self.mf_params  = np.array([Cent,Cdet,wp_a,wp_b,wp_bp,up_c,vp_c,bc_ap,delta_bkg,wpmin])
         #self.mf_params  = np.array([Cent,2.*Cent,wp_a,wp_b,wp_bp,up_c,vp_c,bc_ap,0.5*wp_bp])
         ####################################
         # define vertical grid
