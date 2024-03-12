@@ -23,15 +23,12 @@ import numpy as np
 
 
 ###################################################
-
-
-
-
 plt.rcParams['text.usetex'] = True
 plt.rcParams.update({'font.size': 18})
 plt.rcParams.update({'figure.facecolor': 'white'})
 plt.rcParams.update({'savefig.facecolor': 'white'})
 ###########################################
+
 # colors
 blue, orange, magenta, grey, green = '#0db4c3', '#eea021', '#ff0364', '#606172', '#3fb532'
 
@@ -179,11 +176,17 @@ for i, run_params in enumerate(runs):
 
 # LOAD outputs
 
-out = [0]*len(runs)
+# TH_scm = [0]*len(runs)
+# U_scm = [0]*len(runs)
+# V_scm = [0]*len(runs)
 
-for i, run_params in enumerate(runs):
-    print('opening '+run_params['output_filename'])
-    out[i] = xr.open_dataset(run_params['output_filename'])
+# #interpolate scm output on LES #TODO do the converse to reduce computation cost?
+
+
+# for i, run_params in enumerate(runs):
+#     TH_scm = scm[i].t_history
+#     U_scm  = scm[i].u_history
+#     V_scm  = scm[i].v_history
 
 instant = 71
 
@@ -192,7 +195,7 @@ mld = (-z_r_les[(-WTH[instant]).argmax()]).data
 
 
 ################################# PLOTTING
-styles = ['k-', 'b-', 'r-']
+styles = ['-', '-', '-']
 #colors = ['k',blue,orange]
 colors = ['k','tab:blue','tab:orange']
 alpha = [0.5,1,1]
@@ -219,7 +222,7 @@ if case == 'W005_C500_NO_COR':
             alpha=alpha_les, linewidth=linewidth_les,  label='LES')
 
     for i, label in enumerate(run_label):
-        ax.plot(scm[i].t_np1[:, 0], out[i].z_r/mld, styles[i], color = colors[i],
+        ax.plot(scm[i].t_np1[:, 0], scm[i].z_r/mld, linestyle=styles[i], color = colors[i],
                 alpha=alpha[i], linewidth=linewidth[i], label=label)
 
     ax.set_xlim((1.55, 1.8))
@@ -253,17 +256,17 @@ if case == 'W005_C500_NO_COR':
     ax.plot(WTH[instant], z_r_les/mld, style_les,
             alpha=alpha_les, linewidth=linewidth_les, label='LES')
 
-    for i, label in enumerate(run_label):
-        if run_label == 'ED':
-            ax.plot(-(scm[i].wted), out[i].z_w/mld, styles[i], color = colors[i],
-                    alpha=alpha[i], linewidth=linewidth[i], label=label)
-        else:
-            ax.plot(-(scm[i].wted + scm[i].wtmf), out[i].z_w/mld, styles[i], color = colors[i],
-                    alpha=alpha[i], linewidth=linewidth[i], label=label)
-    ax.ticklabel_format(style='sci', axis='x', scilimits=(0, 0))
+    #for i, label in enumerate(run_label):
+    #    if run_label == 'ED':
+    #        ax.plot(-(scm[i].wted), scm[i].z_w/mld, styles[i], color = colors[i],
+    #                alpha=alpha[i], linewidth=linewidth[i], label=label)
+    #    else:
+    #        ax.plot(-(scm[i].wted + scm[i].wtmf), scm[i].z_w/mld, styles[i], color = colors[i],
+    #                alpha=alpha[i], linewidth=linewidth[i], label=label)
+    #ax.ticklabel_format(style='sci', axis='x', scilimits=(0, 0))
 
-    ax.plot( -out[1]['WT_ED'][-1,:], out[1].z_w/mld, color ='tab:blue'  , linestyle ='--', alpha=1.0 , linewidth=3 )
-    ax.plot( -out[2]['WT_ED'][-1,:], out[2].z_w/mld, color ='tab:orange', linestyle ='--', alpha=1.0 , linewidth=3 )
+    #ax.plot( -out[1]['WT_ED'][-1,:], out[1].z_w/mld, color ='tab:blue'  , linestyle ='--', alpha=1.0 , linewidth=3 )
+    #ax.plot( -out[2]['WT_ED'][-1,:], out[2].z_w/mld, color ='tab:orange', linestyle ='--', alpha=1.0 , linewidth=3 )
 
 
     ax.set_ylim((-1.3, 0))
@@ -280,7 +283,7 @@ if case == 'W005_C500_NO_COR':
             alpha=alpha_les, linewidth=linewidth_les, label='LES')
 
     for i, label in enumerate(run_label):
-        ax.plot(scm[i].tke_np1, out[i].z_w/mld, styles[i], color = colors[i],
+        ax.plot(scm[i].tke_np1, scm[i].z_w/mld, styles[i], color = colors[i],
                 alpha=alpha[i], linewidth=linewidth[i], label=label)
     ax.ticklabel_format(style='sci', axis='x', scilimits=(0, 0))
 
@@ -298,7 +301,7 @@ if case == 'W005_C500_NO_COR':
             alpha=alpha_les, linewidth=linewidth_les, label='LES')
 
     for i, label in enumerate(run_label):
-        ax.plot((scm[i].wtke), out[i].z_r/mld, styles[i], color = colors[i],
+        ax.plot((scm[i].wtke), scm[i].z_r/mld, styles[i], color = colors[i],
                 alpha=alpha[i], linewidth=linewidth[i], label=label)
 
 
@@ -316,14 +319,14 @@ if case == 'W005_C500_NO_COR':
     ax.plot(-WU[instant], z_r_les/mld, style_les,alpha=alpha_les, linewidth=linewidth_les, label='LES')
 
 
-    for i, label in enumerate(run_label):
-            ax.plot((scm[i].wued + scm[i].wumf), scm[i].z_w/mld, styles[i], color = colors[i],
-                    alpha=alpha[i], linewidth=linewidth[i], label=label)
+    # for i, label in enumerate(run_label):
+    #         ax.plot((scm[i].wued + scm[i].wumf), scm[i].z_w/mld, styles[i], color = colors[i],
+    #                 alpha=alpha[i], linewidth=linewidth[i], label=label)
 
-    ax.ticklabel_format(style='sci', axis='x', scilimits=(0, 0))
+    # ax.ticklabel_format(style='sci', axis='x', scilimits=(0, 0))
 
-    ax.plot( scm[1].wued, scm[1].z_w/mld, color ='tab:blue'  , linestyle ='--', alpha=1.0 , linewidth=3 )
-    ax.plot( scm[2].wued, scm[2].z_w/mld, color ='tab:orange', linestyle ='--', alpha=1.0 , linewidth=3 )
+    # ax.plot( scm[1].wued, scm[1].z_w/mld, color ='tab:blue'  , linestyle ='--', alpha=1.0 , linewidth=3 )
+    # ax.plot( scm[2].wued, scm[2].z_w/mld, color ='tab:orange', linestyle ='--', alpha=1.0 , linewidth=3 )
 
     ax.set_ylim((-1.3, 0))
 
@@ -373,7 +376,7 @@ if case == 'FC500':
             alpha=alpha_les, linewidth=linewidth_les,  label='LES')
 
     for i, label in enumerate(run_label):
-        ax.plot(scm[i].t_np1[:, 0], out[i].z_r/mld, styles[i], color = colors[i],
+        ax.plot(scm[i].t_np1[:, 0], scm[i].z_r/mld, styles[i], color = colors[i],
                 alpha=alpha[i], linewidth=linewidth[i], label=label)
 
     ax.set_xlim((1.65, 1.78))
@@ -390,15 +393,15 @@ if case == 'FC500':
 
     for i, label in enumerate(run_label):
         if run_label == 'ED':
-            ax.plot(-(scm[i].wted), out[i].z_w/mld, styles[i], color = colors[i],
+            ax.plot(-(scm[i].wted), scm[i].z_w/mld, styles[i], color = colors[i],
                     alpha=alpha[i], linewidth=linewidth[i], label=label)
         else:
-            ax.plot(-(scm[i].wted + scm[i].wtmf), out[i].z_w/mld, styles[i], color = colors[i],
+            ax.plot(-(scm[i].wted + scm[i].wtmf), scm[i].z_w/mld, styles[i], color = colors[i],
                     alpha=alpha[i], linewidth=linewidth[i], label=label)
     ax.ticklabel_format(style='sci', axis='x', scilimits=(0, 0))
 
-    ax.plot( -out[1]['WT_ED'][-1,:], out[1].z_w/mld, color ='tab:blue'  , linestyle ='--', alpha=1.0 , linewidth=3 )
-    ax.plot( -out[2]['WT_ED'][-1,:], out[2].z_w/mld, color ='tab:orange', linestyle ='--', alpha=1.0 , linewidth=3 )
+    #ax.plot( -out[1]['WT_ED'][-1,:], out[1].z_w/mld, color ='tab:blue'  , linestyle ='--', alpha=1.0 , linewidth=3 )
+    #ax.plot( -out[2]['WT_ED'][-1,:], out[2].z_w/mld, color ='tab:orange', linestyle ='--', alpha=1.0 , linewidth=3 )
 
     ax.set_ylim((-1.3, 0))
 
@@ -414,7 +417,7 @@ if case == 'FC500':
             alpha=alpha_les, linewidth=linewidth_les, label='LES')
 
     for i, label in enumerate(run_label):
-        ax.plot(scm[i].tke_np1, out[i].z_w/mld, styles[i], color = colors[i],
+        ax.plot(scm[i].tke_np1, scm[i].z_w/mld, styles[i], color = colors[i],
                 alpha=alpha[i], linewidth=linewidth[i], label=label)
     ax.ticklabel_format(style='sci', axis='x', scilimits=(0, 0))
 
@@ -433,7 +436,7 @@ if case == 'FC500':
             alpha=alpha_les, linewidth=linewidth_les, label='LES')
 
     for i, label in enumerate(run_label):
-        ax.plot((scm[i].wtke), out[i].z_r/mld, styles[i], color = colors[i],
+        ax.plot((scm[i].wtke), scm[i].z_r/mld, styles[i], color = colors[i],
                 alpha=alpha[i], linewidth=linewidth[i], label=label)
 
 
@@ -465,4 +468,4 @@ plt.savefig(saving_path+saving_name, bbox_inches='tight', dpi=300)
 
 print('figure saved at'+saving_path+saving_name)
 
-plt.show()
+#plt.show()
