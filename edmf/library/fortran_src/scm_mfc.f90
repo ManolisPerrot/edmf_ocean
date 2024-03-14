@@ -21,13 +21,13 @@ MODULE scm_mfc
 
 CONTAINS
   !===================================================================================================
-  SUBROUTINE compute_MF_bdy(u_m,v_m,t_m,tke,Hz,ntra,npts,wp0,up0,vp0,tp0,wpmin)
+  SUBROUTINE compute_MF_bdy(u_m,v_m,t_m,tke,Hz,wpmin,ntra,npts,wp0,up0,vp0,tp0)
   !---------------------------------------------------------------------------------------------------
     !!==========================================================================<br />
     !!                  ***  ROUTINE compute_MF_bdy  ***                        <br />
     !! ** Purposes : compute top initial condition for mass flux equation       <br />
     !!==========================================================================<br />
-    USE scm_par
+    !USE scm_par
     IMPLICIT NONE
     INTEGER, INTENT(IN   )         :: ntra                 !! number of tracers
     INTEGER, INTENT(IN   )         :: npts                 !! number of points used for extrapolation
@@ -282,7 +282,7 @@ CONTAINS
     !! ** Purposes : compute plume vertical velocity for Rio et al. (2010)
     !!                        entrainment/detrainement closure                  <br />
     !!==========================================================================<br />
-    USE scm_par
+    !USE scm_par
     IMPLICIT NONE
     REAL(8), INTENT(INOUT)      :: wpm          !! vertical velocity at the bottom of the grid cell [m/s]
     REAL(8), INTENT(INOUT)      :: h            !! distance from the top of the grid cell where w_p = w_p_min [m]
@@ -331,7 +331,7 @@ CONTAINS
     !! ** Purposes : compute plume fractional area for Rio et al. (2010)
     !!                        entrainment/detrainement closure                  <br />
     !!==========================================================================<br />
-    USE scm_par
+   ! USE scm_par
     IMPLICIT NONE
     REAL(8), INTENT(INOUT)      :: apm    !! fractional area at the bottom of the grid cell
     REAL(8), INTENT(IN   )      :: app    !! fractional area at the top   of the grid cell
@@ -366,7 +366,7 @@ CONTAINS
   REAL(8) FUNCTION Det_R10(beta1,beta2,wpp,wpm,delta0,hk,wpmin)
     !! Detrainment \( {\rm Det\_R10} = -\frac{D_k h_k}{a^p} = \min\left( \beta_2(w_{k+1/2}^p-w_{k-1/2}^p), 0 \right) + \min\left(-2 w^{\rm p}_{\min}, h_k \delta_0 \frac{w_{k+1/2}^p+w_{k-1/2}^p}{2} \right) \)  <br />
     !! The minimum detrainment \( -2 w^{\rm p}_{\min} \) ensures that \( a^{\rm p}_{k-1/2} = 0 \) as soon as \( w^{\rm p}_{k+1/2} = w^{\rm p}_{k-1/2} = -w^{\rm p}_{\min} \)
-    USE scm_par
+    !USE scm_par
     IMPLICIT NONE
     REAL(8), INTENT(IN)    :: beta1   !! parameter of the MF scheme for the entrainment zone
     REAL(8), INTENT(IN)    :: wpp     !! \( w^{\rm p}_{k+1/2} \)
@@ -408,7 +408,7 @@ CONTAINS
     !! ** Purposes : compute plume tracer properties for Rio et al. (2010)
     !!                        entrainment/detrainement closure                  <br />
     !!==========================================================================<br />
-    USE scm_par
+    !USE scm_par
     IMPLICIT NONE
     REAL(8), INTENT(INOUT)      :: tpm    !! tracer value at the bottom of the grid cell
     REAL(8), INTENT(IN   )      :: tpp    !! tracer value at the top   of the grid cell
@@ -450,7 +450,7 @@ CONTAINS
     !! ** Purposes : compute plume TKE for Rio et al. (2010)
     !!                        entrainment/detrainement closure                  <br />
     !!==========================================================================<br />
-    USE scm_par
+    !USE scm_par
     IMPLICIT NONE
     REAL(8), INTENT(INOUT)      :: tkep_m    !! plume TKE value at the bottom of the grid cell
     REAL(8), INTENT(IN   )      :: tkep_p    !! plume TKE value at the top   of the grid cell
