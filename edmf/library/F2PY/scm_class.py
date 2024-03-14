@@ -113,6 +113,7 @@ class SCM:
         self.MF_tra      = mass_flux_tra  ; self.MF_dyn          = mass_flux_dyn
         self.MF_tke      = mass_flux_tke  ; self.MF_tke_trplCorr = mass_flux_tke_trplCorr
         self.mass_flux_entr = entr_scheme ; self.MF_small_ap     = mass_flux_small_ap
+        self.wpmin = wpmin
         self.mf_params  = np.array([Cent,Cdet,wp_a,wp_b,wp_bp,up_c,vp_c,bc_ap,delta_bkg,wpmin])
         #self.mf_params  = np.array([Cent,2.*Cent,wp_a,wp_b,wp_bp,up_c,vp_c,bc_ap,0.5*wp_bp])
         ####################################
@@ -430,7 +431,7 @@ class SCM:
         wp0,up0,vp0,tp0 = scm_mfc.compute_mf_bdy(
                                       self.u_np1[-2:]  , self.v_np1[-2:],
                                       self.t_np1[-2:,:], self.tke_n[-2:],
-                                      self.Hz[-2:]     , self.ntra, 2 )
+                                      self.Hz[-2:]     , self.wpmin , self.ntra, 2 )
         #=================================================================
         # Compute the mean quantities used to constrain the mass flux eqns
         u_mean,v_mean,t_mean,dtke_m = scm_mfc.compute_mf_forcing(
@@ -446,8 +447,8 @@ class SCM:
                                     self.nz , self.ntraMF , len(self.mf_params)  )
         if self.mass_flux_entr=='R10':
           # non-dimensional delta_0 and wp_bp
-          #self.mf_params[4] = self.mf_params[4]/self.zinv 
-          #self.mf_params[7] = self.mf_params[7]/self.zinv
+          #self.mf_params[4] = -self.mf_params[4]/self.zinv 
+          #self.mf_params[7] = -self.mf_params[7]/self.zinv
           
           self.ap,self.up,self.vp,self.wp,self.tp,self.Bp,self.ent,self.det, self.epsPlume = scm_mfc.mass_flux_r10(
 #          self.ap,self.up,self.vp,self.wp,self.tp,self.Bp,self.ent,self.det, self.zinv = scm_mfc.mass_flux_r10(
