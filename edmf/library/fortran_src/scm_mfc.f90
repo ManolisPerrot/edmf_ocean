@@ -803,9 +803,9 @@ CONTAINS
     !=======================================================================
     ! unpack parameters (mf_params  = [Cent,Cdet,wp_a,wp_b,wp_bp,up_c,vp_c,bc_ap,delta0,wpmin]
     beta1 = mf_params(1); aa     = mf_params(3)
-    bb    = mf_params(4); bp     = mf_params(5)
+    bb    = mf_params(4); bp     = mf_params(5)/(-zinv)
     Cu    = mf_params(6); Cv     = mf_params(7)
-    beta2 = mf_params(2); delta0 = mf_params(9) 
+    beta2 = mf_params(2); delta0 = mf_params(9)/(-zinv)
     wpmin = mf_params(10)
     !hello
     !=======================================================================
