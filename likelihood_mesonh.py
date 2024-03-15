@@ -136,7 +136,7 @@ def likelihood_mesonh(
     wp_a      = 1.,
     wp_b      = 1.25,
     wp_bp     = 0.003,
-    up_c      = 0.5,
+    up_c      = 0.5, #we take up_c=vp_c
     bc_ap     = 0.2,
     delta_bkg = 0.005,
     wpmin     = 1.e-08):
@@ -218,4 +218,6 @@ def likelihood_mesonh(
     # total likelihood is the product of likelihood of each case
     return np.prod(likelihoods)
 
-likelihood_mesonh()
+#### run the function
+out=likelihood_mesonh()
+print('likelihood is ',out)
