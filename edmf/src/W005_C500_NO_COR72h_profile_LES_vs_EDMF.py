@@ -109,12 +109,12 @@ common_params = {
     'Cdet': 1.99,       # 'Cdet': 2.5,
     'wp_a': 1.,
     'wp_b': 1.25,      # 'wp_b': 1.
-    'wp_bp': 0.003,     #      0.002,
+    'wp_bp': 0.003*250,     #      0.002,
     'up_c': 0.5,
     'vp_c': 0.5,
     'bc_ap': 0.2,    #0.3,
-    'delta_bkg': 0.005,   # 0.006,
-    'wpmin' : 1e-8,
+    'delta_bkg': 0.005*250,   # 0.006,
+    'wpmin' : 1.e-08,
     'output_filename': 'run'
 }
 
