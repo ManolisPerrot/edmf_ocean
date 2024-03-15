@@ -10,3 +10,6 @@
 *.xml
 *.pdf
 *.zip
+*.o
+*.mod
+*.pyc
