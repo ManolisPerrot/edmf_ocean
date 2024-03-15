@@ -29,6 +29,7 @@ plt.rcParams.update({'figure.facecolor': 'white'})
 plt.rcParams.update({'savefig.facecolor': 'white'})
 ###########################################
 
+
 # colors
 blue, orange, magenta, grey, green = '#0db4c3', '#eea021', '#ff0364', '#606172', '#3fb532'
 
@@ -109,11 +110,12 @@ common_params = {
     'Cdet': 1.99,       # 'Cdet': 2.5,
     'wp_a': 1.,
     'wp_b': 1.25,      # 'wp_b': 1.
-    'wp_bp': 0.003,     #      0.002,
+    'wp_bp': 0.003*250,     #      0.002,
     'up_c': 0.5,
     'vp_c': 0.5,
     'bc_ap': 0.2,    #0.3,
-    'delta_bkg': 0.005,   # 0.006,
+    'delta_bkg': 0.005*250,   # 0.006,
+    'wpmin' : 1.e-08,
     'output_filename': 'run'
 }
 
@@ -240,7 +242,7 @@ if case == 'W005_C500_NO_COR':
             alpha=alpha_les, linewidth=linewidth_les, label='LES')
 
     for i, label in enumerate(run_label):
-        ax.plot((scm[i].u_np1), scm[i].z_r/mld, styles[i], color = colors[i],
+        ax.plot((scm[i].u_np1), scm[i].z_r/mld, linestyle=styles[i], color = colors[i],
                 alpha=alpha[i], linewidth=linewidth[i], label=label)
 
     ax.ticklabel_format(style='sci', axis='x', scilimits=(0, 0))
@@ -264,6 +266,14 @@ if case == 'W005_C500_NO_COR':
     #        ax.plot(-(scm[i].wted + scm[i].wtmf), scm[i].z_w/mld, styles[i], color = colors[i],
     #                alpha=alpha[i], linewidth=linewidth[i], label=label)
     #ax.ticklabel_format(style='sci', axis='x', scilimits=(0, 0))
+    #for i, label in enumerate(run_label):
+    #    if run_label == 'ED':
+    #        ax.plot(-(scm[i].wted), scm[i].z_w/mld, linestyle=styles[i], color = colors[i],
+    #                alpha=alpha[i], linewidth=linewidth[i], label=label)
+    #    else:
+    #        ax.plot(-(scm[i].wted + scm[i].wtmf), scm[i].z_w/mld, linestyle=styles[i], color = colors[i],
+    #                alpha=alpha[i], linewidth=linewidth[i], label=label)
+    #ax.ticklabel_format(style='sci', axis='x', scilimits=(0, 0))
 
     #ax.plot( -out[1]['WT_ED'][-1,:], out[1].z_w/mld, color ='tab:blue'  , linestyle ='--', alpha=1.0 , linewidth=3 )
     #ax.plot( -out[2]['WT_ED'][-1,:], out[2].z_w/mld, color ='tab:orange', linestyle ='--', alpha=1.0 , linewidth=3 )
@@ -283,7 +293,7 @@ if case == 'W005_C500_NO_COR':
             alpha=alpha_les, linewidth=linewidth_les, label='LES')
 
     for i, label in enumerate(run_label):
-        ax.plot(scm[i].tke_np1, scm[i].z_w/mld, styles[i], color = colors[i],
+        ax.plot(scm[i].tke_np1, scm[i].z_w/mld, linestyle=styles[i], color = colors[i],
                 alpha=alpha[i], linewidth=linewidth[i], label=label)
     ax.ticklabel_format(style='sci', axis='x', scilimits=(0, 0))
 
@@ -301,7 +311,7 @@ if case == 'W005_C500_NO_COR':
             alpha=alpha_les, linewidth=linewidth_les, label='LES')
 
     for i, label in enumerate(run_label):
-        ax.plot((scm[i].wtke), scm[i].z_r/mld, styles[i], color = colors[i],
+        ax.plot((scm[i].wtke), scm[i].z_r/mld, linestyle=styles[i], color = colors[i],
                 alpha=alpha[i], linewidth=linewidth[i], label=label)
 
 
@@ -320,7 +330,7 @@ if case == 'W005_C500_NO_COR':
 
 
     # for i, label in enumerate(run_label):
-    #         ax.plot((scm[i].wued + scm[i].wumf), scm[i].z_w/mld, styles[i], color = colors[i],
+    #         ax.plot((scm[i].wued + scm[i].wumf), scm[i].z_w/mld, linestyle=styles[i], color = colors[i],
     #                 alpha=alpha[i], linewidth=linewidth[i], label=label)
 
     # ax.ticklabel_format(style='sci', axis='x', scilimits=(0, 0))
@@ -376,7 +386,7 @@ if case == 'FC500':
             alpha=alpha_les, linewidth=linewidth_les,  label='LES')
 
     for i, label in enumerate(run_label):
-        ax.plot(scm[i].t_np1[:, 0], scm[i].z_r/mld, styles[i], color = colors[i],
+        ax.plot(scm[i].t_np1[:, 0], scm[i].z_r/mld, linestyle=styles[i], color = colors[i],
                 alpha=alpha[i], linewidth=linewidth[i], label=label)
 
     ax.set_xlim((1.65, 1.78))
@@ -393,10 +403,10 @@ if case == 'FC500':
 
     for i, label in enumerate(run_label):
         if run_label == 'ED':
-            ax.plot(-(scm[i].wted), scm[i].z_w/mld, styles[i], color = colors[i],
+            ax.plot(-(scm[i].wted), scm[i].z_w/mld, linestyle=styles[i], color = colors[i],
                     alpha=alpha[i], linewidth=linewidth[i], label=label)
         else:
-            ax.plot(-(scm[i].wted + scm[i].wtmf), scm[i].z_w/mld, styles[i], color = colors[i],
+            ax.plot(-(scm[i].wted + scm[i].wtmf), scm[i].z_w/mld, linestyle=styles[i], color = colors[i],
                     alpha=alpha[i], linewidth=linewidth[i], label=label)
     ax.ticklabel_format(style='sci', axis='x', scilimits=(0, 0))
 
@@ -417,7 +427,7 @@ if case == 'FC500':
             alpha=alpha_les, linewidth=linewidth_les, label='LES')
 
     for i, label in enumerate(run_label):
-        ax.plot(scm[i].tke_np1, scm[i].z_w/mld, styles[i], color = colors[i],
+        ax.plot(scm[i].tke_np1, scm[i].z_w/mld, linestyle=styles[i], color = colors[i],
                 alpha=alpha[i], linewidth=linewidth[i], label=label)
     ax.ticklabel_format(style='sci', axis='x', scilimits=(0, 0))
 
@@ -436,7 +446,7 @@ if case == 'FC500':
             alpha=alpha_les, linewidth=linewidth_les, label='LES')
 
     for i, label in enumerate(run_label):
-        ax.plot((scm[i].wtke), scm[i].z_r/mld, styles[i], color = colors[i],
+        ax.plot((scm[i].wtke), scm[i].z_r/mld, linestyle=styles[i], color = colors[i],
                 alpha=alpha[i], linewidth=linewidth[i], label=label)
 
 
