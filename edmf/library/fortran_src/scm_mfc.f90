@@ -21,13 +21,13 @@ MODULE scm_mfc
 
 CONTAINS
   !===================================================================================================
-  SUBROUTINE compute_MF_bdy(u_m,v_m,t_m,tke,Hz,ntra,npts,wp0,up0,vp0,tp0)
+  SUBROUTINE compute_MF_bdy(u_m,v_m,t_m,tke,Hz,ntra,npts,up0,vp0,tp0)
   !---------------------------------------------------------------------------------------------------
     !!==========================================================================<br />
     !!                  ***  ROUTINE compute_MF_bdy  ***                        <br />
     !! ** Purposes : compute top initial condition for mass flux equation       <br />
     !!==========================================================================<br />
-    USE scm_par
+    !USE scm_par
     IMPLICIT NONE
     INTEGER, INTENT(IN   )         :: ntra                 !! number of tracers
     INTEGER, INTENT(IN   )         :: npts                 !! number of points used for extrapolation
@@ -36,7 +36,7 @@ CONTAINS
     REAL(8), INTENT(IN   )         :: v_m  (1:npts)        !! mean meridional velocity [m/s]
     REAL(8), INTENT(IN   )         :: t_m  (1:npts,1:ntra) !! mean tracers
     REAL(8), INTENT(IN   )         :: Hz   (1:npts)        !! layer thickness [m]
-    REAL(8), INTENT(  OUT)         :: wp0                  !! vertical plume velocity at the surface [m/s]
+    !REAL(8), INTENT(  OUT)         :: wp0                  !! vertical plume velocity at the surface [m/s]
     REAL(8), INTENT(  OUT)         :: up0                  !! zonal plume velocity at the surface [m/s]
     REAL(8), INTENT(  OUT)         :: vp0                  !! meridional plume velocity at the surface [m/s]
     REAL(8), INTENT(  OUT)         :: tp0(1:ntra+1)        !! tracer plume properties
@@ -44,7 +44,7 @@ CONTAINS
     INTEGER                        :: itrc
     REAL(8)                        :: cff
     !
-    wp0   = - wpmin  !! \( w^{\rm p}_{\rm sfc} = - w^{\rm p}_{\min} \)<br />
+    !wp0   = - wpmin  !! \( w^{\rm p}_{\rm sfc} = - w^{\rm p}_{\min} \)<br />
     !
     cff = 1./(Hz(npts-1)+Hz(npts))
     DO itrc = 1,ntra   ! temperature & salinity
