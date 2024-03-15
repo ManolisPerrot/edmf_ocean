@@ -789,15 +789,14 @@ CONTAINS
     REAL(8)                                :: mxld(0:N), imxld0(1:N)
     REAL(8)                                :: lup, ldwn, epsilon, dtke, rn2
     !=======================================================================
-    ! unpack parameters (mf_params  = [Cent,Cdet,wp_a,wp_b,wp_bp,up_c,vp_c,bc_ap]
+
     beta1 = mf_params(1); aa     = mf_params(3)
-    bb    = mf_params(4); bp     = mf_params(5)
+    bb    = mf_params(4); bp     = mf_params(5)/(-zinv)
     Cu    = mf_params(6); Cv     = mf_params(7)
-    beta2 = mf_params(2); delta0 = mf_params(nparams) 
-    !hello
+    beta2 = mf_params(2); delta0 = mf_params(9)/(-zinv)
     !=======================================================================
     ! initialize plume properties with surface values
-    a_p(N) = mf_params(nparams-1) ; a_p(0:N-1       ) = 0.
+    a_p(N) = mf_params(8)         ; a_p(0:N-1       ) = 0.
     w_p(N) = wp0                  ; w_p(0:N-1       ) = 0.
     u_p(N) = (1.-Cu)*up0          ; u_p(0:N-1       ) = 0.
     v_p(N) = (1.-Cv)*vp0          ; v_p(0:N-1       ) = 0.
