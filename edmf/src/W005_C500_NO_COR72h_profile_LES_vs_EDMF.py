@@ -115,7 +115,7 @@ common_params = {
     'vp_c': 0.5,
     'bc_ap': 0.2,    #0.3,
     'delta_bkg': 0.005,   # 0.006,
-    'wp0' : -5.e-02,
+    'wp0' : -50.e-03,
     'output_filename': 'run'
 }
 

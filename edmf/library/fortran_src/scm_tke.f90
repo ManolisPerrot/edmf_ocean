@@ -16,7 +16,7 @@ MODULE scm_tke
 
 CONTAINS
 
-  SUBROUTINE compute_tke_bdy(taux, tauy, tke_const, tke_sfc, tke_bot, flux_sfc)
+  SUBROUTINE compute_tke_bdy(taux, tauy, tke_const, bc_ap, wp0, tke_sfc, tke_bot, flux_sfc)
     !!==========================================================================<br />
     !!                  ***  ROUTINE compute_tke_bdy  ***                       <br />
     !! ** Purposes : compute top and bottom boundary conditions for TKE equation<br />
@@ -27,9 +27,11 @@ CONTAINS
     REAL(8), INTENT(IN   )         :: tauy         !! meridional surface stress [m2/s2]
 !    REAL(8), INTENT(IN   )         :: Bsfc         !! surface buoyancy flux     [m2/s3]
     INTEGER, INTENT(IN   )         :: tke_const    !! choice of TKE constants
+    REAL(8), INTENT(IN   )         :: bc_ap        !! choice of TKE constants
+    REAL(8), INTENT(IN   )         :: wp0          !! surface value for plume vertical velocity [m/s]
     REAL(8), INTENT(  OUT)         :: tke_sfc      !! surface value for Dirichlet condition [m2/s2]
     REAL(8), INTENT(  OUT)         :: tke_bot      !! bottom value for Dirichlet condition [m2/s2]
-    REAL(8), INTENT(  OUT)         :: flux_sfc     !! surface TKE flux for Neumann condition [m3/s3]
+    REAL(8), INTENT(  OUT)         :: flux_sfc     !! surface TKE ED flux for Neumann condition [m3/s3]
     !local variables
     REAL(8)                        :: wstar2, ustar2, cff
     ! velocity scales
@@ -38,8 +40,8 @@ CONTAINS
     !
     IF( ustar2 == 0. ) THEN !! free convection case ( \( {\rm tke\_sfc\_dirichlet = True}  \) ) :
       tke_sfc  = 0.0001     !! \( k_{\rm sfc} = 1.5 \times 10^{-3}\;{\rm m}^2\;{\rm s}^{-2} \)<br />
-      flux_sfc = 0.
-    ELSE                    !! wind_cooling case ( \( {\rm tke\_sfc\_dirichlet = False}  \) ) : \(  F_{\rm sfc}^k = \left.  K_e \partial_z k \right|_{\rm sfc} = 0\;{\rm m}^3\;{\rm s}^{-3}    \) <br />
+      flux_sfc = 0.5*bc_ap*(wp0)**3 !! energetically consistent boundary condition \( F_{\rm sfc}^k = \left.  K_e \partial_z k \right|_{\rm sfc} \)
+    ELSE                    
       IF(tke_const==0) THEN
         cff = 1./SQRT(cm_nemo*ceps_nemo)
       ELSE IF(tke_const==1) THEN
@@ -49,7 +51,8 @@ CONTAINS
       ENDIF
       !tke_sfc  = cff*ustar2
       tke_sfc  = 67.83*ustar2
-      flux_sfc = 0.   !2.*67.83*ustar2*SQRT(ustar2)
+      flux_sfc = 0.5*bc_ap*(wp0)**3 !! energetically consistent boundary condition \( F_{\rm sfc}^k = \left.  K_e \partial_z k \right|_{\rm sfc} \)
+      !2.*67.83*ustar2*SQRT(ustar2)
     ENDIF
     ! bottom boundary condition
     tke_bot  = tke_min  !! bottom boundary condition : \( k_{\rm bot} = k_{\rm min}  \)
@@ -97,7 +100,7 @@ CONTAINS
     REAL(8), INTENT(IN   )   :: dt                           !! time-step [s]
     REAL(8), INTENT(IN   )   :: tke_sfc                      !! surface boundary condition for TKE [m2/s2]
     REAL(8), INTENT(IN   )   :: tke_bot                      !! bottom boundary condition for TKE [m2/s2]
-    REAL(8), INTENT(IN   )   :: flux_sfc                     !! surface TKE flux [m3/s3]
+    REAL(8), INTENT(IN   )   :: flux_sfc                     !! surface TKE ED flux for Neumann condition [m3/s3]
     REAL(8), INTENT(IN   )   :: tke_n  (0:N)                 !! TKE at time n    [m2/s2]
     REAL(8), INTENT(IN   )   :: lup    (0:N)                 !! upward mixing length [m]
     REAL(8), INTENT(IN   )   :: ldwn   (0:N)                 !! downward mixing length [m]

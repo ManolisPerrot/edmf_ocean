@@ -34,7 +34,7 @@ class SCM:
                         tke_sfc_dirichlet = True , eddy_diff_tke_const = 'NEMO',
                         Cent  = 0.55  , Cdet = -1 , wp_a =  1 , wp_b  = 1   ,
                         wp_bp = 0.0002, up_c = 0.5, vp_c = 0.5, bc_ap = 0.1 ,
-                        delta_bkg = 0., wp0=1.e-08,  entr_scheme = 'P09'  ):
+                        delta_bkg = 0., wp0=-1.e-08,  entr_scheme = 'P09'  ):
         """[summary]
         Args:
             nz: Number of grid points. Defaults to 100.
@@ -115,6 +115,7 @@ class SCM:
         self.mass_flux_entr = entr_scheme ; self.MF_small_ap     = mass_flux_small_ap
         self.mf_params  = np.array([Cent,Cdet,wp_a,wp_b,wp_bp,up_c,vp_c,bc_ap,delta_bkg])
         self.wp0 = wp0
+        self.bc_ap = bc_ap
         #self.mf_params  = np.array([Cent,2.*Cent,wp_a,wp_b,wp_bp,up_c,vp_c,bc_ap,0.5*wp_bp])
         ####################################
         # define vertical grid
@@ -362,7 +363,7 @@ class SCM:
         #=======================================
         # Compute boundary conditions for TKE
         tke_sfc,tke_bot, flux_sfc = scm_tke.compute_tke_bdy(
-                                      self.taux,  self.tauy, self.ED_tke_const  )
+                                      self.taux,  self.tauy, self.ED_tke_const, self.bc_ap, self.wp0 )
         #=======================================
         # Compute TKE production by shear
         self.shear = scm_tke.compute_shear(
