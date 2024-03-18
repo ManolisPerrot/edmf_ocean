@@ -137,6 +137,8 @@ CONTAINS
     !===============================================================
     ! Compute fluxes at rho-points and flux divergence at w-points
     FC      (1:N) = 0.
+    FC(N) = 0.5*Fmass(N)*(w_p(N))**2 ! attention Fmass=-apwp
+    wtke(N) = wtke(N) - FC(N)
     trplCorr(0:N) = 0.
     tke_env (0:N) = 0.
     !

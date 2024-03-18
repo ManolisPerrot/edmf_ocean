@@ -362,8 +362,12 @@ class SCM:
         #  Bsfc,self.alpha,self.beta = scm_oce.compute_bsfc(self.t_np1[-1,self.itemp],self.t_np1[-1,self.isalt],self.stflx,self.srflx,self.ntra)
         #=======================================
         # Compute boundary conditions for TKE
-        tke_sfc,tke_bot, flux_sfc = scm_tke.compute_tke_bdy(
+        if self.MF_tke_trplCorr:
+            tke_sfc,tke_bot, flux_sfc = scm_tke.compute_tke_bdy(
                                       self.taux,  self.tauy, self.ED_tke_const, self.bc_ap, self.wp0 )
+        else:
+           tke_sfc,tke_bot, flux_sfc = scm_tke.compute_tke_bdy(
+                                      self.taux,  self.tauy, self.ED_tke_const, 0.*self.bc_ap, 0.*self.wp0 )
         #=======================================
         # Compute TKE production by shear
         self.shear = scm_tke.compute_shear(
