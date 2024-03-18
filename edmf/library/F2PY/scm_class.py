@@ -413,7 +413,8 @@ class SCM:
         self.vint_TKE = sum( (self.z_r[1:self.nz]-self.z_r[0:self.nz-1])
                         *(self.tke_np1[1:self.nz]-self.tke_n[1:self.nz])/self.dt )
         #surface boundary contribution
-        self.vint_TKE = self.vint_TKE - 0.5*self.inv_schmidt*(self.akv[-1]+self.akv[-2])*(self.tke_np1[-1]-self.tke_np1[-2])/self.Hz[-1]
+        # self.vint_TKE = self.vint_TKE - 0.5*self.inv_schmidt*(self.akv[-1]+self.akv[-2])*(self.tke_np1[-1]-self.tke_np1[-2])/self.Hz[-1]
+        self.vint_TKE = self.vint_TKE + self.wtke[-1] #TODO : à tester !
         self.vint_TKE = self.vint_TKE - residual # remove the component artificially added
         self.tke_n[:] = self.tke_np1[:]
         #
