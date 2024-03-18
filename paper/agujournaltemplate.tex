@@ -272,7 +272,7 @@ In the present study, the eddy viscosity $K_u$ and diffusivities $K_\theta=K_S$
 in turbulent vertical fluxes are computed from a turbulence closure model based on a 
 prognostic equation for the turbulent kinetic energy (TKE) 
 $\displaystyle k = \overline{{\bm u}' \cdot {\bm u}'} / 2$ and a diagnostic 
-computation of appropriate length scales (a.k.a. 1.5-order turbulence closure; see \citeA{perrotEnergeticallyConsistentEddyDiffusivity2024} for details). The plume variables $a_p$, $w_p$, $X_p$ are computed via the following ODEs, in which appears the parameters to estimate:
+computation of appropriate length scales (a.k.a. 1.5-order turbulence closure; see \citeA{perrotEnergeticallyConsistentEddyDiffusivity2024} for details). The plume fractional area, velocities, temperature and salinity $a_p, u_p, v_p,w_p, \theta_p, S_p$ are computed via the following system of ODEs
 %
 \begin{eqnarray*}
     \begin{cases}
@@ -284,15 +284,15 @@ computation of appropriate length scales (a.k.a. 1.5-order turbulence closure; s
         \\
         a_p w_p \partial_z \bm u_{h,p} = E (\overline{\bm u}_h - \bm u_{h,p}) + a_p w_p \underline{C_u} \partial_z   \overline{\bm u}_h 
         \\
-        a_p w_p \partial_z w_p = - \underline{b} E w_p + \underline{a} a_p (b_{\rm{eos}}(\theta_p, S_p) - b_{\rm{eos}}(\overline{\theta},\overline{S}) ) +\underline{ b'} a_p (w_p)^2 
+        a_p w_p \partial_z w_p = - \underline{b} E w_p + \underline{a} a_p (b_{\rm{eos}}(\theta_p, S_p) - b_{\rm{eos}}(\overline{\theta},\overline{S}) ) +\underline{ b'} \frac{1}{h} a_p (w_p)^2 
         \\
         E = a_p \underline{C_{\epsilon}} \max (0,\partial_z w_p)
         \\
-        D = -a_p \underline{C_{\delta}} \min (0,\partial_z w_p) - a_p w_p \underline{\delta_0}
+        D = -a_p \underline{C_{\delta}} \min (0,\partial_z w_p) - a_p w_p \underline{\delta_0}\frac{1}{h}
     \end{cases}
 \end{eqnarray*}
 %
-The imposed surface plume fraction $a_p(z=0)=\underline{a_p^0}$ and plume vertical velocity $w_p(z=0) = \underline{w_p^0}$ provide two additional parameters \blu{TODO: rajouter wp0 dans le code !!}. As a summary, the parameters to estimate forms an array $\bm C = (C_\epsilon, C_\delta, C_u, a, b, b', \delta_0, a_p^0, w_p^0)$. Note that the TKE equation contains also adjustable parameters. However we do not include them in the estimation procedure, since we aim to recover the standard TKE scheme in non convective conditions.  
+where $h(t)$ is a plume vertical length, computed as the depth at which $w_p$ reaches a minimum value $w_p^{\rm min}$. \blu{TODO: use wp0 as a paramter, different from wpmin !!} The imposed surface plume fraction $a_p(z=0)=\underline{a_p^0}$ and plume vertical velocity $w_p(z=0) = \underline{w_p^0}$ provide two additional parameters. Consequently the parameters to estimate forms an array $\bm C = (C_\epsilon, C_\delta, C_u, a, b, b', \delta_0, a_p^0, w_p^0)$. Note that the TKE equation contains also adjustable parameters. However we do not include them in the estimation procedure, since we aim to recover the standard TKE scheme in non convective conditions.  
 
 
 % Finally, the parameterized TKE equation is
@@ -316,7 +316,7 @@ The imposed surface plume fraction $a_p(z=0)=\underline{a_p^0}$ and plume vertic
 
 \blu{Is the constraint exposed in appendix of the paper is related to the dicsretization, or is it possible to get the continuous analog?}
 
-Constraints on $C_\epsilon$ and $C_\delta$ can be derived from the physical constrain $0\leq a_p \leq 1$. A sufficient condition to ensure that $a_p \leq 1$ at any depth is to impose $\partial_z a_p \geq 0$. It would imply that $a_p(z) \leq a_p(z=0)$ for any $z \leq 0$. Rewriting the $a_p$ equation as
+Constraints on $C_\epsilon$ and $C_\delta$ can be derived from the physical constraint $0\leq a_p \leq 1$. A sufficient condition to ensure that $a_p \leq 1$ at any depth is to impose $\partial_z a_p \geq 0$. It would imply that $a_p(z) \leq a_p(z=0)$ for any $z \leq 0$. Rewriting the $a_p$ equation as
 %
 \begin{eqnarray*}
     \partial_z a_p = a_p \delta_0 + 
@@ -366,7 +366,8 @@ buoyancy due to pushing and pulling on the environment – and a reduced entrain
 
 \subsection{$b'$ and $\delta_0$}
 
-\blu{Ces coefs sont des longeurs... à reprendre pour adimensionner... Tan ?}
+Compared to the original version exposed in \cite{perrotEnergeticallyConsistentEddyDiffusivity2024}, the terms involving $b'$ and $\delta_0$ has been rescaled by $\frac{1}{h}$ to obtain non-dimensional parameters.
+
 
 \subsection{}
 

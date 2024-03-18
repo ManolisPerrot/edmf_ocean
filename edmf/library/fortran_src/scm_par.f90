@@ -6,7 +6,7 @@ MODULE scm_par
    REAL(8), PUBLIC, PARAMETER ::   rho0    = 1027.          !! Boussinesq reference density [kg/m3]
    REAL(8), PUBLIC, PARAMETER ::   cp      = 3985.0d0       !! Specific heat capacity of saltwater [J/kg K]
    REAL(8), PUBLIC, PARAMETER ::   rpi     = 4.*ATAN(1.)    !! \( \pi \)
-   REAL(8), PUBLIC, PARAMETER ::   wpmin   = 1.e-08         !! Minimum value of \( w^{\rm p} \) [m/s] <br />
+   !REAL(8), PUBLIC, PARAMETER ::   wpmin   = 1.e-08         !! Minimum value of \( w^{\rm p} \) [m/s] <br />
    !
    !---------------------------------------------------------------------
    ! SCM parameters for TKE turbulent closure <br />
