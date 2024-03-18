@@ -41,6 +41,7 @@ CONTAINS
     IF( ustar2 == 0. ) THEN !! free convection case ( \( {\rm tke\_sfc\_dirichlet = True}  \) ) :
       tke_sfc  = 0.0001     !! \( k_{\rm sfc} = 1.5 \times 10^{-3}\;{\rm m}^2\;{\rm s}^{-2} \)<br />
       flux_sfc = 0.5*bc_ap*(wp0)**3 !! energetically consistent boundary condition \( F_{\rm sfc}^k = \left.  K_e \partial_z k \right|_{\rm sfc} \)
+      !flux_sfc =0.
     ELSE                    
       IF(tke_const==0) THEN
         cff = 1./SQRT(cm_nemo*ceps_nemo)

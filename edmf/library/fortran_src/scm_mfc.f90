@@ -27,7 +27,7 @@ CONTAINS
     !!                  ***  ROUTINE compute_MF_bdy  ***                        <br />
     !! ** Purposes : compute top initial condition for mass flux equation       <br />
     !!==========================================================================<br />
-    !USE scm_par
+    USE scm_par
     IMPLICIT NONE
     INTEGER, INTENT(IN   )         :: ntra                 !! number of tracers
     INTEGER, INTENT(IN   )         :: npts                 !! number of points used for extrapolation
@@ -40,7 +40,6 @@ CONTAINS
     REAL(8), INTENT(  OUT)         :: up0                  !! zonal plume velocity at the surface [m/s]
     REAL(8), INTENT(  OUT)         :: vp0                  !! meridional plume velocity at the surface [m/s]
     REAL(8), INTENT(  OUT)         :: tp0(1:ntra+1)        !! tracer plume properties
-    REAL(8), INTENT(IN   )         :: wpmin                !! minimum vertical velociy
     ! local variables
     INTEGER                        :: itrc
     REAL(8)                        :: cff
@@ -275,14 +274,14 @@ CONTAINS
 
 
   !===================================================================================================
-  SUBROUTINE get_w_p_R10(wpm,wpp,aa,bb,bpr,beta1,Hz,Bp,h,found,wpmin)
+  SUBROUTINE get_w_p_R10(wpm,wpp,aa,bb,bpr,beta1,Hz,Bp,h,found)
   !---------------------------------------------------------------------------------------------------
     !!==========================================================================<br />
     !!                  ***  ROUTINE get_w_p_R10  ***                           <br />
     !! ** Purposes : compute plume vertical velocity for Rio et al. (2010)
     !!                        entrainment/detrainement closure                  <br />
     !!==========================================================================<br />
-    !USE scm_par
+    USE scm_par
     IMPLICIT NONE
     REAL(8), INTENT(INOUT)      :: wpm          !! vertical velocity at the bottom of the grid cell [m/s]
     REAL(8), INTENT(INOUT)      :: h            !! distance from the top of the grid cell where w_p = w_p_min [m]
@@ -294,7 +293,7 @@ CONTAINS
     REAL(8), INTENT(IN   )      :: bb           !! parameter of the MF scheme
     REAL(8), INTENT(IN   )      :: bpr          !! parameter of the MF scheme
     REAL(8), INTENT(IN   )      :: beta1        !! parameter of the MF scheme
-    REAL(8), INTENT(IN   )      :: wpmin        !! minimum vertical velociy
+    !REAL(8), INTENT(IN   )      :: wpmin        !! minimum vertical velociy
 
     ! local variables
     REAL(8)                     :: cff1,cff,rhsw,wpm2
@@ -324,14 +323,14 @@ CONTAINS
 
 
   !===================================================================================================
-  SUBROUTINE get_a_p_R10(apm,app,wpm,wpp,beta1,beta2,hk,delta0,wpmin)
+  SUBROUTINE get_a_p_R10(apm,app,wpm,wpp,beta1,beta2,hk,delta0)
   !---------------------------------------------------------------------------------------------------
     !!==========================================================================<br />
     !!                  ***  ROUTINE get_a_p_R10  ***                           <br />
     !! ** Purposes : compute plume fractional area for Rio et al. (2010)
     !!                        entrainment/detrainement closure                  <br />
     !!==========================================================================<br />
-   ! USE scm_par
+    USE scm_par
     IMPLICIT NONE
     REAL(8), INTENT(INOUT)      :: apm    !! fractional area at the bottom of the grid cell
     REAL(8), INTENT(IN   )      :: app    !! fractional area at the top   of the grid cell
@@ -341,12 +340,11 @@ CONTAINS
     REAL(8), INTENT(IN   )      :: hk     !! thickness of the grid cell [m]
     REAL(8), INTENT(IN   )      :: delta0 !! background detrainement in the entrainment zone [m-1]
     REAL(8), INTENT(IN   )      :: beta2  !! parameter of the MF scheme for the detrainment zone
-    REAL(8), INTENT(IN   )      :: wpmin  !! minimum vertical velociy
     !local variables
     REAL(8)                 :: cff1,cff,EmD
     !
     EmD = Ent_R10(beta1,wpp,wpm)                  + &
-          Det_R10(beta1,beta2,wpp,wpm,delta0,hk,wpmin) !! \(   {\rm EmD}_k = \frac{h_k}{a^{\rm p}} \left( E_k - D_k \right) = {\rm Ent\_R10} + {\rm Det\_R10}  \)  <br />
+          Det_R10(beta1,beta2,wpp,wpm,delta0,hk) !! \(   {\rm EmD}_k = \frac{h_k}{a^{\rm p}} \left( E_k - D_k \right) = {\rm Ent\_R10} + {\rm Det\_R10}  \)  <br />
     cff  = 1. / (2.*wpm+EmD)
     cff1 = app *(2.*wpp-EmD)
     apm = cff*cff1   !! \(  a^{\rm p}_{k-1/2} = a^{\rm p}_{k+1/2} \left(  \frac{2 w^{\rm p}_{k+1/2} - {\rm EmD}_k}{2 w^{\rm p}_{k-1/2} + {\rm EmD}_k}   \right)   \) <br />
@@ -363,10 +361,10 @@ CONTAINS
     Ent_R10 = MAX( beta1*(wpp-wpm), 0. )
   END FUNCTION Ent_R10
 
-  REAL(8) FUNCTION Det_R10(beta1,beta2,wpp,wpm,delta0,hk,wpmin)
+  REAL(8) FUNCTION Det_R10(beta1,beta2,wpp,wpm,delta0,hk)
     !! Detrainment \( {\rm Det\_R10} = -\frac{D_k h_k}{a^p} = \min\left( \beta_2(w_{k+1/2}^p-w_{k-1/2}^p), 0 \right) + \min\left(-2 w^{\rm p}_{\min}, h_k \delta_0 \frac{w_{k+1/2}^p+w_{k-1/2}^p}{2} \right) \)  <br />
     !! The minimum detrainment \( -2 w^{\rm p}_{\min} \) ensures that \( a^{\rm p}_{k-1/2} = 0 \) as soon as \( w^{\rm p}_{k+1/2} = w^{\rm p}_{k-1/2} = -w^{\rm p}_{\min} \)
-    !USE scm_par
+    USE scm_par
     IMPLICIT NONE
     REAL(8), INTENT(IN)    :: beta1   !! parameter of the MF scheme for the entrainment zone
     REAL(8), INTENT(IN)    :: wpp     !! \( w^{\rm p}_{k+1/2} \)
@@ -375,7 +373,7 @@ CONTAINS
     REAL(8), INTENT(IN)    :: hk      !! Thickness \( h_k /) of layer k
     REAL(8), INTENT(IN)    :: beta2   !! parameter of the MF scheme for the detrainment zone
     REAL(8)                :: D0,D1
-    REAL(8), INTENT(IN)    :: wpmin   !! minimum vertical velociy
+    !REAL(8), INTENT(IN)    :: wpmin   !! minimum vertical velociy
     D0 = 0.5*hk*delta0*(wpp+wpm)
     Det_R10 = MIN( beta2*(wpp-wpm), 0. )  &
                          + MIN(D0, -2.*wpmin)
@@ -401,14 +399,14 @@ CONTAINS
 
 
   !===================================================================================================
-  SUBROUTINE get_t_p_R10(tpm,tpp,te,apm,app,wpm,wpp,beta1,beta2,hk,delta0,wpmin)
+  SUBROUTINE get_t_p_R10(tpm,tpp,te,apm,app,wpm,wpp,beta1,beta2,hk,delta0)
   !---------------------------------------------------------------------------------------------------
     !!==========================================================================<br />
     !!                  ***  ROUTINE get_t_p_R10  ***                           <br />
     !! ** Purposes : compute plume tracer properties for Rio et al. (2010)
     !!                        entrainment/detrainement closure                  <br />
     !!==========================================================================<br />
-    !USE scm_par
+    USE scm_par
     IMPLICIT NONE
     REAL(8), INTENT(INOUT)      :: tpm    !! tracer value at the bottom of the grid cell
     REAL(8), INTENT(IN   )      :: tpp    !! tracer value at the top   of the grid cell
@@ -421,7 +419,7 @@ CONTAINS
     REAL(8), INTENT(IN   )      :: hk     !! thickness of the grid cell [m]
     REAL(8), INTENT(IN   )      :: delta0 !! background detrainement in the entrainment zone [m-1]
     REAL(8), INTENT(IN   )      :: beta2  !! increase the detrainement coefficient beta1 [m-1]
-    REAL(8), INTENT(IN   )      :: wpmin  !! minimum vertical velociy
+    !REAL(8), INTENT(IN   )      :: wpmin  !! minimum vertical velociy
 
     ! local variables
     REAL(8)                 :: cffm,cffp,dwpm,dwpp,ap,cff
@@ -429,7 +427,7 @@ CONTAINS
     cffp = app*wpp*tpp         !! \(  \Phi^{\rm p}_{k+1/2} = a^{\rm p}_{k+1/2} w^{\rm p}_{k+1/2} \phi^{\rm p}_{k+1/2}  \)  <br />
     ap   = 0.5*(app+apm)       !! \(  a^{\rm p}_{k} = \frac{a^{\rm p}_{k+1/2}+a^{\rm p}_{k-1/2}}{2}  \)  <br />
     dwpp = Ent_R10(beta1,wpp,wpm)
-    dwpm = Det_R10(beta1,beta2,wpp,wpm,delta0,hk,wpmin)
+    dwpm = Det_R10(beta1,beta2,wpp,wpm,delta0,hk)
     cffm = cffp - ap*(dwpp*te+dwpm*tpp) !! \( \Phi^{\rm p}_{k-1/2} = \Phi^{\rm p}_{k+1/2} - a^{\rm p}_{k} \left( \underbrace{\frac{E_k h_k}{a^p}}_{\rm Ent\_R10} \phi_{k}^{\rm e} \underbrace{- \frac{D_k h_k}{a^p}}_{\rm Det\_R10} \phi_{k+1/2}^{\rm p}     \right)    \) <br />
     IF(apm>0.) THEN
       tpm  = cffm/(apm*wpm)  !! \( \phi^{\rm p}_{k-1/2} = \frac{\Phi^{\rm p}_{k-1/2}}{( a^{\rm p} w^{\rm p} )_{k-1/2}} \)  <br />
@@ -450,7 +448,7 @@ CONTAINS
     !! ** Purposes : compute plume TKE for Rio et al. (2010)
     !!                        entrainment/detrainement closure                  <br />
     !!==========================================================================<br />
-    !USE scm_par
+    USE scm_par
     IMPLICIT NONE
     REAL(8), INTENT(INOUT)      :: tkep_m    !! plume TKE value at the bottom of the grid cell
     REAL(8), INTENT(IN   )      :: tkep_p    !! plume TKE value at the top   of the grid cell
@@ -559,7 +557,7 @@ CONTAINS
   !===================================================================================================
 
   !===================================================================================================
-  SUBROUTINE get_w_p_P09(wpm,wpp,aa,bb,bpr,cent,Hz,Bp,h,found,wpmin)
+  SUBROUTINE get_w_p_P09(wpm,wpp,aa,bb,bpr,cent,Hz,Bp,h,found)
   !---------------------------------------------------------------------------------------------------
     !!==========================================================================<br />
     !!                  ***  ROUTINE get_w_p_P09  ***                           <br />
@@ -578,7 +576,7 @@ CONTAINS
     REAL(8), INTENT(IN   )      :: bb           !! parameter of the MF scheme
     REAL(8), INTENT(IN   )      :: bpr          !! parameter of the MF scheme
     REAL(8), INTENT(IN   )      :: cent         !! parameter of the MF scheme
-    REAL(8), INTENT(IN   )      :: wpmin        !! minimum vertical velociy
+   ! REAL(8), INTENT(IN   )      :: wpmin        !! minimum vertical velociy
 
     ! local variables
     REAL(8)                     :: cff1,cff,rhsw,wpm2
@@ -645,7 +643,7 @@ CONTAINS
     REAL(8)                                :: temp_p,salt_p
     REAL(8)                                :: cffu,cffv,cffw,apr,tke_env
     LOGICAL                                :: found = .false.
-    REAL(8)                                :: wpmin
+    !REAL(8)                                :: wpmin
     !=======================================================================
     ! initialize plume properties with surface values
     a_p(N) = mf_params(8) ; a_p(0:N-1       ) = 0.
@@ -665,7 +663,7 @@ CONTAINS
     ! unpack parameters
     cent  = mf_params(1); cdet = mf_params(2); aa = mf_params(3)
     bb    = mf_params(4); bp = mf_params(5)
-    Cu    = mf_params(6); Cv = mf_params(7); delta0 = mf_params(9); wpmin = mf_params(10) 
+    Cu    = mf_params(6); Cv = mf_params(7); delta0 = mf_params(9); 
     !=======================================================================
     DO k=N,1,-1
       !! Compute \( B^{\rm p}_{k} \) \[ B^{\rm p}_{k} = - \frac{g}{\rho_0} \left( \rho^{\rm p}_{k+1/2} - \overline{\rho}_k \right) \]
@@ -680,7 +678,7 @@ CONTAINS
       cff    = 1.
       IF(.not.small_ap) cff = 1./(1.-a_p(k))
       zbb = cff*bb; zbp = cff*bp
-      CALL get_w_p_P09(w_p(k-1),w_p(k),aa,zbb,zbp,cent,Hz(k),B_p(k),hinv,found,wpmin)
+      CALL get_w_p_P09(w_p(k-1),w_p(k),aa,zbb,zbp,cent,Hz(k),B_p(k),hinv,found)
       IF(found) THEN
         zinv     = z_w(k)-hinv; found = .false.
       ENDIF
@@ -798,7 +796,7 @@ CONTAINS
     LOGICAL                                :: found    = .false.
     REAL(8)                                :: mxld(0:N), imxld0(1:N)
     REAL(8)                                :: lup, ldwn, epsilon, dtke, rn2
-    REAL(8)                                :: wpmin
+    !REAL(8)                                :: wpmin
 
     !=======================================================================
 
@@ -858,7 +856,7 @@ CONTAINS
       !  \[ (w^{\rm p})^{2}_{k+1/2} - (w^{\rm p})^{2}_{k-1/2} =
       !  h_k (b' + b \epsilon_k) \left((w^{\rm p})^{2}_{k+1/2} + (w^{\rm p})^{2}_{k-1/2})\right)
       ! + 2 a h_k B^{\rm p}_{k}\]
-      CALL get_w_p_R10(w_p(k-1),w_p(k),aa,zbb,zbp,beta1,Hz(k),B_p(k),hinv,found,wpmin)
+      CALL get_w_p_R10(w_p(k-1),w_p(k),aa,zbb,zbp,beta1,Hz(k),B_p(k),hinv,found)
       ! diagnostics
       cff       = (w_p(k)-w_p(k-1))/(0.5*Hz(k)*(w_p(k)+w_p(k-1)))
       ent  (k)  = MAX(0., -beta1*cff)
@@ -875,7 +873,7 @@ CONTAINS
       ! - \beta_1 \left(\frac{a^{\rm p}_{k+\frac{1}{2}} + a^{\rm p}_{k-\frac{1}{2}} }{2}\right)
       ! \left(  \max(0, (\delta_z w^{\rm p})_k) + \min\left( \frac{w^{\rm p} h_k}{\beta_1} \delta_0 ,
       ! (\delta_z w^{\rm p})_k + \frac{w^{\rm p} h_k}{\beta_1} (\delta_1)_k \right) \right) \\  \]
-      CALL get_a_p_R10(a_p(k-1),a_p(k),w_p(k-1),w_p(k),beta1,beta2,Hz(k),delta0,wpmin)
+      CALL get_a_p_R10(a_p(k-1),a_p(k),w_p(k-1),w_p(k),beta1,beta2,Hz(k),delta0)
       cff = a_p(k)/(1.-a_p(k))
       IF(small_ap) cff = 0.
       ! Compute tracers (except TKE_p)
@@ -886,16 +884,16 @@ CONTAINS
               !! \phi^{\rm e}_k &= \overline{\phi}_k + \left( \frac{a^{\rm p}_{k+1/2}}{1-a^{\rm p}_{k+1/2}} \right) ( \overline{\phi}_k - \phi^{\rm p}_{k+1/2} ) \hspace{1cm} \mbox{small_ap = False}
               !! \end{align*}
         CALL get_t_p_R10(t_p(k-1,itrc),t_p(k,itrc),t_env,  &
-                     a_p(k-1),a_p(k),w_p(k-1),w_p(k),beta1,beta2,Hz(k),delta0,wpmin) !! Compute \( \phi^{\rm p}_{k-1/2}\) :: call \(  {\rm get\_t\_p\_R10}  \)
+                     a_p(k-1),a_p(k),w_p(k-1),w_p(k),beta1,beta2,Hz(k),delta0) !! Compute \( \phi^{\rm p}_{k-1/2}\) :: call \(  {\rm get\_t\_p\_R10}  \)
       ENDDO
       ! Compute up - Cu umean
       u_env = (1.-Cu)*u_m(k) + cff*( (1.-Cu)*u_m(k) - u_p(k) )
       CALL get_t_p_R10(u_p(k-1),u_p(k),u_env,a_p(k-1),a_p(k),w_p(k-1),w_p(k),   &
-                                                      beta1,beta2,Hz(k),delta0,wpmin) !! Compute \( u^{\rm p}_{k-1/2}\) :: call \(  {\rm get\_t\_p\_R10}  \)
+                                                      beta1,beta2,Hz(k),delta0) !! Compute \( u^{\rm p}_{k-1/2}\) :: call \(  {\rm get\_t\_p\_R10}  \)
       ! Compute vp - Cv vmean
       v_env = (1.-Cv)*v_m(k) + cff*( (1.-Cv)*v_m(k) - v_p(k) )
       CALL get_t_p_R10(v_p(k-1),v_p(k),v_env,a_p(k-1),a_p(k),w_p(k-1),w_p(k),   &
-                                                      beta1,beta2,Hz(k),delta0,wpmin) !! Compute \( v^{\rm p}_{k-1/2}\) :: call \(  {\rm get\_t\_p\_R10}  \)
+                                                      beta1,beta2,Hz(k),delta0) !! Compute \( v^{\rm p}_{k-1/2}\) :: call \(  {\rm get\_t\_p\_R10}  \)
       ! Compute TKEplume - TKEmean
       cff       = a_p(k)/(1.-a_p(k))
       IF(small_ap) cff = 0.

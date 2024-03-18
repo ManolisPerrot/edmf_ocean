@@ -125,7 +125,7 @@ common_params = {
     'vp_c': 0.5,
     'bc_ap': 0.2,    
     'delta_bkg': 0.005,
-    'wpmin'    : 1.e-08,
+    'wp0'    : -1.e-08,
     'output_filename': 'run'
 }
 
@@ -135,27 +135,27 @@ def likelihood_mesonh(
     Cdet      = 1.99,
     wp_a      = 1.,
     wp_b      = 1.25,
-    wp_bp     = 0.003,
+    wp_bp     = 0.003*250,
     up_c      = 0.5, #we take up_c=vp_c
     bc_ap     = 0.2,
-    delta_bkg = 0.005,
-    wpmin     = 1.e-08):
+    delta_bkg = 0.005*250,
+    wp0     = -1.e-08):
 
     # Load the case specific parameters
     # ATTENTION, any parameter entered in case params will 
     # OVERWRITE common params. Double-check scm_configs before running
 
     params_to_estimate = {
-                        'Cent': Cent,
-                        'Cdet': Cdet,
-                        'wp_a': wp_a,
-                        'wp_b': wp_b,
-                        'wp_bp': wp_bp,
-                        'up_c': up_c,
-                        'vp_c': up_c,
-                        'bc_ap': bc_ap,
-                        'delta_bkg': delta_bkg,
-                        'wpmin' : wpmin}
+                        'Cent': Cent, #0=< Cent =< 1
+                        'Cdet': Cdet, #1=< Cdet =< 2?
+                        'wp_a': wp_a, #0=< wp_a =< 1
+                        'wp_b': wp_b, #0=< wp_b =< 1
+                        'wp_bp': wp_bp,#0=< wp_bp =< 10?
+                        'up_c': up_c, #0=< up_c < 1
+                        'vp_c': up_c, 
+                        'bc_ap': bc_ap, #0=< bc_ap =< 1
+                        'delta_bkg': delta_bkg, #0=< delta_bkg =< 10?
+                        'wp0' : wp0} # wp0 < -0.1?  /!\ negative !!
 
     scm = {}
 
