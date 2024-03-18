@@ -79,9 +79,9 @@ CONTAINS
     shear2(0:N) = 0.
     DO k=1,N-1
       cff       = Akv(k) / ( zr(k+1)-zr(k) )**2
-      du        = cff*( u_n(k+1)-u_n(k) )*0.5*( u_n(k+1)+u_np1(k+1)-u_n(k)-u_np1(k) ) !! Shear production term using discretization from Burchard (2002) <br />
+      du        = cff*( u_np1(k+1)-u_np1(k) )*0.5*( u_n(k+1)+u_np1(k+1)-u_n(k)-u_np1(k) ) !! Shear production term using discretization from Burchard (2002) <br />
       !! \( {\rm Sh}_{k+1/2} = \frac{ (K_m)_{k+1/2} }{ \Delta z_{k+1/2}^2 } ( u_{k+1}^n - u_{k}^n ) ( u_{k+1}^{n+1/2} - u_{k}^{n+1/2} )  \)
-      dv        = cff*( v_n(k+1)-v_n(k) )*0.5*( v_n(k+1)+v_np1(k+1)-v_n(k)-v_np1(k) )
+      dv        = cff*( v_np1(k+1)-v_np1(k) )*0.5*( v_n(k+1)+v_np1(k+1)-v_n(k)-v_np1(k) )
       shear2(k) = du + dv
     ENDDO
   !---------------------------------------------------------------------------------------------------
