@@ -2,8 +2,6 @@
 project: SCM-EDMF ocean
 author: M. Perrot / F. Lemarié 
 ---
-Modifications:
-20/02/24: M. Perrot: remove .nc writting and save t,u,v_history timeseries
 #--------------------------------------------------------------------------------
 Single column oceanic model (SCM) with Eddy-Diffusion/Mass-Flux (EDMF) closure.
 #--------------------------------------------------------------------------------
