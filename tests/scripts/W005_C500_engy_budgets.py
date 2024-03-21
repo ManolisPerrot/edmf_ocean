@@ -73,7 +73,7 @@ common_params = {
     'vp_c': 0.5,
     'bc_ap': 0.2,    #0.3,
     'delta_bkg': 0.005*250,   # 0.006,
-    'wp0' : -0.5e-03,
+    'wp0' : -0.5e-08,
     'output_filename': 'run',
     'write_netcdf': True
 }
@@ -180,9 +180,9 @@ ax = axes
 ax.set_title(r'\rm{Vertically integrated total energy budget}')
 ax.set_xlabel(r'\rm{time} (hours)')
 ax.set_ylabel(r'${\rm m}^{3}\;{\rm s}^{-3}$')
+ax.plot( (out[2]['Etke'] )[1:]  , linewidth=3 , alpha=1, linestyle = '-', label='Etke')
 ax.plot( (out[2]['Ekin'] )[1:]  , linewidth=3 , alpha=1, linestyle = '-', label='Ekin')
 ax.plot( (out[2]['Epot'] )[1:]  , linewidth=3 , alpha=1, linestyle = '-', label='Epot')
-ax.plot( (out[2]['Etke'] )[1:]  , linewidth=3 , alpha=1, linestyle = '-', label='Etke')
 ax.plot( (out[2]['Etot'] )[1:]  , linewidth=3 , alpha=1, linestyle = '-', label='Etot')
 
 # ===============================================================
