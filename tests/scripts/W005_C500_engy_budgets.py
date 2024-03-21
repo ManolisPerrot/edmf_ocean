@@ -73,7 +73,7 @@ common_params = {
     'vp_c': 0.5,
     'bc_ap': 0.2,    #0.3,
     'delta_bkg': 0.005*250,   # 0.006,
-    'wp0' : -0.5e-08,
+    'wp0' : -0.5e-01,
     'output_filename': 'run',
     'write_netcdf': True
 }

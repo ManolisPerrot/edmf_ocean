@@ -46,7 +46,7 @@ saving_name = case+'72h_profile_LES_vs_EDMF.png'
 file = 'GN_01.1.OC_01.000_copy.nc'
 
 
-path = '../../data/'+case+'/'
+path = '../data/'+case+'/'
 les = xr.open_dataset(path+file)
 LG_MEAN = xr.open_dataset(
     path+file, group='/LES_budgets/Mean/Cartesian/Not_time_averaged/Not_normalized/cart')
