@@ -5,7 +5,7 @@
 
 import sys  # to put the SCM into the PYTHONPATH
 
-sys.path.append('../library/F2PY')
+sys.path.append('../../library/F2PY')
 
 
 ###########################################
@@ -46,7 +46,7 @@ saving_name = case+'72h_profile_LES_vs_EDMF.png'
 file = 'GN_01.1.OC_01.000_copy.nc'
 
 
-path = '../data/'+case+'/'
+path = '../../data/'+case+'/'
 les = xr.open_dataset(path+file)
 LG_MEAN = xr.open_dataset(
     path+file, group='/LES_budgets/Mean/Cartesian/Not_time_averaged/Not_normalized/cart')
@@ -116,7 +116,8 @@ common_params = {
     'bc_ap': 0.2,    #0.3,
     'delta_bkg': 0.005*250,   # 0.006,
     'wp0' : -0.5e-03,
-    'output_filename': 'run'
+    'output_filename': 'run',
+    'write_netcdf': True
 }
 
 
@@ -140,7 +141,7 @@ runs = [
         'mass_flux_dyn': False,
         'mass_flux_tke': False,
         'mass_flux_tke_trplCorr': False,
-        'output_filename': 'run1'
+        'output_filename': 'run1.nc'
 
     },
     {
@@ -150,7 +151,7 @@ runs = [
         'mass_flux_dyn': True,
         'mass_flux_tke': False,
         'mass_flux_tke_trplCorr': False,
-        'output_filename': 'run2'
+        'output_filename': 'run2.nc'
     },
         {
         'eddy_diff': True,
@@ -159,7 +160,7 @@ runs = [
         'mass_flux_dyn': True,
         'mass_flux_tke': True,
         'mass_flux_tke_trplCorr': True,
-        'output_filename': 'run3'
+        'output_filename': 'run3.nc'
     }
         ]
 
