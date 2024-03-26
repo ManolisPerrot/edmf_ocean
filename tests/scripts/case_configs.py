@@ -86,6 +86,7 @@
 case_params = {
     'WANG1_FR':{
         'h0': 4500.,
+        'nbhours': 276,
         'T0': 3.,
         'N0': 1.5865490613891073e-08, #equals to f(60°)
         'SaltCst': 32.6,

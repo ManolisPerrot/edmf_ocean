@@ -77,11 +77,11 @@ z_r_les = (les.level_les - (les.level_les[0] + les.level_les[-1])).data
 # ====================================Define configurations=======================
 # Define the common parameters (attention some of them will be overwritten by case_configurations.py):
 common_params = {
-    'nz': 100,
-    'dt': 50.,
-    'h0': 2000.,
+    'nz': 450,
+    'dt': 360.,
+    'h0': 4000.,
     'thetas': 6.5,
-    'hc': 400,
+    'hc': 10000000000,
     'nbhours': 72,
     'outfreq': 1,
     'output_filename': "scm_output.nc",
@@ -101,21 +101,21 @@ common_params = {
     'mass_flux_dyn': True,
     'mass_flux_tke': True,
     'mass_flux_tke_trplCorr': True,
-    'mass_flux_small_ap': False,
+    'mass_flux_small_ap': True,
     'lin_eos': True,
     'extrap_ak_surf': True,
     'tke_sfc_dirichlet': False,
     'eddy_diff_tke_const': 'NEMO',
     'entr_scheme': 'R10',
     'Cent': 0.99,
-    'Cdet': 1.99,       
+    'Cdet': 1.95,       
     'wp_a': 1.,
     'wp_b': 1.25,      
-    'wp_bp': 0.003,    
+    'wp_bp': 0.003*250,    
     'up_c': 0.5,
     'vp_c': 0.5,
     'bc_ap': 0.2,    
-    'delta_bkg': 0.005,
+    'delta_bkg': 0.005*250,
     'wp0'    : -1.e-08,
     'output_filename': 'run',
     "write_netcdf": True
@@ -212,8 +212,12 @@ linewidth_les = 4
 #============================================ WC ===============================================
 fig, axes = plt.subplots(nrows=2, ncols=3, sharex=False,
                          sharey=True, figsize=(15, 12))
+
+ax_index=-1
+
 # ===============================================================
-ax = axes.flat[0]
+ax_index+=1
+ax = axes.flat[ax_index]
 ax.set_xlabel(r'$^{\circ}{\rm C}$')
 ax.set_ylabel(r'$z / h $')
 ax.set_title(r'$\overline{\theta}$')
@@ -232,7 +236,8 @@ ax.set_ylim((-1.3, 0))
 
 # ===============================================================
 
-ax = axes.flat[1]
+ax_index+=1
+ax = axes.flat[ax_index]
 ax.set_title(r'$\overline{u}$')
 
 ax.set_xlabel(r'${\rm m}\;{\rm s}^{-1}$')
@@ -254,7 +259,9 @@ ax.set_ylim((-1.3, 0))
 # ===============================================================
 
 
-ax = axes.flat[3]
+ax_index+=1
+ax = axes.flat[ax_index]
+
 ax.set_title(r'$\overline{w^\prime \theta^\prime}$')
 
 ax.plot(WTH[instant], z_r_les/mld, style_les,
@@ -288,7 +295,8 @@ ax.set_xlabel(r'${\rm K}\;{\rm m}\;{\rm s}^{-1}$')
 
 # ===============================================================
 # ===============================================================
-ax = axes.flat[2]
+ax_index+=1
+ax = axes.flat[ax_index]
 ax.set_title(r'$k$')
 
 ax.plot(TKE[instant], z_r_les/mld, style_les,
@@ -306,7 +314,8 @@ ax.set_xlabel(r'${\rm m}^2\;{\rm s}^{-2}$')
 # ===============================================================
 
 
-ax = axes.flat[5]
+ax_index+=1
+ax = axes.flat[ax_index]
 ax.set_title(r'$\overline{w^\prime \frac{u^{\prime 2}}{2}  }$')
 
 ax.plot(WTKE[instant], z_r_les/mld, style_les,
@@ -314,6 +323,10 @@ ax.plot(WTKE[instant], z_r_les/mld, style_les,
 
 for i, label in enumerate(run_label):
     ax.plot((scm[i].wtke), scm[i].z_r/mld, linestyle=styles[i], color = colors[i],
+            alpha=alpha[i], linewidth=linewidth[i], label=label)
+    
+if i==1:
+    ax.plot((out[i]['we'][instant]), out[i].z_w/mld, linestyle=':', color = colors[i],
             alpha=alpha[i], linewidth=linewidth[i], label=label)
 
 
@@ -323,7 +336,8 @@ ax.set_ylim((-1.3, 0))
 ax.set_xlabel(r'${\rm m}^3\;{\rm s}^{-3}$')
 
 # ===============================================================
-ax = axes.flat[4]
+ax_index+=1
+ax = axes.flat[ax_index]
 
 ax.set_xlabel(r'${\rm m}^2\;{\rm s}^{-2}$')
 ax.set_title(r'$\overline{w^\prime u^\prime}$')
