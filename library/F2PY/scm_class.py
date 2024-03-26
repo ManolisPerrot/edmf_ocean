@@ -462,11 +462,17 @@ class SCM:
 
           
           self.ap,self.up,self.vp,self.wp,self.tp,self.Bp,self.ent,self.det, self.epsPlume = scm_mfc.mass_flux_r10(
-#          self.ap,self.up,self.vp,self.wp,self.tp,self.Bp,self.ent,self.det, self.zinv = scm_mfc.mass_flux_r10(
                                     u_mean, v_mean, t_mean, self.tke_n, self.z_w, self.Hz,
                                     tp0   , up0   , vp0   , wp0     , self.mf_params,
                                     self.alpha , self.beta, self.MF_small_ap, self.lineos, self.zinv ,
                                     self.nz , self.ntraMF , len(self.mf_params)   )
+        
+        if self.mass_flux_entr=='R10corNT':
+          self.ap,self.up,self.vp,self.wp,self.tp,self.Bp,self.ent,self.det, self.epsPlume = scm_mfc.mass_flux_r10_cor(
+                                    u_mean, v_mean, t_mean, self.tke_n, self.z_w, self.Hz,
+                                    tp0   , up0   , vp0   , wp0     , self.mf_params,
+                                    self.alpha , self.beta, self.fcor, self.ecor , self.MF_small_ap, self.lineos, self.zinv ,
+                                    self.nz , self.ntraMF , len(self.mf_params)   )  
           #print(self.zinv)
 #
 

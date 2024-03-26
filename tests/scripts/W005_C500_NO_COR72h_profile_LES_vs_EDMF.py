@@ -43,7 +43,7 @@ saving_name = case+'72h_profile_LES_vs_EDMF.png'
 
 # loading LES output once before using the function
 
-file = 'GN_01.1.OC_01.000_copy.nc'
+file = 'GN_01.1.OC_01.000.nc'
 
 
 path = '../data/'+case+'/'
