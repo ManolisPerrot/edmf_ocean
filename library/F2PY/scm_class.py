@@ -20,7 +20,7 @@ class SCM:
 
     def __init__(self,  nz     = 100 ,   dt =  20. , h0    =  1000.,
                         thetas = 6.5 ,   hc = 400. , T0    =     2.,
-                        N0 =1.9620001275490499e-6  , Tcoef = 0.2048,
+                        N0 =1.9620001275490499e-6  , mld_ini=-0., Tcoef = 0.2048,
                         SaltCst = 35., lat0 =  45.  , sustr =     0.,
                         svstr   =  0., stflx=-500. , srflx =     0.,
                         ssflx   =  0., nbhours = 72, outfreq  =  1.,
@@ -43,6 +43,7 @@ class SCM:
             hc: Stretching parameter for the vertical grid. Resolution is almost constant between 0 and hc. Defaults to 400.
             T0: Initial surface temperature. Defaults to 2 (Celsius).
             N0: Initial stratification. Defaults to 1.9620001275490499E-6.
+            mld_ini: initial mixed layer depth (m, NEGATIVE). Default to 0. m.
             Tcoef: Thermal expansion coefficient to define initial temperature profile. Defaults is 0.2048
             SaltCst: constant salinity value for the initial conditions. Default is 35.
             lat0: Latitude of the water column (used to compute Coriolis frequency). Defaults to 45 (degree).
@@ -144,8 +145,17 @@ class SCM:
         self.alpha   = self.Tcoef/self.rho0
         self.beta    = 0.
         strat        = N0 / (self.g * self.alpha )
-        self.t_n  [:,self.itemp] = T0 + 0.5*strat*( self.z_w[1:]+self.z_w[:-1] )
-        self.t_np1[:,self.itemp] = T0 + 0.5*strat*( self.z_w[1:]+self.z_w[:-1] )
+        # self.t_n  [:,self.itemp] = T0 + 0.5*strat*( self.z_w[1:]+self.z_w[:-1] )
+        # self.t_np1[:,self.itemp] = T0 + 0.5*strat*( self.z_w[1:]+self.z_w[:-1] )
+        self.t_n  [:,self.itemp] = T0
+        self.t_np1[:,self.itemp] = T0
+        for k in range(0, self.nz):
+          if self.z_w[k] < mld_ini :
+            self.t_n  [k,self.itemp] = T0 + 0.5*strat*( self.z_w[k+1]+self.z_w[k] ) + strat*(-mld_ini)
+            self.t_np1[k,self.itemp] = T0 + 0.5*strat*( self.z_w[k+1]+self.z_w[k] ) + strat*(-mld_ini)
+
+
+
         ####################################
         # initialize arrays for EDDY-DIFFUSION (tke, bvf, lup,ldwn,tke,AkT,Akv)
         #-----------------------------------

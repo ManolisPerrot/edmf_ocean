@@ -87,6 +87,7 @@ common_params = {
     'output_filename': "scm_output.nc",
     'T0': 3.,
     'N0': 1.5865490613891073e-08, #equals to f(60°)
+    'mld_ini': -1000.,
     'Tcoef': 0.2048,
     'SaltCst': 32.6,
     'lat0': 60.,
