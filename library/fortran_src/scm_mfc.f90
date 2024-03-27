@@ -1052,9 +1052,9 @@ CONTAINS
     !=======================================================================
     ! unpack parameters (mf_params  = [Cent,Cdet,wp_a,wp_b,wp_bp,up_c,vp_c,bc_ap,delta0]
     beta1 = mf_params(1); aa     = mf_params(3)
-    bb    = mf_params(4); bp     = mf_params(5)/(-zinv)
+    bb    = mf_params(4); bp     = mf_params(5)/(-zinv) !bp     = mf_params(5)/(-zinv)
     Cu    = mf_params(6); Cv     = mf_params(7)
-    beta2 = mf_params(2); delta0 = mf_params(9)/(-zinv)
+    beta2 = mf_params(2); delta0 = mf_params(9)/(-zinv) !delta0 = mf_params(9)/(-zinv)
     !=======================================================================
     ! initialize plume properties with surface values
     a_p(N) = mf_params(8) ; a_p(0:N-1       ) = 0.
@@ -1066,8 +1066,8 @@ CONTAINS
     B_p(0:N) = 0.; ent(1:N) = 0.  ; det(1:N) = 0.  ; eps(1:N) = 0.
     !
     DO k = 2,N
-    du_m(k) = u_m(k) - u_m(k-1)
-    dv_m(k) = v_m(k) - v_m(k-1)
+      du_m(k) = u_m(k) - u_m(k-1)
+      dv_m(k) = v_m(k) - v_m(k-1)
     ENDDO
     du_m(1) = du_m(2)
     dv_m(1) = dv_m(2)
@@ -1075,10 +1075,10 @@ CONTAINS
     t_p(N,ntra) = 0.  ! in this case t_p(ntra) contains t_p - tke
     !
     DO k = 1,N
-    cff       = 0.5*(z_w(k)+z_w(k-1))
-    lup       = MAX( -cff     , mxl_min)
-    ldwn      = MAX(  cff-zinv, mxl_min)
-    imxld0(k) = 1./SQRT(lup*ldwn)
+      cff       = 0.5*(z_w(k)+z_w(k-1))
+      lup       = MAX( -cff     , mxl_min)
+      ldwn      = MAX(  cff-zinv, mxl_min)
+      imxld0(k) = 1./SQRT(lup*ldwn)
     ENDDO
     imxld0(N) = 0.5*(3.*imxld0(N-1)-imxld0(N-2))
     !imxld0(1:N) = 0.
@@ -1087,13 +1087,13 @@ CONTAINS
     ! Linear eos version
     !=======================================================================
     IF(lin_eos) THEN
-    DO k = 1,N
-    CALL eos_val_lin(t_m(k,1),t_m(k,2),alpha,beta,rho_m(k))
-    ENDDO
+      DO k = 1,N
+        CALL eos_val_lin(t_m(k,1),t_m(k,2),alpha,beta,rho_m(k))
+      ENDDO  
     ELSE
-    DO k = 1,N
-    CALL eos_val(t_m(k,1),t_m(k,2),0.5*(z_w(k)+z_w(k-1)),rho_m(k))
-    ENDDO
+      DO k = 1,N
+        CALL eos_val(t_m(k,1),t_m(k,2),0.5*(z_w(k)+z_w(k-1)),rho_m(k))
+      ENDDO
     ENDIF
     !=======================================================================
     N2sfc  = -(grav/rho0)*(rho_m(N)-rho_m(N-1))/Hz(N)

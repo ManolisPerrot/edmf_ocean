@@ -78,21 +78,21 @@ z_r_les = (les.level_les - (les.level_les[0] + les.level_les[-1])).data
 # Define the common parameters (attention some of them will be overwritten by case_configurations.py):
 common_params = {
     'nz': 450,
-    'dt': 360.,
-    'h0': 4000.,
+    'dt': 50.,
+    'h0': 4500.,
     'thetas': 6.5,
-    'hc': 10000000000,
-    'nbhours': 72,
+    'hc': 4000000000000,
+    'nbhours': 276,
     'outfreq': 1,
     'output_filename': "scm_output.nc",
-    'T0': 2.,
-    'N0': 1.9620001275490499e-6,
+    'T0': 3.,
+    'N0': 1.5865490613891073e-08, #equals to f(60°)
     'Tcoef': 0.2048,
-    'SaltCst': 35.,
-    'lat0': 0.,
+    'SaltCst': 32.6,
+    'lat0': 60.,
     'sustr': 0.,
     'svstr': 0.,
-    'stflx': -500.,
+    'stflx': -111.12982, #Wm-2
     'srflx': 0.,
     'ssflx': 0.,
     'eddy_diff': True,
@@ -105,20 +105,19 @@ common_params = {
     'lin_eos': True,
     'extrap_ak_surf': True,
     'tke_sfc_dirichlet': False,
-    'eddy_diff_tke_const': 'NEMO',
+    'eddy_diff_tke_const': 'MNH',
     'entr_scheme': 'R10',
-    'Cent': 0.99,
-    'Cdet': 1.95,       
+    'Cent': 0.9,
+    'Cdet': 1.95,       # 'Cdet': 2.5,
     'wp_a': 1.,
-    'wp_b': 1.25,      
-    'wp_bp': 0.003*250,    
-    'up_c': 0.5,
-    'vp_c': 0.5,
-    'bc_ap': 0.2,    
-    'delta_bkg': 0.005*250,
-    'wp0'    : -1.e-08,
+    'wp_b': 1.,      # 'wp_b': 1.
+    'wp_bp': 0.005*250,     #      0.002,
+    'up_c': 0.25,
+    'vp_c': 0.25,
+    'bc_ap': 0.2,    #0.3,
+    'delta_bkg': 0.0025*250,   # 0.006,
     'output_filename': 'run',
-    "write_netcdf": True
+    'write_netcdf': True
 }
 
 common_params.update(case_params[case])  # Update with the specific case configuration in case_params[case]
@@ -126,7 +125,7 @@ common_params.update(case_params[case])  # Update with the specific case configu
 
 # Define parameters specific to each run (overwrite common parameters):
 
-run_label = ['ED',  'EDMF-Energy-cor','EDMF-Energy' ]
+run_label = ['ED',  'EDMF-Energy','EDMF-Energy-cor' ]
 runs = [
     {
         'eddy_diff': True,
@@ -136,7 +135,6 @@ runs = [
         'mass_flux_tke': False,
         'mass_flux_tke_trplCorr': False,
         'output_filename': 'run1.nc'
-
     },
     # {
     #     'eddy_diff': True,
@@ -154,7 +152,7 @@ runs = [
         'mass_flux_dyn': True,
         'mass_flux_tke': True,
         'mass_flux_tke_trplCorr': True,
-        'entr_scheme': 'R10corNT',
+        'entr_scheme': 'R10',
         'output_filename': 'run2.nc'
     },
         {
@@ -164,6 +162,7 @@ runs = [
         'mass_flux_dyn': True,
         'mass_flux_tke': True,
         'mass_flux_tke_trplCorr': True,
+        'entr_scheme': 'R10corNT',
         'output_filename': 'run3.nc'
     }
         ]
@@ -248,9 +247,9 @@ ax.plot(U_les[instant], z_r_les/mld, style_les,
 for i, label in enumerate(run_label):
     ax.plot((scm[i].u_np1), scm[i].z_r/mld, linestyle=styles[i], color = colors[i],
             alpha=alpha[i], linewidth=linewidth[i], label=label)
-    if i != 0: 
-        ax.plot((out[i].w_p[instant]), out[i].z_w/mld, linestyle=':', color = colors[i],
-            alpha=alpha[i], linewidth=linewidth[i], label=label)
+    # if i != 0: 
+    #     ax.plot((out[i].w_p[instant]), out[i].z_w/mld, linestyle=':', color = colors[i],
+    #         alpha=alpha[i], linewidth=linewidth[i], label=label)
 
 ax.ticklabel_format(style='sci', axis='x', scilimits=(0, 0))
 ax.set_ylim((-1.3, 0))
@@ -375,7 +374,7 @@ for i,ax in enumerate(axes.flat):
 
 
 
-handles, labels = ax.get_legend_handles_labels()
+handles, labels = axes.flat[0].get_legend_handles_labels()
 fig.legend(handles, labels, loc='upper center', bbox_to_anchor=(
     0.5, -0.05), fancybox=False, shadow=False, ncol=4)
 
