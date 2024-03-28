@@ -302,7 +302,6 @@ class SCM:
             self.u_n[:] = self.u_np1[:]; self.v_n[:] = self.v_np1[:];
             self.t_n[:,:] = self.t_np1[:,:]; self.tke_n[:] = self.tke_np1[:]
         self.do_turb_fluxes (  )
-        print(self.vint_Etot)
 #
 
 
