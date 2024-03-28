@@ -170,6 +170,7 @@ class SCM:
         self.akv   = np.zeros(self.nz+1); self.akv[:] = self.akvmin
         self.eps   = np.zeros(self.nz+1)  # TKE dissipation
         self.shear = np.zeros(self.nz+1)
+        self.residual = np.array(0.)
         ####################################
         # initialize arrays for MASS-FLUX
         #-----------------------------------
@@ -186,7 +187,7 @@ class SCM:
         # store MASS-FLUX solution (temperature, velocity)
         # in order to avoid writing a netcdf file
         #-----------------------------------
-        dimt = nbhours // outfreq 
+        dimt = nbhours // outfreq
         self.t_history = np.zeros((self.nz,dimt), order='F')
         self.u_history = np.zeros((self.nz,dimt), order='F')
         self.v_history = np.zeros((self.nz,dimt), order='F')
@@ -217,11 +218,10 @@ class SCM:
         #=============================
         kout = 0
         if self.write_netcdf:
-            self.output_init( ); #to initialize .nc dataset 
+            self.output_init( ); #to initialize .nc dataset
             #save initial temperature and velocity
             self.t_history[:,kout] = self.t_n[:,self.itemp]
-            self.u_history[:,kout] = self.u_n[:]
-            self.v_history[:,kout] = self.v_n[:]
+            self.u_history[:,kout] = self.u_n[:]; self.v_history[:,kout] = self.v_n[:]
         swr_frac = scm_oce.lmd_swfrac(self.Hz,self.nz)   ## Compute fraction of solar shortwave flux penetrating to specified depth
         if self.ED: self.do_ED( )                        ## Initialize eddy-diffusion scheme to compute eddy diffusivity/eddy viscosity for the first time-step
         ####################################
@@ -273,71 +273,13 @@ class SCM:
             #==========================================================
             # Check for outputs & diagnostics
             #==========================================================
-            if self.write_netcdf:
-                # Turbulent fluxes diagnostics
-                self.wted[  self.nz] = self.stflx[self.itemp]                   ## (w'theta')_ED
-                self.wted[1:self.nz] = self.akt[1:self.nz] * (  self.t_np1[1:self.nz  ,self.itemp]
-                                        - self.t_np1[0:self.nz-1,self.itemp] ) / self.Hz[0:self.nz-1]
-                self.wued[  self.nz] = self.taux                 ## (w'theta')_ED
-                self.wued[1:self.nz] = self.akv[1:self.nz] * (  self.u_np1[1:self.nz]
-                                        - self.u_np1[0:self.nz-1] ) / self.Hz[0:self.nz-1]
-                if self.MF_tra:                                                 ## (w'theta')_MF
-                  self.wtmf[1:self.nz] =  self.Fmass[1:self.nz]*(
-                                              self.tp   [1:self.nz,  self.itemp]
-                                            - self.t_np1[0:self.nz-1,self.itemp] )
-                if self.MF_dyn:                                                 ## (w'u')_MF
-                  self.wumf[1:self.nz] =  self.Fmass[1:self.nz]*(
-                                              self.up   [1:self.nz]
-                                            - self.u_np1[0:self.nz-1] )
-                if  time % self.outfreq == 0:
+                if  time % self.outfreq == 0 and self.write_netcdf:
                     kout+=1
+                    self.do_diags_energy(  )
+                    self.do_turb_fluxes (  )
                     #=======================================
-                    
-                     #Compute b_n and b_np1 for diagnostics purposes
-                    if self.lineos:
-                      rho_n,bvf = scm_oce.rho_eos_lin(
-                                     self.t_n[:,self.itemp], self.t_n[:,self.isalt],
-                                     self.z_r , self.alpha , self.beta , self.nz  )
-                      rho_np1,bvf = scm_oce.rho_eos_lin(
-                                     self.t_np1[:,self.itemp], self.t_np1[:,self.isalt],
-                                     self.z_r , self.alpha , self.beta , self.nz  )
-                    else:
-                      rho_n,bvf = scm_oce.rho_eos(
-                                     self.t_n[:,self.itemp], self.t_n[:,self.isalt],
-                                     self.z_r, self.z_w, self.nz )
-                      rho_np1,bvf = scm_oce.rho_eos(
-                                     self.t_np1[:,self.itemp], self.t_np1[:,self.isalt],
-                                     self.z_r, self.z_w, self.nz )
                     # Compute mixed layer depth from bvf
-                    self.hmxl  = scm_oce.compute_mxl2(bvf,self.rhoc,self.z_r,10.,self.nz)
-                    # Compute buoyancy
-                    b_n   = -(self.g/self.rho0)*rho_n[:]
-                    b_np1 = -(self.g/self.rho0)*rho_np1[:]
-                    # Energy diagnostics
-                    self.vint_Ekin = 0.
-                    cor_KE         = 0.
-                    for k in range(self.nz):
-                        self.vint_Ekin = self.vint_Ekin + 0.5*self.Hz[k] * (
-                                               self.u_np1[k]*self.u_np1[k]
-                                              -self.u_n  [k]*self.u_n  [k]
-                                              +self.v_np1[k]*self.v_np1[k]
-                                              -self.v_n  [k]*self.v_n  [k] ) / self.dt
-                        cor_KE         = cor_KE + 0.5*self.Hz[k]*self.fcor * (
-                                               self.u_np1[k]*self.v_np1[k]
-                                              -self.u_n  [k]*self.v_n  [k] )
-                    sfc_KE = 0.5*( (self.u_np1[-1]+self.u_n[-1])*self.taux
-                                 + (self.v_np1[-1]+self.v_n[-1])*self.tauy )
-                    #
-                    self.vint_Ekin = self.vint_Ekin - cor_KE - sfc_KE
-                    self.vint_Eps  = sum( (self.z_r[1:self.nz]
-                                          -self.z_r[0:self.nz-1] ) * self.eps[1:self.nz] )
-                    self.vint_Epot = sum( self.Hz[:]*(-self.z_r[:]) *
-                                                          (b_np1[:]-b_n[:])/self.dt
-                                        + self.Hz[:]*self.cp *
-                                                         (self.t_np1[:,self.itemp]-self.t_n[:,self.itemp])/self.dt )
-                    sfc_Epot       = -self.cp*self.stflx[self.itemp]
-                    self.vint_Epot = self.vint_Epot + sfc_Epot
-                    self.vint_Etot = self.vint_Epot + self.vint_TKE + self.vint_Ekin
+                    self.hmxl  = scm_oce.compute_mxl2(self.bvf,self.rhoc,self.z_r,10.,self.nz)
                     #=======================================
                     # Write outputs in .nc file
                     self.output_state(TimeInSecs=time,kout=kout)
@@ -346,8 +288,100 @@ class SCM:
             self.u_history[:,kout-1] = self.u_np1[:]
             self.v_history[:,kout-1] = self.v_np1[:]
             # swap arrays
-            self.u_n[:] = self.u_np1[:]; self.v_n[:] = self.v_np1[:]; self.t_n[:,:] = self.t_np1[:,:]
+            self.u_n[:] = self.u_np1[:]; self.v_n[:] = self.v_np1[:];
+            self.t_n[:,:] = self.t_np1[:,:]; self.tke_n[:] = self.tke_np1[:]
+        self.do_turb_fluxes (  )
+#
 
+
+
+
+
+
+
+
+
+
+
+
+#
+    def do_turb_fluxes(self):
+        # Turbulent fluxes diagnostics
+        self.wted[  self.nz] = self.stflx[self.itemp]                   ## (w'theta')_ED
+        self.wted[1:self.nz] = self.akt[1:self.nz] * (  self.t_np1[1:self.nz  ,self.itemp]
+                                - self.t_np1[0:self.nz-1,self.itemp] ) / self.Hz[0:self.nz-1]
+        self.wued[  self.nz] = self.taux                 ## (w'theta')_ED
+        self.wued[1:self.nz] = self.akv[1:self.nz] * (  self.u_np1[1:self.nz]
+                                - self.u_np1[0:self.nz-1] ) / self.Hz[0:self.nz-1]
+        if self.MF_tra:                                                 ## (w'theta')_MF
+          self.wtmf[1:self.nz] =  self.Fmass[1:self.nz]*(
+                                              self.tp   [1:self.nz,  self.itemp]
+                                            - self.t_np1[0:self.nz-1,self.itemp] )
+        if self.MF_dyn:                                                 ## (w'u')_MF
+          self.wumf[1:self.nz] =  self.Fmass[1:self.nz]*(
+                                               self.up   [1:self.nz]
+                                             - self.u_np1[0:self.nz-1] )
+#
+
+
+
+
+
+
+
+
+
+
+
+
+#
+    def do_diags_energy(self):
+        #Compute b_n and b_np1 for diagnostics purposes
+        if self.lineos:
+          rho_n,bvf = scm_oce.rho_eos_lin(
+                            self.t_n[:,self.itemp], self.t_n[:,self.isalt],
+                            self.z_r , self.alpha , self.beta , self.nz  )
+          rho_np1,bvf = scm_oce.rho_eos_lin(
+                            self.t_np1[:,self.itemp], self.t_np1[:,self.isalt],
+                            self.z_r , self.alpha , self.beta , self.nz  )
+        else:
+          rho_n,bvf = scm_oce.rho_eos(
+                            self.t_n[:,self.itemp], self.t_n[:,self.isalt],
+                                             self.z_r, self.z_w, self.nz )
+          rho_np1,bvf = scm_oce.rho_eos(
+                            self.t_np1[:,self.itemp], self.t_np1[:,self.isalt],
+                                             self.z_r, self.z_w, self.nz )
+        # Compute buoyancy
+        b_n   = -(self.g/self.rho0)*rho_n[:]
+        b_np1 = -(self.g/self.rho0)*rho_np1[:]
+        # Energy diagnostics
+        self.vint_Ekin = 0.;self.vint_Epot = 0.
+        self.vint_Eps  = 0.;self.vint_TKE  = 0.
+        dissip         = 0.
+        #
+        for k in range(self.nz):
+          self.vint_Ekin = self.vint_Ekin + 0.5*self.Hz[k] * (
+                                             self.u_np1[k]*self.u_np1[k]
+                                          -  self.u_n  [k]*self.u_n  [k]
+                                          +  self.v_np1[k]*self.v_np1[k]
+                                          -  self.v_n  [k]*self.v_n  [k] ) / self.dt   # m3/s3
+          self.vint_Epot = self.vint_Epot + self.Hz[k]*(-self.z_r[k])*(b_np1[k]-b_n[k])/self.dt
+          dissip = dissip + self.Hz[k]*self.cp*(self.t_np1[k,self.itemp]-self.t_n[k,self.itemp])/self.dt
+        #
+        for k in range(self.nz-1):
+          self.vint_Eps = self.vint_Eps+(self.z_r[k+1]-self.z_r[k])*self.eps[k+1]
+          self.vint_TKE = self.vint_TKE+(self.z_r[k+1]-self.z_r[k])*(self.tke_np1[k+1]-self.tke_n[k+1])/self.dt
+        # remove surface contributions
+        sfc_KE   = 0.5*( (self.u_np1[-1]+self.u_n[-1])*self.taux
+                       + (self.v_np1[-1]+self.v_n[-1])*self.tauy )
+        sfc_Epot = -self.cp*self.stflx[self.itemp]
+        sfc_Epot = sfc_Epot - 0.5*self.Hz[-1]*self.g*self.alpha*self.stflx[self.itemp]
+        #
+        sfc_TKE  = self.wtke[-1]
+        self.vint_Ekin = self.vint_Ekin - sfc_KE
+        self.vint_Epot = self.vint_Epot + dissip  + sfc_Epot
+        self.vint_TKE  = self.vint_TKE  + sfc_TKE - self.residual
+        self.vint_Etot = self.vint_Epot + self.vint_TKE + self.vint_Ekin
 #
 
 
@@ -375,7 +409,6 @@ class SCM:
           #                        - self.beta  *  self.stflx[self.isalt]           )
         else:
           rho,self.bvf = scm_oce.rho_eos(self.t_np1[:,self.itemp],self.t_np1[:,self.isalt],self.z_r,self.z_w,self.nz)
-        #  Bsfc,self.alpha,self.beta = scm_oce.compute_bsfc(self.t_np1[-1,self.itemp],self.t_np1[-1,self.isalt],self.stflx,self.srflx,self.ntra)
         #=======================================
         # Compute boundary conditions for TKE
         if self.MF_tke_trplCorr:
@@ -404,7 +437,7 @@ class SCM:
                                         self.z_r  , self.wtke, self.nz  )
         #=========================
         # Advance TKE
-        self.tke_np1, self.Prdtl, self.eps, residual = scm_tke.advance_tke(
+        self.tke_np1, self.Prdtl, self.eps, self.residual = scm_tke.advance_tke(
                                          self.tke_n, self.lupw, self.ldwn,
                                          self.akv  , self.akt , self.Hz  ,
                                          self.z_r  , self.bvf , self.buoyMF,
@@ -425,14 +458,6 @@ class SCM:
         if self.ED_evd: scm_oce.compute_evd(
                                           self.bvf, self.akv, self.akt,
                                           10., self.nz  )
-        # Vertically integrated energy budgets
-        self.vint_TKE = sum( (self.z_r[1:self.nz]-self.z_r[0:self.nz-1])
-                        *(self.tke_np1[1:self.nz]-self.tke_n[1:self.nz])/self.dt )
-        #surface boundary contribution
-        # self.vint_TKE = self.vint_TKE - 0.5*self.inv_schmidt*(self.akv[-1]+self.akv[-2])*(self.tke_np1[-1]-self.tke_np1[-2])/self.Hz[-1]
-        self.vint_TKE = self.vint_TKE + self.wtke[-1] #TODO : à tester !
-        self.vint_TKE = self.vint_TKE - residual # remove the component artificially added
-        self.tke_n[:] = self.tke_np1[:]
         #
 
 
@@ -470,20 +495,19 @@ class SCM:
                                     self.nz , self.ntraMF , len(self.mf_params)  )
         if self.mass_flux_entr=='R10':
 
-          
+
           self.ap,self.up,self.vp,self.wp,self.tp,self.Bp,self.ent,self.det, self.epsPlume = scm_mfc.mass_flux_r10(
                                     u_mean, v_mean, t_mean, self.tke_n, self.z_w, self.Hz,
                                     tp0   , up0   , vp0   , wp0     , self.mf_params,
                                     self.alpha , self.beta, self.MF_small_ap, self.lineos, self.zinv ,
                                     self.nz , self.ntraMF , len(self.mf_params)   )
-        
+
         if self.mass_flux_entr=='R10corNT':
           self.ap,self.up,self.vp,self.wp,self.tp,self.Bp,self.ent,self.det, self.epsPlume = scm_mfc.mass_flux_r10_cor(
                                     u_mean, v_mean, t_mean, self.tke_n, self.z_w, self.Hz,
                                     tp0   , up0   , vp0   , wp0     , self.mf_params,
                                     self.alpha , self.beta, self.fcor, self.ecor , self.MF_small_ap, self.lineos, self.zinv ,
-                                    self.nz , self.ntraMF , len(self.mf_params)   )  
-          #print(self.zinv)
+                                    self.nz , self.ntraMF , len(self.mf_params)   )
 #
 
 
