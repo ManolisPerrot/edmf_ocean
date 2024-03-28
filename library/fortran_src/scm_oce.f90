@@ -17,7 +17,7 @@ MODULE scm_oce
 
 CONTAINS
   !===================================================================================================
-  SUBROUTINE advance_tra_ED(t_n,stflx,srflx,swr_frac,Hz,Akt,zw,eps,alpha,dt,N,ntra,t_np1)
+  SUBROUTINE advance_tra_ED(t_n,stflx,srflx,swr_frac,btflx,Hz,Akt,zw,eps,alpha,dt,N,ntra,t_np1)
   !---------------------------------------------------------------------------------------------------
     !!============================================================================<br />
     !!                  ***  ROUTINE advance_tra_ED  ***                          <br />
@@ -31,6 +31,7 @@ CONTAINS
     REAL(8), INTENT(IN   )          :: dt               !! time-step [s]
     REAL(8), INTENT(IN   )          :: t_n  (1:N,ntra)  !! tracer at time step n
     REAL(8), INTENT(IN   )          :: stflx(  ntra)    !! surface tracer fluxes
+    REAL(8), INTENT(IN   )          :: btflx(  ntra)    !! surface tracer fluxes
     REAL(8), INTENT(IN   )          :: srflx            !! surface radiative flux [W/m2]
     REAL(8), INTENT(IN   )          :: swr_frac(0:N)    !! fraction of solar penetration
     REAL(8), INTENT(IN   )          :: Hz      (1:N)    !! layer thickness [m]
@@ -71,8 +72,9 @@ CONTAINS
       !=======================================================================
       ! right hand side for the tridiagonal problem
       ff(1:N) = t_np1(1:N,itrc)
+      ff(1  ) = ff(1) - dt*btflx(itrc)
       ! solve tridiagonal problem
-      CALL tridiag_solve(N,Hz,Akt,0.*FC,0.d8,ff,dt)
+      CALL tridiag_solve(N,Hz,Akt,ff,dt)
       ! update tracer
       t_np1(1:N,itrc) = ff(1:N)
       !-----------
@@ -176,7 +178,7 @@ CONTAINS
 
 
   !===================================================================================================
-  SUBROUTINE advance_dyn_Cor_ED(u_n,v_n,sustr,svstr,Hz,Akv,fcor,dt,nn,N,u_np1,v_np1)
+  SUBROUTINE advance_dyn_Cor_ED(u_n,v_n,ustr_sfc,vstr_sfc,ustr_bot,vstr_bot,Hz,Akv,fcor,dt,nn,N,u_np1,v_np1)
   !---------------------------------------------------------------------------------------------------
     !!============================================================================<br />
     !!                  ***  ROUTINE advance_dyn_Cor_ED  ***                      <br />
@@ -202,8 +204,10 @@ CONTAINS
     REAL(8), INTENT(IN   )          :: v_n   (1:N )       !! v-velocity component at time n [m/s]
     REAL(8), INTENT(IN   )          :: Hz      (1:N)      !! layer thickness [m]
     REAL(8), INTENT(IN   )          :: Akv     (0:N)      !! eddy-viscosity [m2/s]
-    REAL(8), INTENT(IN   )          :: sustr              !! zonal surface stress      [m2/s2]
-    REAL(8), INTENT(IN   )          :: svstr              !! meridional surface stress [m2/s2]
+    REAL(8), INTENT(IN   )          :: ustr_sfc              !! zonal surface stress      [m2/s2]
+    REAL(8), INTENT(IN   )          :: vstr_sfc              !! meridional surface stress [m2/s2]
+    REAL(8), INTENT(IN   )          :: ustr_bot              !! zonal surface stress      [m2/s2]
+    REAL(8), INTENT(IN   )          :: vstr_bot              !! meridional surface stress [m2/s2]
     REAL(8), INTENT(  OUT)          :: u_np1 (1:N )       !! u-velocity component at time n+1 [m/s]
     REAL(8), INTENT(  OUT)          :: v_np1 (1:N )       !! v-velocity component at time n+1 [m/s]
     ! local variables
@@ -237,8 +241,10 @@ CONTAINS
     !  ENDDO
     !ENDIF
     !! 2 - Apply surface forcing <br />
-    u_np1(N)=u_np1(N) + dt*sustr    !<-- sustr is in m2/s2 here
-    v_np1(N)=v_np1(N) + dt*svstr
+    u_np1(N)=u_np1(N) + dt*ustr_sfc    !<-- sustr is in m2/s2 here
+    v_np1(N)=v_np1(N) + dt*vstr_sfc
+    u_np1(1)=u_np1(1) - dt*ustr_bot    !<-- sustr is in m2/s2 here
+    v_np1(1)=v_np1(1) - dt*vstr_bot
     !=======================================================================
     !! 3 - Implicit integration for vertical viscosity <br />
     !! \begin{align*}
@@ -247,15 +253,14 @@ CONTAINS
     !=======================================================================
     ! u-component
     !--------------------------------------------------------
-    FC(0:N) = 0.
     ff(1:N) = u_np1(1:N)
-    CALL tridiag_solve(N,Hz,Akv,FC,0.d8,ff,dt) ! Invert tridiagonal matrix
+    CALL tridiag_solve(N,Hz,Akv,ff,dt) ! Invert tridiagonal matrix
     u_np1(1:N) = ff(1:N)    !EXP(-dt*sig(1:N))*ff(1:N)
     !
     ! v-component
     !--------------------------------------------------------
     ff(1:N) = v_np1(1:N)
-    CALL tridiag_solve(N,Hz,Akv,FC,0.d8,ff,dt)    ! Invert tridiagonal matrix
+    CALL tridiag_solve(N,Hz,Akv,ff,dt)    ! Invert tridiagonal matrix
     v_np1(1:N) = ff(1:N)     !EXP(-dt*sig(1:N))*ff(1:N)
     !@note A different time discretization of the Coriolis term could be tested
     ! to check the phase shift compared to MesoNH
@@ -350,11 +355,12 @@ CONTAINS
     REAL(8), INTENT(  OUT)       :: hmxl300            !! mixed layer depth [m]
     ! local variables
     integer                        :: k
-    real(8)                        :: cff_new,cff_old,bvf_c,kstart
+    real(8)                        :: cff_new,cff_old,bvf_c
+    integer                        :: kstart
     ! find 10m depth
     kstart = N
     do while( zr(kstart) > -10.  )
-      kstart = kstart - 1.
+      kstart = kstart - 1
     enddo
     !
     bvf_c = rhoc10*(grav/rho0)
@@ -416,11 +422,12 @@ CONTAINS
     REAL(8), INTENT(  OUT)       :: hmxl              !! mixed layer depth [m]
     ! local variables
     integer                        :: k
-    real(8)                        :: cff_new,cff_old,bvf_c,kstart
+    real(8)                        :: cff_new,cff_old,bvf_c
+    integer                        :: kstart
     ! find 300m depth
     kstart = N
     do while( zr(kstart) > zref  )
-      kstart = kstart - 1.
+      kstart = kstart - 1
     enddo
     !
     bvf_c = rhoc*(grav/rho0)
@@ -669,7 +676,7 @@ CONTAINS
 
 
   !===================================================================================================
-  SUBROUTINE tridiag_solve(N,Hz,Ak,Fmass,r_D,f,dt)
+  SUBROUTINE tridiag_solve(N,Hz,Ak,f,dt)
   !---------------------------------------------------------------------------------------------------
     !!============================================================================<br />
     !!                  ***  ROUTINE tridiag_solve  ***                           <br />
@@ -681,39 +688,29 @@ CONTAINS
     REAL(8), INTENT(IN   )    :: Hz(1:N)            !! layer thickness [m]
     REAL(8), INTENT(IN   )    :: dt                 !! time-step [s]
     REAL(8), INTENT(IN   )    :: Ak(0:N)            !! eddy diffusivity/viscosity [m2/s]
-    REAL(8), INTENT(IN   )    :: Fmass(0:N)         !! mass flux (in case of an implicit treatment of MF terms) [m/s]
-    REAL(8), INTENT(IN   )    :: r_D                !! bottom friction multiplied by bottom velocity (not used yet) [m/s]
     REAL(8), INTENT(INOUT)    :: f(1:N)             !! (in: right-hand side) (out:solution of tridiagonal problem)
     ! local variables
     INTEGER                   :: k
     REAL(8)                   :: a(1:N),b(1:N),c(1:N),q(1:N)
-    REAL(8)                   :: difA,difC,advA,advB,advC,cff
+    REAL(8)                   :: difA,difC,cff
     !
     DO k=2,N-1
       difA  =       -2.*dt* Ak  (k-1) / (Hz(k-1)+Hz(k))
       difC  =       -2.*dt* Ak  (k  ) / (Hz(k+1)+Hz(k))
-      advA  =   - dt*Hz(k)*Fmass(k-1) / (Hz(k)+Hz(k-1))
-      advC  =   - dt*Hz(k)*Fmass(k  ) / (Hz(k)+Hz(k+1))
-      advB  =   dt*Hz(k+1)*Fmass(k  ) / (Hz(k)+Hz(k+1))  &
-            - dt*Hz(k-1)*Fmass(k-1) / (Hz(k)+Hz(k-1))
-      a (k) = difA + advA
-      c (k) = difC - advC
-      b (k) = Hz(k) - difA - difC + advB
+      a (k) = difA
+      c (k) = difC
+      b (k) = Hz(k) - difA - difC
     ENDDO
     !++ Bottom BC
     a (1) = 0.
-    difC  = - 2.*dt*Ak(1)/( Hz(2)+Hz(1) ) - dt*r_D
-    advC  =  - dt*Hz(1)*Fmass(1  ) / (Hz(1)+Hz(2))
-    advB  =    dt*Hz(2)*Fmass(1  ) / (Hz(1)+Hz(2))
-    c (1) = difC - advC
-    b (1) = Hz(1) - difC + advB
+    difC  = - 2.*dt*Ak(1)/( Hz(2)+Hz(1) )
+    c (1) = difC
+    b (1) = Hz(1) - difC
     !++ Surface BC
     difA  = -2.*dt*Ak(N-1)/( Hz(N-1)+Hz(N))
-    advA  = - dt*Hz(N  )*Fmass(N-1) / (Hz(N)+Hz(N-1))
-    advB  = - dt*Hz(N-1)*Fmass(N-1) / (Hz(N)+Hz(N-1))
-    a (N) = difA + advA
+    a (N) = difA
     c (N) = 0.
-    b (N) = Hz(N) - difA + advB
+    b (N) = Hz(N) - difA
     !
     cff   = 1./b(1)
     q (1) = - c(1)*cff

@@ -25,6 +25,7 @@ class SCM:
                         svstr   =  0., stflx=-500. , srflx =     0.,
                         ssflx   =  0., nbhours = 72, outfreq  =  1.,
                         output_filename="scm_output.nc" , eddy_diff = True ,
+                        btflx='no flux',
                         evd = False  , mass_flux_tra          = False  ,
                                        mass_flux_dyn          = False  ,
                                        mass_flux_tke          = False  ,
@@ -89,17 +90,23 @@ class SCM:
         ####################################
         # surface boundary conditions
         #-----------------------------------
-        self.taux      = sustr                                                  ## zonal wind stress       [m2/s2]
-        self.tauy      = svstr                                                  ## meridional wind stress  [m2/s2]
+        self.ustr_sfc      = sustr                                                  ## zonal wind stress       [m2/s2]
+        self.vstr_sfc      = svstr                                                  ## meridional wind stress  [m2/s2]
         self.stflx     = np.zeros(2)
         cff            = 1./(self.rho0*self.cp)
         self.stflx[self.itemp]  = stflx*cff                                     ## non-penetrative heat flux  [K m / s]
         self.srflx     = srflx*cff                                              ## solar radiation            [K m / s]
         self.stflx[self.isalt]  = ssflx                                         ## freshwater flux         [psu m / s]
+        self.btflx     = np.zeros(2)
+        self.ustr_bot  = 0.
+        self.vstr_bot  = 0.
         ####################################
         # Eddy-diffusion parameters
         #-----------------------------------
-        self.tkemin      = 1.e-8; self.akvmin    = 1.e-4; self.aktmin    = 1.e-5
+        #self.tkemin = 1.e-8; self.akvmin    = 1.e-4; self.aktmin    = 1.e-5
+        self.akvmin = 1.e-4
+        self.aktmin = 1.e-5
+        self.mxlmin = 1.
         self.ED          = eddy_diff     ; self.ED_evd          = evd
         #
         self.ED_tke_sfc_dirichlet = tke_sfc_dirichlet
@@ -110,6 +117,7 @@ class SCM:
           self.ED_tke_const    = 1; cm = 0.126; self.inv_schmidt = 0.34/cm
         if eddy_diff_tke_const=='RS81':
           self.ED_tke_const    = 2; cm = 0.0667; self.inv_schmidt= 0.4/cm
+        self.tkemin = np.power( self.akvmin/(cm*self.mxlmin), 2 )
         ####################################
         # Mass flux options and parameters
         #-----------------------------------
@@ -153,9 +161,9 @@ class SCM:
           if self.z_w[k] < mld_ini :
             self.t_n  [k,self.itemp] = T0 + 0.5*strat*( self.z_w[k+1]+self.z_w[k] ) + strat*(-mld_ini)
             self.t_np1[k,self.itemp] = T0 + 0.5*strat*( self.z_w[k+1]+self.z_w[k] ) + strat*(-mld_ini)
-
-
-
+        self.btflx[self.itemp]  = 0.
+        if btflx=='linear_continuation': self.btflx[self.itemp] = self.aktmin * N0 / (self.g * self.alpha )
+        self.btflx[self.isalt]  = 0.
         ####################################
         # initialize arrays for EDDY-DIFFUSION (tke, bvf, lup,ldwn,tke,AkT,Akv)
         #-----------------------------------
@@ -239,14 +247,15 @@ class SCM:
             #===================================================
             self.t_np1  = scm_oce.advance_tra_ed(
                                         self.t_n, self.stflx, self.srflx,
-                                        swr_frac, self.Hz   , self.akt  ,
+                                        swr_frac, self.btflx, self.Hz   , self.akt  ,
                                         self.z_w, self.eps  , self.alpha,
                                         self.dt , self.nz   , self.ntra  )
             #==============================================================
             # advance dynamics to n+1 (Coriolis + vertical viscosity only)
             #==============================================================
             self.u_np1, self.v_np1 = scm_oce.advance_dyn_cor_ed(
-                                        self.u_n, self.v_n, self.taux, self.tauy,
+                                        self.u_n, self.v_n, self.ustr_sfc, self.vstr_sfc,
+                                        self.ustr_bot, self.vstr_bot,
                                         self.Hz , self.akv, self.fcor, self.dt  ,
                                         nn, self.nz  )
             #===================
@@ -293,6 +302,7 @@ class SCM:
             self.u_n[:] = self.u_np1[:]; self.v_n[:] = self.v_np1[:];
             self.t_n[:,:] = self.t_np1[:,:]; self.tke_n[:] = self.tke_np1[:]
         self.do_turb_fluxes (  )
+        print(self.vint_Etot)
 #
 
 
@@ -312,8 +322,8 @@ class SCM:
         self.wted[  self.nz] = self.stflx[self.itemp]                   ## (w'theta')_ED
         self.wted[1:self.nz] = self.akt[1:self.nz] * (  self.t_np1[1:self.nz  ,self.itemp]
                                 - self.t_np1[0:self.nz-1,self.itemp] ) / self.Hz[0:self.nz-1]
-        self.wued[  self.nz] = self.taux                 ## (w'theta')_ED
-        self.wved[  self.nz] = self.tauy
+        self.wued[  self.nz] = self.ustr_sfc               ## (w'theta')_ED
+        self.wved[  self.nz] = self.vstr_sfc
         self.wued[1:self.nz] = self.akv[1:self.nz] * (  self.u_np1[1:self.nz]
                                 - self.u_np1[0:self.nz-1] ) / self.Hz[0:self.nz-1]
         self.wved[1:self.nz] = self.akv[1:self.nz] * (  self.v_np1[1:self.nz]
@@ -380,8 +390,8 @@ class SCM:
           self.vint_Eps = self.vint_Eps+(self.z_r[k+1]-self.z_r[k])*self.eps[k+1]
           self.vint_TKE = self.vint_TKE+(self.z_r[k+1]-self.z_r[k])*(self.tke_np1[k+1]-self.tke_n[k+1])/self.dt
         # remove surface contributions
-        sfc_KE   = 0.5*( (self.u_np1[-1]+self.u_n[-1])*self.taux
-                       + (self.v_np1[-1]+self.v_n[-1])*self.tauy )
+        sfc_KE   = 0.5*( (self.u_np1[-1]+self.u_n[-1])*self.ustr_sfc
+                       + (self.v_np1[-1]+self.v_n[-1])*self.vstr_sfc )
         sfc_Epot = -self.cp*self.stflx[self.itemp]
         sfc_Epot = sfc_Epot - 0.5*self.Hz[-1]*self.g*self.alpha*self.stflx[self.itemp]
         #
@@ -421,10 +431,10 @@ class SCM:
         # Compute boundary conditions for TKE
         if self.MF_tke_trplCorr:
             tke_sfc,tke_bot, flux_sfc = scm_tke.compute_tke_bdy(
-                                      self.taux,  self.tauy, self.ED_tke_const, self.bc_ap, self.wp0 )
+                                      self.ustr_sfc,  self.vstr_sfc, self.ED_tke_const, self.bc_ap, self.wp0 )
         else:
            tke_sfc,tke_bot, flux_sfc = scm_tke.compute_tke_bdy(
-                                      self.taux,  self.tauy, self.ED_tke_const, 0.*self.bc_ap, 0.*self.wp0 )
+                                      self.ustr_sfc,  self.vstr_sfc, self.ED_tke_const, 0.*self.bc_ap, 0.*self.wp0 )
         #=======================================
         # Compute TKE production by shear
         self.shear = scm_tke.compute_shear(
@@ -456,7 +466,7 @@ class SCM:
         # Finalize eddy-viscosity/diffusivity computation
         self.lupw,self.ldwn = scm_tke.compute_mxl(
                                          self.tke_np1, self.bvf , self.Hz,
-                                         self.taux   , self.tauy, self.nz )
+                                         self.ustr_sfc   , self.vstr_sfc, self.nz )
         self.akv,self.akt   = scm_tke.compute_ed (
                                          self.tke_np1, self.lupw, self.ldwn,
                                          self.Prdtl  , self.ED_extrap_sfc,
@@ -537,8 +547,8 @@ class SCM:
         ocean_time = fh01.createVariable('ocean_time','f8',('time')); ocean_time[:] = 0.
         ocean_time.units = 'seconds'
         ocean_time.long_name = 'time since initialization'
-        taux = fh01.createVariable('taux','f8',('time')); taux[:] = self.taux
-        tauy = fh01.createVariable('tauy','f8',('time')); tauy[:] = self.tauy
+        taux = fh01.createVariable('taux','f8',('time')); taux[:] = self.ustr_sfc
+        tauy = fh01.createVariable('tauy','f8',('time')); tauy[:] = self.vstr_sfc
         Qns  = fh01.createVariable('Qns','f8',('time'));   Qns[:] = self.stflx[self.itemp]*self.rho0*self.cp           #non-solar
         Qs   = fh01.createVariable( 'Qs','f8',('time'));    Qs[:] = self.srflx*self.rho0*self.cp                          #solar
         Fw   = fh01.createVariable( 'Fw','f8',('time'));    Fw[:] = self.stflx[self.isalt]            #freshwater
@@ -607,8 +617,8 @@ class SCM:
     def output_state(self,TimeInSecs,kout):
         fh01 = Dataset(self.output, mode='a',format="NETCDF4")
         fh01.variables['ocean_time'][kout] = TimeInSecs
-        fh01.variables['taux'][kout]       = self.taux
-        fh01.variables['tauy'][kout]       = self.tauy
+        fh01.variables['taux'][kout]       = self.ustr_sfc
+        fh01.variables['tauy'][kout]       = self.vstr_sfc
         fh01.variables['Qns'][kout]        = self.stflx[self.itemp]*self.cp*self.rho0
         fh01.variables['Qs'][kout]         = self.srflx
         fh01.variables['Fw'][kout]         = self.stflx[self.isalt]*self.cp*self.rho0

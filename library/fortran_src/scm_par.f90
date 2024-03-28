@@ -11,7 +11,7 @@ MODULE scm_par
    !---------------------------------------------------------------------
    ! SCM parameters for TKE turbulent closure <br />
    !---------------------------------------------------------------------
-   REAL(8), PUBLIC, PARAMETER ::   tke_min   = 1.e-8          !! minimum TKE value [m2/s2]
+!   REAL(8), PUBLIC, PARAMETER ::   tke_min   = 1.e-8          !! minimum TKE value [m2/s2]
    REAL(8), PUBLIC, PARAMETER ::   tke_min0  = 1.e-4          !! surface minimum value of tke for Dirichlet condition [m2/s2]
    REAL(8), PUBLIC, PARAMETER ::   avm_bak   = 1.e-4          !! background eddy-viscosity [m2/s]
    REAL(8), PUBLIC, PARAMETER ::   avt_bak   = 1.e-5          !! background eddy-diffusivity [m2/s]
@@ -34,9 +34,10 @@ MODULE scm_par
    REAL(8), PUBLIC, PARAMETER ::     ce_r81 = 0.4     !! Constant \( c_e \) in Redelsperger & Sommeria 1981
    REAL(8), PUBLIC, PARAMETER ::    Ric_r81 = 0.139   !! Critical Richardson number
    !
-   REAL(8), PUBLIC, PARAMETER ::   mxl_min = (avm_bak / 0.1) / sqrt( tke_min )  !! minimum value for mixing lengths [m]
+   REAL(8), PUBLIC, PARAMETER ::   mxl_min  = 1.      !(avm_bak / 0.1) / sqrt( tke_min )  !! minimum value for mixing lengths [m]
    REAL(8), PUBLIC, PARAMETER ::   mxl_min0 = 0.04    !! minimum surface value for miwing lengths [m]
    REAL(8), PUBLIC, PARAMETER ::   pdlrmin  = 0.1     !! minimum value for the inverse Prandtl number
+   REAL(8), PUBLIC, PARAMETER ::   tke_min  = ( avm_bak/(cm_nemo*mxl_min) )**2
    !
    REAL(8), PUBLIC, PARAMETER ::  bshear    =   1.e-20 !! minimum shear
    REAL(8), PUBLIC, PARAMETER ::  rsmall    =   1.e-20
