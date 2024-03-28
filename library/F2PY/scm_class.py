@@ -197,6 +197,8 @@ class SCM:
         if self.write_netcdf:
             self.wted   = np.zeros(self.nz+1); self.wtmf   = np.zeros(self.nz+1)
             self.wued   = np.zeros(self.nz+1); self.wumf   = np.zeros(self.nz+1)
+            self.wved   = np.zeros(self.nz+1); self.wvmf   = np.zeros(self.nz+1)
+
         self.buoyMF = np.zeros(self.nz+1); self.shearMF = np.zeros(self.nz+1)
         self.wtke   = np.zeros(self.nz  )
         self.triple_corr     = np.zeros(self.nz+1);
@@ -311,8 +313,11 @@ class SCM:
         self.wted[1:self.nz] = self.akt[1:self.nz] * (  self.t_np1[1:self.nz  ,self.itemp]
                                 - self.t_np1[0:self.nz-1,self.itemp] ) / self.Hz[0:self.nz-1]
         self.wued[  self.nz] = self.taux                 ## (w'theta')_ED
+        self.wved[  self.nz] = self.tauy
         self.wued[1:self.nz] = self.akv[1:self.nz] * (  self.u_np1[1:self.nz]
                                 - self.u_np1[0:self.nz-1] ) / self.Hz[0:self.nz-1]
+        self.wved[1:self.nz] = self.akv[1:self.nz] * (  self.v_np1[1:self.nz]
+                                - self.v_np1[0:self.nz-1] ) / self.Hz[0:self.nz-1]
         if self.MF_tra:                                                 ## (w'theta')_MF
           self.wtmf[1:self.nz] =  self.Fmass[1:self.nz]*(
                                               self.tp   [1:self.nz,  self.itemp]
@@ -321,6 +326,9 @@ class SCM:
           self.wumf[1:self.nz] =  self.Fmass[1:self.nz]*(
                                                self.up   [1:self.nz]
                                              - self.u_np1[0:self.nz-1] )
+          self.wvmf[1:self.nz] =  self.Fmass[1:self.nz]*(
+                                               self.vp   [1:self.nz]
+                                             - self.v_np1[0:self.nz-1] )
 #
 
 
@@ -546,7 +554,10 @@ class SCM:
         var  = fh01.createVariable('Etke','f8',('time')); var[0] = self.vint_TKE
         var  = fh01.createVariable('Eeps','f8',('time')); var[0] = self.vint_Eps
         var  = fh01.createVariable('hmxl','f8',('time')); var[0] = self.hmxl
-        var  = fh01.createVariable('WT','f8',('time','z_w')); var[0,:] = self.wted[:]+self.wtmf[:]; var.units = 's-2'; del var
+        var  = fh01.createVariable('WT','f8',('time','z_w')); var[0,:] = self.wted[:]+self.wtmf[:]; var.units = 'K m s-1'; del var
+        var  = fh01.createVariable('WU','f8',('time','z_w')); var[0,:] = self.wued[:]+self.wumf[:]; var.units = 'm2 s-2'; del var
+        var  = fh01.createVariable('WV','f8',('time','z_w')); var[0,:] = self.wved[:]+self.wvmf[:]; var.units = 'm2 s-2'; del var
+
         if self.ED:
             var  = fh01.createVariable('tke','f8',('time','z_w')); var[0,:] = self.tke_n[:]; var.units = 'm2 s-2'; del var
             var  = fh01.createVariable('Akv','f8',('time','z_w')); var[0,:] = self.akv[:]; var.units = 'm2 s-1'; del var
@@ -554,7 +565,9 @@ class SCM:
             var  = fh01.createVariable('bvf','f8',('time','z_w')); var[0,:] = self.bvf[:]; var.units = 's-2'; del var
             var  = fh01.createVariable('lup','f8',('time','z_w')); var[0,:] = self.lupw[:]; var.units = 'm'; del var
             var  = fh01.createVariable('ldw','f8',('time','z_w')); var[0,:] = self.ldwn[:]; var.units = 'm'; del var
-            var  = fh01.createVariable('WT_ED','f8',('time','z_w')); var[0,:] = self.wted[:]; var.units = 's-2'; del var
+            var  = fh01.createVariable('WT_ED','f8',('time','z_w')); var[0,:] = self.wted[:]; var.units = 'K m s-1'; del var
+            var  = fh01.createVariable('WU_ED','f8',('time','z_w')); var[0,:] = self.wued[:]; var.units = 'm2 s-2'; del var
+            var  = fh01.createVariable('WV_ED','f8',('time','z_w')); var[0,:] = self.wved[:]; var.units = 'm2 s-2'; del var
             var  = fh01.createVariable('Prdtl','f8',('time','z_w')); var[0,:] = self.Prdtl[:]; var.units = 'none'; del var
         if self.MF_tra:
             var = fh01.createVariable('a_p','f8',('time','z_w')); var[0,:] = self.ap[:]; del var
@@ -566,6 +579,8 @@ class SCM:
             var = fh01.createVariable('Ent','f8',('time','z_r')); var[0,:] = self.ent[:]; del var
             var = fh01.createVariable('Det','f8',('time','z_r')); var[0,:] = self.det[:]; del var
             var  = fh01.createVariable('WT_MF','f8',('time','z_w')); var[0,:] = self.wtmf[:]; del var
+            var  = fh01.createVariable('WU_MF','f8',('time','z_w')); var[0,:] = self.wumf[:]; del var
+            var  = fh01.createVariable('WV_MF','f8',('time','z_w')); var[0,:] = self.wvmf[:]; del var
             var = fh01.createVariable('u_p','f8',('time','z_w')); var[0,:] = self.up[:]; del var
             var = fh01.createVariable('v_p','f8',('time','z_w')); var[0,:] = self.vp[:]; del var
             if self.MF_tke:
@@ -608,6 +623,10 @@ class SCM:
         fh01.variables['Eeps'][kout]       = self.vint_Eps
         fh01.variables['hmxl'][kout]       = self.hmxl
         fh01.variables['WT'][kout,:]       = self.wted[:]+self.wtmf[:]
+        fh01.variables['WU'][kout,:]       = self.wued[:]+self.wumf[:]
+        fh01.variables['WV'][kout,:]       = self.wved[:]+self.wvmf[:]
+
+
         if self.ED:
             fh01.variables['tke'][kout,:] = self.tke_n[:]
             fh01.variables['Akv'][kout,:] = self.akv[:]
@@ -616,6 +635,8 @@ class SCM:
             fh01.variables['lup'][kout,:] = self.lupw[:]
             fh01.variables['ldw'][kout,:] = self.ldwn[:]
             fh01.variables['WT_ED'][kout,:] = self.wted[:]
+            fh01.variables['WU_ED'][kout,:] = self.wued[:]
+            fh01.variables['WV_ED'][kout,:] = self.wved[:]
             fh01.variables['Prdtl'][kout,:] = self.Prdtl[:]
         if self.MF_tra:
             fh01.variables['zinv'][kout]  = self.zinv
@@ -627,6 +648,8 @@ class SCM:
             fh01.variables['Ent'][kout,:] = self.ent[:]
             fh01.variables['Det'][kout,:] = self.det[:]
             fh01.variables['WT_MF'][kout,:] = self.wtmf[:]
+            fh01.variables['WU_MF'][kout,:] = self.wumf[:]
+            fh01.variables['WV_MF'][kout,:] = self.wvmf[:]
             fh01.variables['u_p'][kout,:] = self.up[:]
             fh01.variables['v_p'][kout,:] = self.vp[:]
             if self.MF_tke:
