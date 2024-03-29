@@ -281,20 +281,24 @@ class SCM:
             #==========================================================
             # Check for outputs & diagnostics
             #==========================================================
-            if  time % self.outfreq == 0 and self.write_netcdf:
+            if  time % self.outfreq == 0:
               kout+=1
-              self.do_diags_energy(  )
-              self.do_turb_fluxes (  )
-              #=======================================
-              # Compute mixed layer depth from bvf
-              self.hmxl  = scm_oce.compute_mxl2(self.bvf,self.rhoc,self.z_r,10.,self.nz)
-              #=======================================
-              # Write outputs in .nc file
-              self.output_state(TimeInSecs=time,kout=kout)
-            # save advanced temperature and velocity
-            self.t_history[:,kout-1] = self.t_np1[:,self.itemp]
-            self.u_history[:,kout-1] = self.u_np1[:]
-            self.v_history[:,kout-1] = self.v_np1[:]
+              # save in np.array advanced temperature and velocity
+              self.t_history[:,kout-1] = self.t_np1[:,self.itemp]
+              self.u_history[:,kout-1] = self.u_np1[:]
+              self.v_history[:,kout-1] = self.v_np1[:]
+
+              if self.write_netcdf:
+                # compute diagnostics
+                self.do_diags_energy(  )
+                self.do_turb_fluxes (  )
+                #=======================================
+                # Compute mixed layer depth from bvf
+                self.hmxl  = scm_oce.compute_mxl2(self.bvf,self.rhoc,self.z_r,10.,self.nz)
+                #=======================================
+                # Write outputs in .nc file
+                self.output_state(TimeInSecs=time,kout=kout)
+
             # swap arrays
             self.u_n[:] = self.u_np1[:]; self.v_n[:] = self.v_np1[:];
             self.t_n[:,:] = self.t_np1[:,:]; self.tke_n[:] = self.tke_np1[:]
