@@ -88,6 +88,9 @@ common_params = {
     'bc_ap': 0.2,    #0.3,
     'delta_bkg': 0.005*250,   # 0.006,
     'wp0' : -0.5e-03,
+    'akvmin': 1.e-5,
+    'aktmin': 1.e-6,
+    'mxlmin': 1.,
     'output_filename': 'run',
     'write_netcdf': True
 }
@@ -104,8 +107,19 @@ runs = [
         'mass_flux_dyn': False,
         'mass_flux_tke': False,
         'mass_flux_tke_trplCorr': False,
-        'output_filename': 'run1.nc'
-
+        'output_filename': 'run1.nc',
+        'mxlmin': 1.
+    },
+    {
+        'btflx': 'linear_continuation',
+        'eddy_diff': True,
+        'evd': False,
+        'mass_flux_tra': False,
+        'mass_flux_dyn': False,
+        'mass_flux_tke': False,
+        'mass_flux_tke_trplCorr': False,
+        'output_filename': 'run2.nc',
+        'mxlmin': 0.05
     }
         ]
 
@@ -125,6 +139,7 @@ ax.set_title(r"$\overline{\theta}$",fontsize=14)
 xmin = 13; xmax = 16.5
 ax.set_xlim(xmin,xmax)
 ax.plot(  scm[0].t_n[:,scm[0].itemp], scm[0].z_r,linewidth=2, color='k')
+ax.plot(  scm[1].t_n[:,scm[1].itemp], scm[0].z_r,linewidth=2, color='b')
 # theoretical mixed layer depth
 hmxl2  = - 1.05*np.sqrt(scm[0].ustr_sfc)*np.sqrt(30.*3600./0.01)
 ax.axhline(y = hmxl2, color = 'r', linestyle = '-')
@@ -133,11 +148,13 @@ ax = axes[1]
 ax.ticklabel_format(style='sci', axis='x', scilimits=(0,0))
 ax.set_title(r"$k$",fontsize=14)
 ax.plot(  scm[0].tke_np1[:], scm[0].z_w,linewidth=2, color='k')
+ax.plot(  scm[1].tke_np1[:], scm[1].z_w,linewidth=2, color='b')
 #=================
 ax = axes[2]
 ax.ticklabel_format(style='sci', axis='x', scilimits=(0,0))
 ax.set_title(r"$K_m$",fontsize=14)
 ax.plot(  scm[0].akv[:], scm[0].z_w,linewidth=2, color='k')
+ax.plot(  scm[1].akv[:], scm[1].z_w,linewidth=2, color='b')
 #=================
 plt.tight_layout()
 plt.show()
