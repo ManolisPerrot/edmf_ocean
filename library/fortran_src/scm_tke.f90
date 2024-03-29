@@ -16,12 +16,12 @@ MODULE scm_tke
 
 CONTAINS
 
-  SUBROUTINE compute_tke_bdy(taux, tauy, tke_const, bc_ap, wp0, tke_sfc, tke_bot, flux_sfc)
+  SUBROUTINE compute_tke_bdy(taux, tauy, tke_const, bc_ap, wp0, tkemin, tke_sfc, tke_bot, flux_sfc)
     !!==========================================================================<br />
     !!                  ***  ROUTINE compute_tke_bdy  ***                       <br />
     !! ** Purposes : compute top and bottom boundary conditions for TKE equation<br />
     !!==========================================================================<br />
-    USE scm_par
+    USE scm_par, ONLY: cm_nemo,ceps_nemo,cm_mnh,ceps_mnh,cm_r81,ceps_r81
     IMPLICIT NONE
     REAL(8), INTENT(IN   )         :: taux         !! zonal surface stress      [m2/s2]
     REAL(8), INTENT(IN   )         :: tauy         !! meridional surface stress [m2/s2]
@@ -29,6 +29,7 @@ CONTAINS
     INTEGER, INTENT(IN   )         :: tke_const    !! choice of TKE constants
     REAL(8), INTENT(IN   )         :: bc_ap        !! choice of TKE constants
     REAL(8), INTENT(IN   )         :: wp0          !! surface value for plume vertical velocity [m/s]
+    REAL(8), INTENT(IN   )         :: tkemin
     REAL(8), INTENT(  OUT)         :: tke_sfc      !! surface value for Dirichlet condition [m2/s2]
     REAL(8), INTENT(  OUT)         :: tke_bot      !! bottom value for Dirichlet condition [m2/s2]
     REAL(8), INTENT(  OUT)         :: flux_sfc     !! surface TKE ED flux for Neumann condition [m3/s3]
@@ -42,7 +43,7 @@ CONTAINS
       tke_sfc  = 0.0001     !! \( k_{\rm sfc} = 1.5 \times 10^{-3}\;{\rm m}^2\;{\rm s}^{-2} \)<br />
       flux_sfc = 0.5*bc_ap*(wp0)**3 !! energetically consistent boundary condition \( F_{\rm sfc}^k = \left.  K_e \partial_z k \right|_{\rm sfc} \)
       !flux_sfc =0.
-    ELSE                    
+    ELSE
       IF(tke_const==0) THEN
         cff = 1./SQRT(cm_nemo*ceps_nemo)
       ELSE IF(tke_const==1) THEN
@@ -50,13 +51,13 @@ CONTAINS
       ELSE
         cff = 1./SQRT( cm_r81*ceps_r81 )
       ENDIF
-      !tke_sfc  = cff*ustar2
-      tke_sfc  = 67.83*ustar2
+      tke_sfc  = cff*ustar2
+      !tke_sfc  = 67.83*ustar2
       flux_sfc = 0.5*bc_ap*(wp0)**3 !! energetically consistent boundary condition \( F_{\rm sfc}^k = \left.  K_e \partial_z k \right|_{\rm sfc} \)
       !2.*67.83*ustar2*SQRT(ustar2)
     ENDIF
     ! bottom boundary condition
-    tke_bot  = tke_min  !! bottom boundary condition : \( k_{\rm bot} = k_{\rm min}  \)
+    tke_bot  = tkemin  !! bottom boundary condition : \( k_{\rm bot} = k_{\rm min}  \)
   !-----------------------------------------------------------------------------
   END SUBROUTINE compute_tke_bdy
   !=============================================================================
@@ -90,12 +91,14 @@ CONTAINS
   !
   SUBROUTINE advance_tke( tke_n, lup, ldwn, Akv, Akt, Hz, zr, bvf, buoyMF, shear2,       &
                           shear2MF, trpl_corrMF, wtke, dt, tke_sfc, tke_bot, flux_sfc,   &
-                          dirichlet_bdy_sfc, tke_const, N, tke_np1, pdlr, eps, residual )
+                          dirichlet_bdy_sfc, tke_const, tkemin, N, tke_np1, pdlr, eps, residual )
     !!==========================================================================<br />
     !!                  ***  ROUTINE advance_tke  ***                           <br />
     !! ** Purposes : tke time stepping, advance tke from time step n to n+1     <br />
     !!==========================================================================<br />
-    USE scm_par
+    USE scm_par, ONLY:ceps_nemo,Ric_nemo,ce_nemo,cm_nemo, &
+                      ceps_mnh,Ric_mnh,ce_mnh,cm_mnh,ct_mnh, &
+                      ceps_r81,Ric_r81,ce_r81,cm_r81,ct_r81,bshear,pdlrmin
     IMPLICIT NONE
     INTEGER, INTENT(IN   )   :: N                            !! number of vertical levels
     REAL(8), INTENT(IN   )   :: dt                           !! time-step [s]
@@ -116,6 +119,7 @@ CONTAINS
     REAL(8), INTENT(IN   )   :: trpl_corrMF(0:N)             !! Contribution of mass flux to d(w'e)/dz term [m2/s3]
     INTEGER, INTENT(IN   )   :: tke_const                    !! choice of TKE constants
     LOGICAL, INTENT(IN   )   :: dirichlet_bdy_sfc            !! Nature of the TKE surface boundary condition (T:dirichlet,F:Neumann)
+    REAL(8), INTENT(IN   )   :: tkemin
     REAL(8), INTENT(INOUT)   :: wtke(1:N)                    !! Diagnostics : w'e term  [m3/s3]
     REAL(8), INTENT(  OUT)   :: tke_np1(0:N)                 !! TKE at time n+1    [m2/s2]
     REAL(8), INTENT(  OUT)   :: pdlr(0:N)                    !! inverse of turbulent Prandtl number
@@ -126,11 +130,11 @@ CONTAINS
     REAL(8)                  :: mxld(0:N),mxlm(0:N),ff(0:N), cff, Ric, isch
     REAL(8)                  :: sh2,buoy,Ri,cff1,cff2,cff3,rhs,rhsmin,ceps,ct,cm
     ! Initialization
-    tke_np1(  N  ) = tke_min
+    tke_np1(  N  ) = tkemin
     IF(dirichlet_bdy_sfc) tke_np1(  N  ) = tke_sfc
     !
     tke_np1(  0  ) = tke_bot
-    tke_np1(1:N-1) = tke_min
+    tke_np1(1:N-1) = tkemin
     ! Initialize constants
     IF(tke_const==0) THEN
       ceps = ceps_nemo; Ric  = Ric_nemo; isch = ce_nemo / cm_nemo
@@ -177,8 +181,8 @@ CONTAINS
       ! dissipation divided by tke
       eps(k)    = cff2*ceps*SQRT(tke_n(k))/mxld(k)
       ! increase rhs if too small to guarantee that tke > tke_min
-      rhsmin    = (tke_min-tke_n(k))/dt   &
-                           + eps(k)*tke_min - cff3*eps(k)*tke_n(k)
+      rhsmin    = (tkemin-tke_n(k))/dt   &
+                           + eps(k)*tkemin - cff3*eps(k)*tke_n(k)
       ! right hand side for tridiagonal problem
       ff(k)     = tke_n(k) + dt*MAX(rhs,rhsmin) + dt*cff3*eps(k)*tke_n(k)  !! Right-hand-side for tridiagonal problem \( f_{k+1/2} = k^n_{k+1/2} + \Delta t {\rm rhs}_{k+1/2} + \frac{1}{2} \Delta t c_\epsilon \frac{ k^n_{k+1/2} \sqrt{k^n_{k+1/2}} }{(l_\epsilon)_{k+1/2}}   \)<br />
       ! keep track of the energy spuriously added to get tke > tke_min
@@ -195,7 +199,7 @@ CONTAINS
     CALL tridiag_solve_tke(N,Hz,isch*Akv,zr,eps,ff,dt,dirichlet_bdy_sfc)  !! Solve the tridiagonal problem
     !
     DO k = 0,N
-      tke_np1(k)=MAX(ff(k),tke_min)
+      tke_np1(k)=MAX(ff(k),tkemin)
     ENDDO
     ! ** Diagnostics **
     !         Store the TKE dissipation term for diagnostics
@@ -213,13 +217,13 @@ CONTAINS
 
 
   !===================================================================================================
-  SUBROUTINE compute_mxl(tke, bvf, Hz, taux, tauy, N, lup, ldwn)
+  SUBROUTINE compute_mxl(tke, bvf, Hz, taux, tauy, mxlmin, N, lup, ldwn)
   !---------------------------------------------------------------------------------------------------
     !!============================================================================<br />
     !!                  ***  ROUTINE compute_mxl  ***                             <br />
     !! ** Purposes : compute mixing length scales                                 <br />
     !!============================================================================<br />
-    USE scm_par
+    USE scm_par, ONLY:grav,vkarmn,rsmall,mxl_min0
     IMPLICIT NONE
     INTEGER, INTENT(IN   )  :: N              !! number of vertical levels
     REAL(8), INTENT(IN   )  :: tke(0:N)       !! turbulent kinetic energy [m2/s2]
@@ -227,7 +231,8 @@ CONTAINS
     REAL(8), INTENT(IN   )  :: Hz(1:N)        !! layer thickness [m]
     REAL(8), INTENT(IN   )  :: taux           !! surface stress [m2/s2]
     REAL(8), INTENT(IN   )  :: tauy           !! surface stress [m2/s2]
-    REAL(8), INTENT(  OUT)  :: lup(0:N)   !! upward mixing length [m]
+    REAL(8), INTENT(IN   )  :: mxlmin         !!
+    REAL(8), INTENT(  OUT)  :: lup(0:N)       !! upward mixing length [m]
     REAL(8), INTENT(  OUT)  :: ldwn(0:N)      !! downward mixing length [m]
     ! local variables
     INTEGER                 :: k
@@ -237,12 +242,12 @@ CONTAINS
     !<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
     ustar2     =  SQRT( taux**2+tauy**2 )  !! \( u_{\star}^2 = \sqrt{\tau_x^2 + \tau_y^2} \)<br />
     !
-    lup (0:N)  = mxl_min
-    ldwn(0:N)  = mxl_min
+    lup (0:N)  = mxlmin
+    ldwn(0:N)  = mxlmin
     !
     DO k = 0, N              ! interior value : l=sqrt(2*e/n^2)
       rn2     = MAX( bvf(k) , rsmall )
-      ld80(k) = MAX( mxl_min,  SQRT(2.*tke(k) / rn2 ) ) !! Buoyancy length scale : \(  (l_{\rm up})_{k+1/2}=(l_{\rm dwn})_{k+1/2}=(l_{D80})_{k+1/2} = \sqrt{\frac{2 k_{k+1/2}^{n+1}}{ \max( (N^2)_{k+1/2}, (N^2)_{\min} ) }}     \)<br />
+      ld80(k) = MAX( mxlmin,  SQRT(2.*tke(k) / rn2 ) ) !! Buoyancy length scale : \(  (l_{\rm up})_{k+1/2}=(l_{\rm dwn})_{k+1/2}=(l_{D80})_{k+1/2} = \sqrt{\frac{2 k_{k+1/2}^{n+1}}{ \max( (N^2)_{k+1/2}, (N^2)_{\min} ) }}     \)<br />
     END DO
     !! Physical limits for the mixing lengths <br />
     ldwn(0  ) = 0.
@@ -263,19 +268,21 @@ CONTAINS
   !===================================================================================================
 
   !===================================================================================================
-  SUBROUTINE compute_ED(tke,lup,ldwn,pdlr,extrap_sfc,tke_const,N,Akv,Akt)
+  SUBROUTINE compute_ED(tke,lup,ldwn,pdlr,extrap_sfc,tke_const,Akvmin,Aktmin,N,Akv,Akt)
   !---------------------------------------------------------------------------------------------------
     !!============================================================================<br />
     !!                  ***  ROUTINE compute_ED  ***                              <br />
     !! ** Purposes : compute the vertical eddy viscosity and diffusivity          <br />
     !!============================================================================<br />
-    USE scm_par
+    USE scm_par, ONLY: cm_nemo,cm_mnh,cm_r81
     IMPLICIT NONE
     INTEGER, INTENT(IN   )  :: N                   !! number of vertical levels
     REAL(8), INTENT(IN   )  :: tke(0:N)            !! turbulent kinetic energy [m2/s2]
     REAL(8), INTENT(IN   )  :: pdlr(0:N)           !! inverse turbulent Prandtl number
     REAL(8), INTENT(IN   )  :: lup(0:N)            !! upward mixing length [m]
     REAL(8), INTENT(IN   )  :: ldwn(0:N)           !! downward mixing length [m]
+    REAL(8), INTENT(IN   )  :: Akvmin
+    REAL(8), INTENT(IN   )  :: Aktmin
     LOGICAL, INTENT(IN   )  :: extrap_sfc          !! (T) extrapolate eddy coefficients to the surface
     INTEGER, INTENT(IN   )  :: tke_const           !! choice of TKE constants
     REAL(8), INTENT(  OUT)  :: Akv(0:N)            !! eddy-viscosity [m2/s]
@@ -295,8 +302,8 @@ CONTAINS
     DO k = 0, N
       mxlm          = MIN ( lup(k),  ldwn(k) )      !! Compute "master" mixing length \( (l_m)_{k+1/2} = \min( (l_{\rm up})_{k+1/2}, (l_{\rm dwn})_{k+1/2} ) \)<br />
       av            = cm * mxlm * SQRT(tke(k))      !! Compute eddy-viscosity \( (K_m)_{k+1/2} = C_m l_m \sqrt{k_{k+1/2}^{n+1}}  \)<br />
-      Akv  (k  )    = MAX(           av,avm_bak )
-      Akt  (k  )    = MAX( pdlr(k) * av,avt_bak )   !! Compute eddy-diffusivity \( (K_s)_{k+1/2} = ({\rm Pr}_t)^{-1}_{k+1/2}   (K_m)_{k+1/2} \)<br />
+      Akv  (k  )    = MAX(           av,Akvmin )
+      Akt  (k  )    = MAX( pdlr(k) * av,Aktmin )   !! Compute eddy-diffusivity \( (K_s)_{k+1/2} = ({\rm Pr}_t)^{-1}_{k+1/2}   (K_m)_{k+1/2} \)<br />
     END DO
     Akv(N) = 0.; Akt(N) = 0.
     !Warning : extrapolation ignores the variations of Hz with depth
