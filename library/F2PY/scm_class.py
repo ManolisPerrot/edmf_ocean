@@ -509,21 +509,19 @@ class SCM:
         tkepmin = self.min_Threshold[0]
         mxlpmin = self.min_Threshold[3]
         #
-        if self.mass_flux_entr=='P09':
-          self.ap,self.up,self.vp,self.wp,self.tp,self.Bp,self.ent,self.det  =  scm_mfc.mass_flux_p09(
-                                    u_mean, v_mean, t_mean, self.z_w, self.Hz       ,
-                                    tp0   , up0   , vp0   , wp0     , self.mf_params,
-                                    self.eos_params, self.MF_small_ap,self.zinv ,
-                                    self.nz , self.ntraMF , len(self.mf_params), len(self.eos_params)  )
+        #if self.mass_flux_entr=='P09':
+        #  self.ap,self.up,self.vp,self.wp,self.tp,self.Bp,self.ent,self.det  =  scm_mfc.mass_flux_p09(
+        #                            u_mean, v_mean, t_mean, self.z_w, self.Hz       ,
+        #                            tp0   , up0   , vp0   , wp0     , self.mf_params,
+        #                            self.eos_params, self.MF_small_ap,self.zinv ,
+        #                            self.nz , self.ntraMF , len(self.mf_params), len(self.eos_params)  )
+        #
         if self.mass_flux_entr=='R10':
-
-
           self.ap,self.up,self.vp,self.wp,self.tp,self.Bp,self.ent,self.det, self.epsPlume = scm_mfc.mass_flux_r10(
                                     u_mean, v_mean, t_mean, self.tke_n, self.z_w, self.Hz,
                                     tp0   , up0   , vp0   , wp0     , self.mf_params,
                                     self.eos_params, tkepmin, mxlpmin, self.MF_small_ap, self.lineos, self.zinv ,
                                     self.nz , self.ntraMF , len(self.mf_params), len(self.eos_params)   )
-
         if self.mass_flux_entr=='R10corNT':
           self.ap,self.up,self.vp,self.wp,self.tp,self.Bp,self.ent,self.det, self.epsPlume = scm_mfc.mass_flux_r10_cor(
                                     u_mean, v_mean, t_mean, self.tke_n, self.z_w, self.Hz,
