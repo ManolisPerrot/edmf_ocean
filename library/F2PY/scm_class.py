@@ -287,7 +287,7 @@ class SCM:
               self.do_turb_fluxes (  )
               #=======================================
               # Compute mixed layer depth from bvf
-              self.hmxl  = scm_oce.compute_mxl2(self.bvf,self.rhoc,self.z_r,10.,self.nz)
+              self.hmxl  = scm_oce.compute_mxl2(self.bvf,self.rhoc,self.z_r,10.,self.rho0,self.nz)
               #=======================================
               # Write outputs in .nc file
               self.output_state(TimeInSecs=time,kout=kout)

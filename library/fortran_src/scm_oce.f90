@@ -338,15 +338,16 @@ CONTAINS
   !===================================================================================================
 
   !===================================================================================================
-  SUBROUTINE compute_mxl (bvf,rhoc10,rhoc300,zr,N,hmxl10,hmxl300)
+  SUBROUTINE compute_mxl (bvf,rhoc10,rhoc300,zr,rhoRef,N,hmxl10,hmxl300)
   !---------------------------------------------------------------------------------------------------
-    USE scm_par
+    USE scm_par, ONLY : grav
     IMPLICIT NONE
     INTEGER, INTENT(IN   )       :: N                  !! number of vertical levels
     REAL(8), INTENT(IN   )       :: bvf(0:N)           !! Brunt Vaisala frequancy [s-2]
     REAL(8), INTENT(IN   )       :: zr (1:N)           !! depth at cell center [m]
     REAL(8), INTENT(IN   )       :: rhoc10             !! thermal expension coefficient [kg m-3]
     REAL(8), INTENT(IN   )       :: rhoc300            !! thermal expension coefficient [kg m-3]
+    REAL(8), INTENT(IN   )       :: rhoRef
     REAL(8), INTENT(  OUT)       :: hmxl10             !! mixed layer depth [m]
     REAL(8), INTENT(  OUT)       :: hmxl300            !! mixed layer depth [m]
     ! local variables
@@ -359,7 +360,7 @@ CONTAINS
       kstart = kstart - 1
     enddo
     !
-    bvf_c = rhoc10*(grav/rho0)
+    bvf_c = rhoc10*(grav/rhoRef)
     !
     hmxl10  = zr(kstart) ! initialize at the near bottom value
     cff_old = 0.
@@ -385,7 +386,7 @@ CONTAINS
       kstart = kstart - 1.
     enddo
     !
-    bvf_c = rhoc300*(grav/rho0)
+    bvf_c = rhoc300*(grav/rhoRef)
     !
     hmxl300  = zr(kstart) ! initialize at the near bottom value
     cff_old = 0.
@@ -406,7 +407,7 @@ CONTAINS
 
 
   !===================================================================================================
-  SUBROUTINE compute_mxl2 (bvf,rhoc,zr,zref,N,hmxl)
+  SUBROUTINE compute_mxl2 (bvf,rhoc,zr,zref,rhoRef,N,hmxl)
   !---------------------------------------------------------------------------------------------------
     USE scm_par
     IMPLICIT NONE
@@ -415,6 +416,7 @@ CONTAINS
     REAL(8), INTENT(IN   )       :: zr (1:N)           !! depth at cell center [m]
     REAL(8), INTENT(IN   )       :: rhoc               !! thermal expension coefficient [kg m-3]
     REAL(8), INTENT(IN   )       :: zref
+    REAL(8), INTENT(IN   )       :: rhoRef
     REAL(8), INTENT(  OUT)       :: hmxl              !! mixed layer depth [m]
     ! local variables
     integer                        :: k
@@ -426,7 +428,7 @@ CONTAINS
       kstart = kstart - 1
     enddo
     !
-    bvf_c = rhoc*(grav/rho0)
+    bvf_c = rhoc*(grav/rhoRef)
     !
     hmxl  = zr(kstart) ! initialize at the near bottom value
     cff_old = 0.
