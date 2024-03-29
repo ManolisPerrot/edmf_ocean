@@ -21,7 +21,7 @@ class SCM:
     def __init__(self,  nz     = 100                    , dt      =  30.        , h0              =  1000.,
                         thetas = 6.5                    , hc      = 400.        , T0              =     2.,
                         N0     = 1.9620001275490499e-6  , mld_ini = -0.         , mld_iniS        =    -0.,
-                        lin_eos = True                  ,
+                        cpoce  = 3985.                  , lin_eos = True                  ,
                         Tcoef  = 0.2048                 , Scoef   =  0.         , SaltCst         =    35.,
                         Tref   = 2.                     , Sref    = 35.         , lat0            =    45.,
                         sustr  = 0.                     , svstr   =  0.         , stflx           =  -500.,
@@ -32,9 +32,11 @@ class SCM:
                         mass_flux_dyn = False           , mass_flux_tke = False , mass_flux_tke_trplCorr = False,
                         mass_flux_small_ap     = True   , extrap_ak_surf = True , tke_sfc_dirichlet = False,
                         eddy_diff_tke_const = 'NEMO'    , akvmin   = 1.e-4      , aktmin   = 1.e-5         ,
+                        mxlmin  =                    1.0,
                         Cent  = 0.55         , Cdet = -1         , wp_a =  1        , wp_b  = 1   ,
                         wp_bp = 0.0002       , up_c = 0.5        , vp_c = 0.5       , bc_ap = 0.1 ,
-                        delta_bkg = 0.       , wp0=-1.e-08       ,  entr_scheme = 'R10'  ,  write_netcdf=False ):
+                        delta_bkg = 0.       , wp0=-1.e-08       ,  entr_scheme = 'R10'  ,
+                        write_netcdf=False, avg_last_hour=False ):
         """[summary]
         Args:
             nz: Number of grid points. Defaults to 100.
@@ -90,8 +92,10 @@ class SCM:
         # should check if self.outfreq is a multiple of the time-step
         self.output    = output_filename
         self.write_netcdf = write_netcdf
+        self.do_avg    = avg_last_hour
+        self.start_avg = (nbhours-1.)*3600.
         # physical constants
-        self.rho0        = 1027; self.cp        = 3985.; self.g         = 9.81
+        self.rho0        = 1027; self.cp        = cpoce; self.g         = 9.81
         self.lineos      = True
         self.alpha       = Tcoef/self.rho0;      self.beta    = Scoef/self.rho0
         self.T0          = Tref           ;      self.S0      = Sref
@@ -121,8 +125,8 @@ class SCM:
           self.ED_tke_const    = 1; cm = 0.126; self.inv_schmidt = 0.34/cm
         if eddy_diff_tke_const=='RS81':
           self.ED_tke_const    = 2; cm = 0.0667; self.inv_schmidt= 0.4/cm
-        #
-        mxlmin = 1.;  tkemin = np.power( akvmin/(cm*mxlmin), 2 )
+        #values to recover cm*mxlmin*SQRT(tkemin) = akvmin
+        tkemin = np.power( akvmin/(cm*mxlmin), 2 )
         self.min_Threshold   = np.array([tkemin,akvmin,aktmin,mxlmin])
         ####################################
         # Mass flux options and parameters
@@ -216,6 +220,16 @@ class SCM:
             self.vint_Etot = np.array(1e-14); self.vint_Ekin = np.array(1e-14)
             self.vint_Epot = np.array(1e-14); self.vint_TKE  = np.array(1e-14)
             self.vint_Eps  = np.array(1e-14)
+        ################################################
+        # Average over the last hour of the simulation
+        #-----------------------------------------------
+        if self.do_avg:
+            self.u_avg      = np.zeros(self.nz)
+            self.v_avg      = np.zeros(self.nz)
+            self.t_avg      = np.zeros((self.nz,self.ntra), order='F')
+            self.tke_avg    = np.zeros(self.nz+1)
+            self.wt_avg     = np.zeros(self.nz+1)
+            self.navg       = 0.
 ################################################################################################################
 
 
@@ -279,6 +293,15 @@ class SCM:
             if self.ED:
                 self.do_ED( )
             #==========================================================
+            if time >= self.start_avg and self.do_avg:
+              self.do_turb_fluxes (  )
+              self.u_avg[:]   = self.u_avg[:] + self.u_np1[:]
+              self.v_avg[:]   = self.v_avg[:] + self.v_np1[:]
+              self.tke_avg[:] = self.tke_avg[:] + self.tke_np1[:]
+              self.wt_avg[:]  = self.wt_avg[:] - self.wted[:] - self.wtmf[:]
+              self.t_avg[:]   = self.t_avg[:] + self.t_np1[:]
+              self.navg       = self.navg + 1.
+            #==========================================================
             # Check for outputs & diagnostics
             #==========================================================
             if  time % self.outfreq == 0 and self.write_netcdf:
@@ -300,6 +323,13 @@ class SCM:
             self.t_n[:,:] = self.t_np1[:,:]; self.tke_n[:] = self.tke_np1[:]
             self.wtke[:]  = 0.                            ## diagnostics : reset the array containing w'e
         self.do_turb_fluxes (  )
+        if self.do_avg:
+          cff = 1./self.navg
+          self.u_avg[:]   = cff*self.u_avg[:]
+          self.v_avg[:]   = cff*self.v_avg[:]
+          self.tke_avg[:] = cff*self.tke_avg[:]
+          self.wt_avg[:]  = cff*self.wt_avg[:]
+          self.t_avg[:]   = cff*self.t_avg[:]
 #
 
 
