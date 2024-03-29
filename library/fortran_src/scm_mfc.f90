@@ -166,7 +166,7 @@ CONTAINS
     !  wpr        = w_p(k)
     !  tke_env(k) = tke(k) - a_p(k)*( tke_p(k) + wpr*wpr + upr*upr + vpr*vpr )
     !ENDDO
-    tke_env(0:N) = tke_min
+    tke_env(0:N) = 0.
   !---------------------------------------------------------------------------------------------------
   END SUBROUTINE compute_tripleCorr
   !===================================================================================================
@@ -660,8 +660,8 @@ CONTAINS
 
 
   !===================================================================================================
-  SUBROUTINE mass_flux_P09(u_m,v_m,t_m,z_w,Hz,tp0,up0,vp0,wp0,mf_params,eos_params,small_ap,zinv,  &
-                          N,ntra,nparams,neos,a_p,u_p,v_p,w_p,t_p,B_p,ent,det)
+  SUBROUTINE mass_flux_P09(u_m,v_m,t_m,z_w,Hz,tp0,up0,vp0,wp0,mf_params,eos_params,   &
+                           small_ap,zinv,N,ntra,nparams,neos,a_p,u_p,v_p,w_p,t_p,B_p,ent,det)
   !---------------------------------------------------------------------------------------------------
     !!==========================================================================<br />
     !!                  ***  ROUTINE mass_flux_P09  ***                           <br />
@@ -794,8 +794,8 @@ CONTAINS
   !===================================================================================================
 
   !===================================================================================================
-  SUBROUTINE mass_flux_R10(u_m,v_m,t_m,tke_m,z_w,Hz,tp0,up0,vp0,wp0,mf_params,eos_params,small_ap,lin_eos,zinv,  &
-                                     N,ntra,nparams,neos,a_p,u_p,v_p,w_p,t_p,B_p,ent,det,eps)
+  SUBROUTINE mass_flux_R10(u_m,v_m,t_m,tke_m,z_w,Hz,tp0,up0,vp0,wp0,mf_params,eos_params,  &
+                           tkep_min,mxlp_min,small_ap,lin_eos,zinv, N,ntra,nparams,neos,a_p,u_p,v_p,w_p,t_p,B_p,ent,det,eps)
   !---------------------------------------------------------------------------------------------------
     !!==========================================================================<br />
     !!                  ***  ROUTINE mass_flux_R10  ***                         <br />
@@ -815,7 +815,7 @@ CONTAINS
     !
     ! \partial_z(a^{\rm p} w^{\rm p} e^{\rm p}) &=  E \left\{ e + \frac{1}{2} \| \mathbf{v}^{\rm p} - \mathbf{v} \|^2 + \underbrace{\frac{a^{\rm p}}{1-a^{\rm p}} \left( (e-e^{\rm p}) + \frac{1}{2} \| \mathbf{v}^{\rm p} - \mathbf{v} \|^2 \right)}_{\rm mass\_flux\_small\_ap=False} \right\} - D e^{\rm p}  \\
     !!==========================================================================<br />
-    USE scm_par, ONLY : grav,mxl_min,ceps_nemo,tke_min
+    USE scm_par, ONLY : grav,ceps_nemo
     IMPLICIT NONE
     INTEGER, INTENT(IN   )                 :: N                     !! number of vertical levels
     INTEGER, INTENT(IN   )                 :: ntra                  !! number of tracers
@@ -830,6 +830,8 @@ CONTAINS
     REAL(8), INTENT(IN   )                 :: up0                   !! surface value for plume zonal velocity [m/s]
     REAL(8), INTENT(IN   )                 :: vp0                   !! surface value for plume meridional velocity [m/s]
     REAL(8), INTENT(IN   )                 :: wp0                   !! surface value for plume vertical velocity [m/s]
+    REAL(8), INTENT(IN   )                 :: tkep_min
+    REAL(8), INTENT(IN   )                 :: mxlp_min
     REAL(8), INTENT(IN   )                 :: tp0(1:ntra)           !! surface value for plume tracers
     REAL(8), INTENT(IN   )                 :: mf_params(1:nparams)  !! parameters in the ODEs
     REAL(8), INTENT(IN   )                 :: eos_params(1:neos)    !! parameters in the EOS (for lin eos only)
@@ -878,8 +880,8 @@ CONTAINS
     !
     DO k = 1,N
       cff       = 0.5*(z_w(k)+z_w(k-1))
-      lup       = MAX( -cff     , mxl_min)
-      ldwn      = MAX(  cff-zinv, mxl_min)
+      lup       = MAX( -cff     , mxlp_min)
+      ldwn      = MAX(  cff-zinv, mxlp_min)
       imxld0(k) = 1./SQRT(lup*ldwn)
     ENDDO
     imxld0(N) = 0.5*(3.*imxld0(N-1)-imxld0(N-2))
@@ -979,15 +981,15 @@ CONTAINS
     u_p(0) = u_p(1); v_p(0) = v_p(1)
     !
     DO k = 0,N
-      t_p(k,ntra) = MAX( t_p(k,ntra) + tke_m(k), tke_min )
+      t_p(k,ntra) = MAX( t_p(k,ntra) + tke_m(k), tkep_min )
     ENDDO
   !---------------------------------------------------------------------------------------------------
   END SUBROUTINE mass_flux_R10
   !===================================================================================================
 
   !===================================================================================================
-  SUBROUTINE mass_flux_R10_cor(u_m,v_m,t_m,tke_m,z_w,Hz,tp0,up0,vp0,wp0,mf_params,eos_params,fcor,ecor,   &
-    small_ap,lin_eos,zinv,N,ntra,nparams,neos,a_p,u_p,v_p,w_p,t_p,B_p,ent,det,eps)
+  SUBROUTINE mass_flux_R10_cor(u_m,v_m,t_m,tke_m,z_w,Hz,tp0,up0,vp0,wp0,mf_params,eos_params,fcor,ecor, &
+    tkep_min, mxlp_min, small_ap,lin_eos,zinv,N,ntra,nparams,neos,a_p,u_p,v_p,w_p,t_p,B_p,ent,det,eps)
     !---------------------------------------------------------------------------------------------------
     !!==========================================================================<br />
     !!                  ***  ROUTINE mass_flux_R10  ***                         <br />
@@ -1007,7 +1009,7 @@ CONTAINS
     !
     ! \partial_z(a^{\rm p} w^{\rm p} e^{\rm p}) &=  E \left\{ e + \frac{1}{2} \| \mathbf{v}^{\rm p} - \mathbf{v} \|^2 + \underbrace{\frac{a^{\rm p}}{1-a^{\rm p}} \left( (e-e^{\rm p}) + \frac{1}{2} \| \mathbf{v}^{\rm p} - \mathbf{v} \|^2 \right)}_{\rm mass\_flux\_small\_ap=False} \right\} - D e^{\rm p}  \\
     !!==========================================================================<br />
-    USE scm_par, ONLY : grav,mxl_min,ceps_nemo,tke_min
+    USE scm_par, ONLY : grav,ceps_nemo
     IMPLICIT NONE
     INTEGER, INTENT(IN   )                 :: N                     !! number of vertical levels
     INTEGER, INTENT(IN   )                 :: ntra                  !! number of tracers
@@ -1027,6 +1029,8 @@ CONTAINS
     REAL(8), INTENT(IN   )                 :: eos_params(1:neos)    !! parameters in the EOS (for lin eos only)
     REAL(8), INTENT(IN   )                 :: fcor                  !! Coriolis frequency [s-1]
     REAL(8), INTENT(IN   )                 :: ecor                  !! NT Coriolis frequency [s-1]
+    REAL(8), INTENT(IN   )                 :: tkep_min
+    REAL(8), INTENT(IN   )                 :: mxlp_min
     LOGICAL, INTENT(IN   )                 :: small_ap              !! (T) small area approximation (F) no approximation
     LOGICAL, INTENT(IN   )                 :: lin_eos               !!
     REAL(8), INTENT(  OUT)                 :: a_p(0:N)              !! fractional area occupied by the plume
@@ -1081,8 +1085,8 @@ CONTAINS
     !
     DO k = 1,N
       cff       = 0.5*(z_w(k)+z_w(k-1))
-      lup       = MAX( -cff     , mxl_min)
-      ldwn      = MAX(  cff-zinv, mxl_min)
+      lup       = MAX( -cff     , mxlp_min)
+      ldwn      = MAX(  cff-zinv, mxlp_min)
       imxld0(k) = 1./SQRT(lup*ldwn)
     ENDDO
     imxld0(N) = 0.5*(3.*imxld0(N-1)-imxld0(N-2))
@@ -1199,7 +1203,7 @@ CONTAINS
     !u_p(0) = u_p(1); v_p(0) = v_p(1)
     !
     DO k = 0,N
-    t_p(k,ntra) = MAX( t_p(k,ntra) + tke_m(k), tke_min )
+    t_p(k,ntra) = MAX( t_p(k,ntra) + tke_m(k), tkep_min )
     ENDDO
   !---------------------------------------------------------------------------------------------------
   END SUBROUTINE mass_flux_R10_cor

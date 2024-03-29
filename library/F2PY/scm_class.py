@@ -424,12 +424,15 @@ class SCM:
                                  self.z_r,self.z_w,self.rho0,self.nz)
         #=======================================
         # Compute boundary conditions for TKE
+        tkemin = self.min_Threshold[0]
         if self.MF_tke_trplCorr:
             tke_sfc,tke_bot, flux_sfc = scm_tke.compute_tke_bdy(
-                                      self.ustr_sfc,  self.vstr_sfc, self.ED_tke_const, self.bc_ap, self.wp0 )
+                                      self.ustr_sfc,  self.vstr_sfc, self.ED_tke_const,
+                                      self.bc_ap, self.wp0, tkemin)
         else:
            tke_sfc,tke_bot, flux_sfc = scm_tke.compute_tke_bdy(
-                                      self.ustr_sfc,  self.vstr_sfc, self.ED_tke_const, 0.*self.bc_ap, 0.*self.wp0 )
+                                      self.ustr_sfc,  self.vstr_sfc, self.ED_tke_const,
+                                      0.*self.bc_ap, 0.*self.wp0, tkemin)
         #=======================================
         # Compute TKE production by shear
         self.shear = scm_tke.compute_shear(
@@ -456,16 +459,19 @@ class SCM:
                                          self.z_r  , self.bvf , self.buoyMF,
                                          self.shear, self.shearMF, self.triple_corr,
                                          self.wtke, self.dt, tke_sfc, tke_bot, flux_sfc,
-                                         self.ED_tke_sfc_dirichlet, self.ED_tke_const, self.nz  )
+                                         self.ED_tke_sfc_dirichlet, self.ED_tke_const  ,
+                                         tkemin, self.nz  )
         #===================================================
         # Finalize eddy-viscosity/diffusivity computation
+        mxlmin = self.min_Threshold[3]
         self.lupw,self.ldwn = scm_tke.compute_mxl(
                                          self.tke_np1, self.bvf , self.Hz,
-                                         self.ustr_sfc   , self.vstr_sfc, self.nz )
+                                         self.ustr_sfc   , self.vstr_sfc, mxlmin, self.nz )
+        Akvmin = self.min_Threshold[1]; Aktmin = self.min_Threshold[2]
         self.akv,self.akt   = scm_tke.compute_ed (
                                          self.tke_np1, self.lupw, self.ldwn,
                                          self.Prdtl  , self.ED_extrap_sfc,
-                                         self.ED_tke_const, self.nz  )
+                                         self.ED_tke_const, Akvmin, Aktmin, self.nz  )
         #=========================
         # Apply EVD if necessary
         if self.ED_evd: scm_oce.compute_evd(
@@ -500,6 +506,9 @@ class SCM:
                                       self.tke_n, self.nz   , self.ntra )
         #=======================================================================================
         # Compute mass flux variables (Rio et al. 2010 closure or Pergaud et al. 2009 closure)
+        tkepmin = self.min_Threshold[0]
+        mxlpmin = self.min_Threshold[3]
+        #
         if self.mass_flux_entr=='P09':
           self.ap,self.up,self.vp,self.wp,self.tp,self.Bp,self.ent,self.det  =  scm_mfc.mass_flux_p09(
                                     u_mean, v_mean, t_mean, self.z_w, self.Hz       ,
@@ -512,14 +521,14 @@ class SCM:
           self.ap,self.up,self.vp,self.wp,self.tp,self.Bp,self.ent,self.det, self.epsPlume = scm_mfc.mass_flux_r10(
                                     u_mean, v_mean, t_mean, self.tke_n, self.z_w, self.Hz,
                                     tp0   , up0   , vp0   , wp0     , self.mf_params,
-                                    self.eos_params, self.MF_small_ap, self.lineos, self.zinv ,
+                                    self.eos_params, tkepmin, mxlpmin, self.MF_small_ap, self.lineos, self.zinv ,
                                     self.nz , self.ntraMF , len(self.mf_params), len(self.eos_params)   )
 
         if self.mass_flux_entr=='R10corNT':
           self.ap,self.up,self.vp,self.wp,self.tp,self.Bp,self.ent,self.det, self.epsPlume = scm_mfc.mass_flux_r10_cor(
                                     u_mean, v_mean, t_mean, self.tke_n, self.z_w, self.Hz,
                                     tp0   , up0   , vp0   , wp0     , self.mf_params,
-                                    self.eos_params, self.fcor, self.ecor , self.MF_small_ap, self.lineos, self.zinv ,
+                                    self.eos_params, tkepmin, mxlpmin, self.fcor, self.ecor , self.MF_small_ap, self.lineos, self.zinv ,
                                     self.nz , self.ntraMF , len(self.mf_params), len(self.eos_params)   )
 #
 
