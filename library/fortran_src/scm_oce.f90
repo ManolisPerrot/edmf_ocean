@@ -178,7 +178,7 @@ CONTAINS
 
 
   !===================================================================================================
-  SUBROUTINE advance_dyn_Cor_ED(u_n,v_n,ustr_sfc,vstr_sfc,ustr_bot,vstr_bot,Hz,Akv,fcor,dt,nn,N,u_np1,v_np1)
+  SUBROUTINE advance_dyn_Cor_ED(u_n,v_n,ustr_sfc,vstr_sfc,ustr_bot,vstr_bot,Hz,Akv,fcor,dt,N,u_np1,v_np1)
   !---------------------------------------------------------------------------------------------------
     !!============================================================================<br />
     !!                  ***  ROUTINE advance_dyn_Cor_ED  ***                      <br />
@@ -197,7 +197,6 @@ CONTAINS
     !! \end{align*}
     IMPLICIT NONE
     INTEGER, INTENT(IN   )          :: N                  !! number of vertical levels
-    INTEGER, INTENT(IN   )          :: nn                 !! index for alternating Coriolis integration
     REAL(8), INTENT(IN   )          :: dt                 !! time-step [s]
     REAL(8), INTENT(IN   )          :: fcor               !! Coriolis frequaency [s-1]
     REAL(8), INTENT(IN   )          :: u_n   (1:N )       !! u-velocity component at time n [m/s]
@@ -212,7 +211,7 @@ CONTAINS
     REAL(8), INTENT(  OUT)          :: v_np1 (1:N )       !! v-velocity component at time n+1 [m/s]
     ! local variables
     INTEGER                         :: k
-    REAL(8)                         :: FC(0:N), ff(1:N), cff, cff1
+    REAL(8)                         :: ff(1:N), cff, cff1
     REAL(8)                         :: gamma_Cor = 0.55
     !
     cff      = (dt*fcor)*(dt*fcor)
@@ -240,7 +239,7 @@ CONTAINS
     !    v_np1(k)  = Hz(k)*( v_np1(k)           )
     !  ENDDO
     !ENDIF
-    !! 2 - Apply surface forcing <br />
+    !! 2 - Apply surface and bottom forcing <br />
     u_np1(N)=u_np1(N) + dt*ustr_sfc    !<-- sustr is in m2/s2 here
     v_np1(N)=v_np1(N) + dt*vstr_sfc
     u_np1(1)=u_np1(1) - dt*ustr_bot    !<-- sustr is in m2/s2 here
@@ -261,10 +260,7 @@ CONTAINS
     !--------------------------------------------------------
     ff(1:N) = v_np1(1:N)
     CALL tridiag_solve(N,Hz,Akv,ff,dt)    ! Invert tridiagonal matrix
-    v_np1(1:N) = ff(1:N)     !EXP(-dt*sig(1:N))*ff(1:N)
-    !@note A different time discretization of the Coriolis term could be tested
-    ! to check the phase shift compared to MesoNH
-    !@endnote<br />
+    v_np1(1:N) = ff(1:N)
   !---------------------------------------------------------------------------------------------------
   END SUBROUTINE advance_dyn_Cor_ED
   !===================================================================================================
@@ -453,35 +449,37 @@ CONTAINS
 
 
   !===================================================================================================
-  SUBROUTINE rho_eos_lin (temp,salt,zr,alpha,beta,N,rho,bvf)
+  SUBROUTINE rho_eos_lin (temp,salt,zr,eos_params,N,neos,rho,bvf)
   !---------------------------------------------------------------------------------------------------
     !!==========================================================================<br />
     !!                  ***  ROUTINE rho_eos_lin  ***                           <br />
     !! ** Purposes : Compute density anomaly and Brunt Vaisala frequency via linear
     !!                                                  Equation Of State (EOS) <br />
     !!==========================================================================<br />
-    USE scm_par
+    USE scm_par, ONLY : grav 
     IMPLICIT NONE
-    INTEGER, INTENT(IN   )         :: N                  !! number of vertical levels
+    INTEGER, INTENT(IN   )         :: N,neos             !! number of vertical levels
     REAL(8), INTENT(IN   )         :: temp(1:N)          !! temperature [C]
     REAL(8), INTENT(IN   )         :: salt(1:N)          !! salinity [psu]
     REAL(8), INTENT(IN   )         :: zr (1:N  )         !! depth at cell centers [m]
-    REAL(8), INTENT(IN   )         :: alpha              !! thermal expension coefficient [C-1]
-    REAL(8), INTENT(IN   )         :: beta               !! haline expension coefficient [psu-1]
+    REAL(8), INTENT(IN   )         :: eos_params(neos)
     REAL(8), INTENT(  OUT)         :: bvf(0:N  )         !! Brunt Vaisala frequancy [s-2]
     REAL(8), INTENT(  OUT)         :: rho(1:N  )         !! density anomaly [kg/m3]
     ! local variables
     integer                        :: k
     real(8)                        :: cff
-    !---------------------------------------------------------------------------------------------------
-    !-------
+    real(8)                        :: alpha,beta,rhoRef,T0,S0
+    !---------------------------------------------------------------------------
+    rhoRef = eos_params(1); alpha  = eos_params(2); beta = eos_params(3)
+    T0     = eos_params(4); S0     = eos_params(5)
+    !---------------------------------------------------------------------------
     DO k=1,N
-      rho(k)= rho0*( 1. - alpha*( temp(k) - 2. ) + beta*( salt(k) - 35. ) )    !! \(   \rho_{k} = \rho_0 \left( 1 - \alpha (\theta - 2) + \beta (S - 35)   \right)  \)  <br />
+      rho(k)= rhoRef*( 1. - alpha*( temp(k) - T0) + beta*( salt(k) - S0) )    !! \(   \rho_{k} = \rho_0 \left( 1 - \alpha (\theta - 2) + \beta (S - 35)   \right)  \)  <br />
     ENDDO
     !----
     DO k=1,N-1
       cff    = 1./(zr(k+1)-zr(k))
-      bvf(k) = -cff*(grav/rho0)*(rho(k+1)-rho(k))  !!  \(   (N^2)_{k+1/2} = - \frac{g}{\rho_0}  \frac{ \rho_{k+1}-\rho_{k} }{\Delta z_{k+1/2}} \)
+      bvf(k) = -cff*(grav/rhoRef)*(rho(k+1)-rho(k))  !!  \(   (N^2)_{k+1/2} = - \frac{g}{\rho_0}  \frac{ \rho_{k+1}-\rho_{k} }{\Delta z_{k+1/2}} \)
     ENDDO
     bvf(0) = 0.
     bvf(N) = bvf(N-1)

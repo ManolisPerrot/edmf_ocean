@@ -173,23 +173,27 @@ CONTAINS
 
 
   !===================================================================================================
-  SUBROUTINE eos_val_lin(temp,salt,alpha,beta,rho)
+  SUBROUTINE eos_val_lin(temp,salt,eos_params,neos,rho)
   !---------------------------------------------------------------------------------------------------
     !!==========================================================================<br />
     !!                  ***  ROUTINE eos_val_lin  ***                           <br />
     !! ** Purposes : compute density anomaly from linear equation of state      <br />
     !!==========================================================================<br />
-    USE scm_par
     IMPLICIT NONE
+    INTEGER, INTENT(IN   )              :: neos
     REAL(8), INTENT(IN   )              :: temp    !! temperature [C]
     REAL(8), INTENT(IN   )              :: salt    !! salinity [psu]
-    REAL(8), INTENT(IN   )              :: alpha   !! thermal expension coefficient [C-1]
-    REAL(8), INTENT(IN   )              :: beta    !! haline expension coefficient [psu-1]
+    REAL(8), INTENT(IN   )              :: eos_params(neos)
     REAL(8), INTENT(INOUT)              :: rho     !! density anomaly
-    !---------------------------------------------------------------------------------------------------
+    !
+    REAL(8)                             :: alpha,beta,rhoRef,T0,S0    !! haline expension coefficient [psu-1]
+    !---------------------------------------------------------------------------
+    rhoRef = eos_params(1); alpha  = eos_params(2); beta = eos_params(3)
+    T0     = eos_params(4); S0     = eos_params(5)
+    !---------------------------------------------------------------------------
     ! Compute density anomaly via linear Equation Of State (EOS)
     !-------
-    rho = rho0*( 1. - alpha*( temp - 2. ) + beta*( salt - 35. ) )  !! \(   \rho_{k} = \rho_0 \left( 1 - \alpha (\theta - 2) + \beta (S - 35)   \right)  \)  <br />
+    rho = rhoRef*( 1. - alpha*( temp - T0 ) + beta*( salt - S0 ) )  !! \(   \rho_{k} = \rho_0 \left( 1 - \alpha (\theta - 2) + \beta (S - 35)   \right)  \)  <br />
     !!@note Reference values \( \theta_0 = 2^{o}C \) and \( S_0 = 35\;{\rm psu}\) are hardcoded !!  @endnote <br />
     return
   !---------------------------------------------------------------------------------------------------
@@ -198,7 +202,7 @@ CONTAINS
 
 
   !===================================================================================================
-  SUBROUTINE eos_val (temp,salt,zr,rho)
+  SUBROUTINE eos_val (temp,salt,zr,rhoRef,rho)
   !---------------------------------------------------------------------------------------------------
     !!==========================================================================<br />
     !!                  ***  ROUTINE rho_eos  ***                           <br />
@@ -210,6 +214,7 @@ CONTAINS
     REAL(8), INTENT(IN   )         :: temp               !! temperature [C]
     REAL(8), INTENT(IN   )         :: salt               !! salinity [psu]
     REAL(8), INTENT(IN   )         :: zr                 !! depth [m]
+    REAL(8), INTENT(IN   )         :: rhoRef             !! reference density
     REAL(8), INTENT(INOUT)         :: rho                !! density anomaly [kg/m3]
     ! local variables
     real(8)                        :: cff,cff1,dr00,dpth,rho1
@@ -247,7 +252,7 @@ CONTAINS
     parameter(E00=+1.045941e-5, E01=-5.782165e-10,E02=+1.296821e-7,  &
               E10=-2.595994e-7, E11=-1.248266e-9, E12=-3.508914e-9)
     !---------------------------------------------------------------------------
-    dr00=r00-rho0
+    dr00=r00-rhoRef
     ! Compute density anomaly via Equation Of State (EOS) for seawater
     Tt       = temp
     Ts       = salt
@@ -269,7 +274,7 @@ CONTAINS
     dpth = -zr
     cff  = K00-0.1*dpth
     cff1 = K0+dpth*(K1+K2*dpth)
-    rho  = ( rho1*cff*(K00+cff1)-0.1*dpth*rho0*cff1 )/(cff*(cff+cff1))
+    rho  = ( rho1*cff*(K00+cff1)-0.1*dpth*rhoRef*cff1 )/(cff*(cff+cff1))
   !---------------------------------------------------------------------------------------------------
   END SUBROUTINE eos_val
   !===================================================================================================
@@ -525,7 +530,7 @@ CONTAINS
   !---------------------------------------------------------------------------------------------------
   END SUBROUTINE get_u_p_R10
   !===================================================================================================
-  
+
 
 
 
@@ -655,8 +660,8 @@ CONTAINS
 
 
   !===================================================================================================
-  SUBROUTINE mass_flux_P09(u_m,v_m,t_m,z_w,Hz,tp0,up0,vp0,wp0,mf_params,alpha,beta,small_ap,zinv,  &
-                          N,ntra,nparams,a_p,u_p,v_p,w_p,t_p,B_p,ent,det)
+  SUBROUTINE mass_flux_P09(u_m,v_m,t_m,z_w,Hz,tp0,up0,vp0,wp0,mf_params,eos_params,small_ap,zinv,  &
+                          N,ntra,nparams,neos,a_p,u_p,v_p,w_p,t_p,B_p,ent,det)
   !---------------------------------------------------------------------------------------------------
     !!==========================================================================<br />
     !!                  ***  ROUTINE mass_flux_P09  ***                           <br />
@@ -670,6 +675,7 @@ CONTAINS
     INTEGER, INTENT(IN   )                 :: N                     !! number of vertical levels
     INTEGER, INTENT(IN   )                 :: ntra                  !! number of tracers
     INTEGER, INTENT(IN   )                 :: nparams               !! number of parameters in the EDOs
+    INTEGER, INTENT(IN   )                 :: neos                  !! number of parameters in the EOS (for lin eos only)
     REAL(8), INTENT(IN   )                 :: z_w(0:N)              !! depth at cell interfaces [m]
     REAL(8), INTENT(IN   )                 :: Hz(1:N)               !! layer thickness [m]
     REAL(8), INTENT(IN   )                 :: u_m(1:N     )         !! mean zonal velocity [m/s]
@@ -680,8 +686,7 @@ CONTAINS
     REAL(8), INTENT(IN   )                 :: wp0                   !! surface value for plume vertical velocity [m/s]
     REAL(8), INTENT(IN   )                 :: tp0(1:ntra)           !! surface value for plume tracers
     REAL(8), INTENT(IN   )                 :: mf_params(1:nparams)  !! parameters in the ODEs
-    REAL(8), INTENT(IN   )                 :: alpha                 !! thermal expension coefficient [C-1]
-    REAL(8), INTENT(IN   )                 :: beta                  !! haline expension coefficient [psu-1]
+    REAL(8), INTENT(IN   )                 :: eos_params(1:neos)    !! parameters in the EOS (for lin eos only)
     LOGICAL, INTENT(IN   )                 :: small_ap              !! (T) small area approximation (F) no approximation
     REAL(8), INTENT(  OUT)                 :: a_p(0:N)              !! fractional area occupied by the plume
     REAL(8), INTENT(  OUT)                 :: w_p(0:N)              !! vertical velocity in the plume [m/s]
@@ -713,21 +718,21 @@ CONTAINS
     ! Linear eos version
     !=======================================================================
     DO k = 1,N
-      CALL eos_val_lin(t_m(k,1),t_m(k,2),alpha,beta,rho_m(k))
+      CALL eos_val_lin(t_m(k,1),t_m(k,2),eos_params,neos,rho_m(k))
       !CALL eos_val (t_m(k,1),t_m(k,2),0.5*(z_w(k)+z_w(k-1)),rho_m(k))
     ENDDO
     !=======================================================================
     ! unpack parameters
     cent  = mf_params(1); cdet = mf_params(2); aa = mf_params(3)
     bb    = mf_params(4); bp = mf_params(5)
-    Cu    = mf_params(6); Cv = mf_params(7); delta0 = mf_params(9); 
+    Cu    = mf_params(6); Cv = mf_params(7); delta0 = mf_params(9);
     !=======================================================================
     DO k=N,1,-1
       !! Compute \( B^{\rm p}_{k} \) \[ B^{\rm p}_{k} = - \frac{g}{\rho_0} \left( \rho^{\rm p}_{k+1/2} - \overline{\rho}_k \right) \]
       temp_p = t_p(k,1); salt_p = t_p(k,2)
-      CALL eos_val_lin(temp_p,salt_p,alpha,beta,rho_p)
+      CALL eos_val_lin(temp_p,salt_p,eos_params,neos,rho_p)
       !CALL eos_val(temp_p,salt_p,0.5*(z_w(k)+z_w(k-1)),rho_p)
-      B_p(k) = - grav * ( rho_p - rho_m(k) ) / rho0
+      B_p(k) = - grav * ( rho_p - rho_m(k) ) / eos_params(1)
       !! Compute \( w^{\rm p}_{k-1/2} \)
       !!\[ (w^{\rm p})^{2}_{k+1/2} - (w^{\rm p})^{2}_{k-1/2} =
       !!  h_k b' \left((w^{\rm p})^{2}_{k+1/2} + (w^{\rm p})^{2}_{k-1/2}\right)
@@ -789,8 +794,8 @@ CONTAINS
   !===================================================================================================
 
   !===================================================================================================
-  SUBROUTINE mass_flux_R10(u_m,v_m,t_m,tke_m,z_w,Hz,tp0,up0,vp0,wp0,mf_params,alpha,beta,small_ap,lin_eos,zinv,  &
-                                     N,ntra,nparams,a_p,u_p,v_p,w_p,t_p,B_p,ent,det,eps)
+  SUBROUTINE mass_flux_R10(u_m,v_m,t_m,tke_m,z_w,Hz,tp0,up0,vp0,wp0,mf_params,eos_params,small_ap,lin_eos,zinv,  &
+                                     N,ntra,nparams,neos,a_p,u_p,v_p,w_p,t_p,B_p,ent,det,eps)
   !---------------------------------------------------------------------------------------------------
     !!==========================================================================<br />
     !!                  ***  ROUTINE mass_flux_R10  ***                         <br />
@@ -810,11 +815,12 @@ CONTAINS
     !
     ! \partial_z(a^{\rm p} w^{\rm p} e^{\rm p}) &=  E \left\{ e + \frac{1}{2} \| \mathbf{v}^{\rm p} - \mathbf{v} \|^2 + \underbrace{\frac{a^{\rm p}}{1-a^{\rm p}} \left( (e-e^{\rm p}) + \frac{1}{2} \| \mathbf{v}^{\rm p} - \mathbf{v} \|^2 \right)}_{\rm mass\_flux\_small\_ap=False} \right\} - D e^{\rm p}  \\
     !!==========================================================================<br />
-    USE scm_par
+    USE scm_par, ONLY : grav,mxl_min,ceps_nemo,tke_min
     IMPLICIT NONE
     INTEGER, INTENT(IN   )                 :: N                     !! number of vertical levels
     INTEGER, INTENT(IN   )                 :: ntra                  !! number of tracers
     INTEGER, INTENT(IN   )                 :: nparams               !! number of parameters in the EDOs
+    INTEGER, INTENT(IN   )                 :: neos                  !! number of parameters in the EDOs
     REAL(8), INTENT(IN   )                 :: z_w(0:N)              !! depth at cell interfaces [m]
     REAL(8), INTENT(IN   )                 :: Hz(1:N)               !! layer thickness [m]
     REAL(8), INTENT(IN   )                 :: u_m(1:N     )         !! mean zonal velocity [m/s]
@@ -826,8 +832,7 @@ CONTAINS
     REAL(8), INTENT(IN   )                 :: wp0                   !! surface value for plume vertical velocity [m/s]
     REAL(8), INTENT(IN   )                 :: tp0(1:ntra)           !! surface value for plume tracers
     REAL(8), INTENT(IN   )                 :: mf_params(1:nparams)  !! parameters in the ODEs
-    REAL(8), INTENT(IN   )                 :: alpha                 !! thermal expension coefficient [C-1]
-    REAL(8), INTENT(IN   )                 :: beta                  !! haline expension coefficient [psu-1]
+    REAL(8), INTENT(IN   )                 :: eos_params(1:neos)    !! parameters in the EOS (for lin eos only)
     LOGICAL, INTENT(IN   )                 :: small_ap              !! (T) small area approximation (F) no approximation
     LOGICAL, INTENT(IN   )                 :: lin_eos               !!
     REAL(8), INTENT(  OUT)                 :: a_p(0:N)              !! fractional area occupied by the plume
@@ -885,24 +890,24 @@ CONTAINS
     !=======================================================================
     IF(lin_eos) THEN
       DO k = 1,N
-        CALL eos_val_lin(t_m(k,1),t_m(k,2),alpha,beta,rho_m(k))
+        CALL eos_val_lin(t_m(k,1),t_m(k,2),eos_params,neos,rho_m(k))
       ENDDO
     ELSE
       DO k = 1,N
-        CALL eos_val(t_m(k,1),t_m(k,2),0.5*(z_w(k)+z_w(k-1)),rho_m(k))
+        CALL eos_val(t_m(k,1),t_m(k,2),0.5*(z_w(k)+z_w(k-1)),eos_params(1),rho_m(k))
       ENDDO
     ENDIF
     !=======================================================================
-    N2sfc  = -(grav/rho0)*(rho_m(N)-rho_m(N-1))/Hz(N)
+    N2sfc  = -(grav/eos_params(1))*(rho_m(N)-rho_m(N-1))/Hz(N)
     !=======================================================================
     DO k=N,1,-1
       ! Compute B_p
       temp_p = t_p(k,1); salt_p = t_p(k,2)
       !
-      IF(lin_eos) THEN; CALL eos_val_lin(temp_p,salt_p,alpha,beta,rho_p)
-      ELSE; CALL eos_val(temp_p,salt_p,0.5*(z_w(k)+z_w(k-1)),rho_p); ENDIF
+      IF(lin_eos) THEN; CALL eos_val_lin(temp_p,salt_p,eos_params,neos,rho_p)
+      ELSE; CALL eos_val(temp_p,salt_p,0.5*(z_w(k)+z_w(k-1)),eos_params(1),rho_p); ENDIF
       !! Compute \( B^{\rm p}_{k} \) \[ B^{\rm p}_{k} = - \frac{g}{\rho_0} \left( \rho^{\rm p}_{k+1/2} - \overline{\rho}_k \right) \]
-      B_p(k) = - grav * ( rho_p - rho_m(k) ) / rho0
+      B_p(k) = - grav * ( rho_p - rho_m(k) ) / eos_params(1)
       ! Wp equation first
       !! If \( {\rm small\_ap = False} : (b',b) \rightarrow \frac{(b',b)}{1-a^{\rm p}_{k+1/2}} \) <br />
       cff    = 1.
@@ -981,8 +986,8 @@ CONTAINS
   !===================================================================================================
 
   !===================================================================================================
-  SUBROUTINE mass_flux_R10_cor(u_m,v_m,t_m,tke_m,z_w,Hz,tp0,up0,vp0,wp0,mf_params,alpha,beta,fcor,ecor,   &
-    small_ap,lin_eos,zinv,N,ntra,nparams,a_p,u_p,v_p,w_p,t_p,B_p,ent,det,eps)
+  SUBROUTINE mass_flux_R10_cor(u_m,v_m,t_m,tke_m,z_w,Hz,tp0,up0,vp0,wp0,mf_params,eos_params,fcor,ecor,   &
+    small_ap,lin_eos,zinv,N,ntra,nparams,neos,a_p,u_p,v_p,w_p,t_p,B_p,ent,det,eps)
     !---------------------------------------------------------------------------------------------------
     !!==========================================================================<br />
     !!                  ***  ROUTINE mass_flux_R10  ***                         <br />
@@ -1002,11 +1007,12 @@ CONTAINS
     !
     ! \partial_z(a^{\rm p} w^{\rm p} e^{\rm p}) &=  E \left\{ e + \frac{1}{2} \| \mathbf{v}^{\rm p} - \mathbf{v} \|^2 + \underbrace{\frac{a^{\rm p}}{1-a^{\rm p}} \left( (e-e^{\rm p}) + \frac{1}{2} \| \mathbf{v}^{\rm p} - \mathbf{v} \|^2 \right)}_{\rm mass\_flux\_small\_ap=False} \right\} - D e^{\rm p}  \\
     !!==========================================================================<br />
-    USE scm_par
+    USE scm_par, ONLY : grav,mxl_min,ceps_nemo,tke_min
     IMPLICIT NONE
     INTEGER, INTENT(IN   )                 :: N                     !! number of vertical levels
     INTEGER, INTENT(IN   )                 :: ntra                  !! number of tracers
     INTEGER, INTENT(IN   )                 :: nparams               !! number of parameters in the EDOs
+    INTEGER, INTENT(IN   )                 :: neos                  !! number of parameters in the EDOs
     REAL(8), INTENT(IN   )                 :: z_w(0:N)              !! depth at cell interfaces [m]
     REAL(8), INTENT(IN   )                 :: Hz(1:N)               !! layer thickness [m]
     REAL(8), INTENT(IN   )                 :: u_m(1:N     )         !! mean zonal velocity [m/s]
@@ -1018,8 +1024,7 @@ CONTAINS
     REAL(8), INTENT(IN   )                 :: wp0                   !! surface value for plume vertical velocity [m/s]
     REAL(8), INTENT(IN   )                 :: tp0(1:ntra)           !! surface value for plume tracers
     REAL(8), INTENT(IN   )                 :: mf_params(1:nparams)  !! parameters in the ODEs
-    REAL(8), INTENT(IN   )                 :: alpha                 !! thermal expension coefficient [C-1]
-    REAL(8), INTENT(IN   )                 :: beta                  !! haline expension coefficient [psu-1]
+    REAL(8), INTENT(IN   )                 :: eos_params(1:neos)    !! parameters in the EOS (for lin eos only)
     REAL(8), INTENT(IN   )                 :: fcor                  !! Coriolis frequency [s-1]
     REAL(8), INTENT(IN   )                 :: ecor                  !! NT Coriolis frequency [s-1]
     LOGICAL, INTENT(IN   )                 :: small_ap              !! (T) small area approximation (F) no approximation
@@ -1088,24 +1093,24 @@ CONTAINS
     !=======================================================================
     IF(lin_eos) THEN
       DO k = 1,N
-        CALL eos_val_lin(t_m(k,1),t_m(k,2),alpha,beta,rho_m(k))
-      ENDDO  
+        CALL eos_val_lin(t_m(k,1),t_m(k,2),eos_params,neos,rho_m(k))
+      ENDDO
     ELSE
       DO k = 1,N
-        CALL eos_val(t_m(k,1),t_m(k,2),0.5*(z_w(k)+z_w(k-1)),rho_m(k))
+        CALL eos_val(t_m(k,1),t_m(k,2),0.5*(z_w(k)+z_w(k-1)),eos_params(1),rho_m(k))
       ENDDO
     ENDIF
     !=======================================================================
-    N2sfc  = -(grav/rho0)*(rho_m(N)-rho_m(N-1))/Hz(N)
+    N2sfc  = -(grav/eos_params(1))*(rho_m(N)-rho_m(N-1))/Hz(N)
     !=======================================================================
     DO k=N,1,-1
     ! Compute B_p
     temp_p = t_p(k,1); salt_p = t_p(k,2)
     !
-    IF(lin_eos) THEN; CALL eos_val_lin(temp_p,salt_p,alpha,beta,rho_p)
-    ELSE; CALL eos_val(temp_p,salt_p,0.5*(z_w(k)+z_w(k-1)),rho_p); ENDIF
+    IF(lin_eos) THEN; CALL eos_val_lin(temp_p,salt_p,eos_params,neos,rho_p)
+    ELSE; CALL eos_val(temp_p,salt_p,0.5*(z_w(k)+z_w(k-1)),eos_params(1),rho_p); ENDIF
     !! Compute \( B^{\rm p}_{k} \) \[ B^{\rm p}_{k} = - \frac{g}{\rho_0} \left( \rho^{\rm p}_{k+1/2} - \overline{\rho}_k \right) \]
-    B_p(k) = - grav * ( rho_p - rho_m(k) ) / rho0
+    B_p(k) = - grav * ( rho_p - rho_m(k) ) / eos_params(1)
     ! Wp equation first
     !! If \( {\rm small\_ap = False} : (b',b) \rightarrow \frac{(b',b)}{1-a^{\rm p}_{k+1/2}} \) <br />
     cff    = 1.
