@@ -362,10 +362,10 @@ class SCM:
         else:
           rho_n,bvf = scm_oce.rho_eos(
                             self.t_n[:,self.itemp], self.t_n[:,self.isalt],
-                                             self.z_r, self.z_w, self.nz )
+                                             self.z_r, self.z_w, self.rho0, self.nz )
           rho_np1,bvf = scm_oce.rho_eos(
                             self.t_np1[:,self.itemp], self.t_np1[:,self.isalt],
-                                             self.z_r, self.z_w, self.nz )
+                                             self.z_r, self.z_w, self.rho0, self.nz )
         # Compute buoyancy
         b_n   = -(self.g/self.rho0)*rho_n[:]
         b_np1 = -(self.g/self.rho0)*rho_np1[:]
@@ -419,11 +419,9 @@ class SCM:
           rho,self.bvf = scm_oce.rho_eos_lin(
                                  self.t_np1[:,self.itemp], self.t_np1[:,self.isalt],
                                  self.z_r, self.eos_params,self.nz, len(self.eos_params) )
-          #
-          #Bsfc         = self.g*( self.alpha * (self.stflx[self.itemp]+self.srflx)
-          #                        - self.beta  *  self.stflx[self.isalt]           )
         else:
-          rho,self.bvf = scm_oce.rho_eos(self.t_np1[:,self.itemp],self.t_np1[:,self.isalt],self.z_r,self.z_w,self.nz)
+          rho,self.bvf = scm_oce.rho_eos(self.t_np1[:,self.itemp],self.t_np1[:,self.isalt],
+                                 self.z_r,self.z_w,self.rho0,self.nz)
         #=======================================
         # Compute boundary conditions for TKE
         if self.MF_tke_trplCorr:

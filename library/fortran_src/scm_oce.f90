@@ -456,7 +456,7 @@ CONTAINS
     !! ** Purposes : Compute density anomaly and Brunt Vaisala frequency via linear
     !!                                                  Equation Of State (EOS) <br />
     !!==========================================================================<br />
-    USE scm_par, ONLY : grav 
+    USE scm_par, ONLY : grav
     IMPLICIT NONE
     INTEGER, INTENT(IN   )         :: N,neos             !! number of vertical levels
     REAL(8), INTENT(IN   )         :: temp(1:N)          !! temperature [C]
@@ -489,20 +489,21 @@ CONTAINS
 
 
   !===================================================================================================
-  SUBROUTINE rho_eos (temp,salt,zr,zw,N,rho,bvf)
+  SUBROUTINE rho_eos (temp,salt,zr,zw,rhoRef,N,rho,bvf)
   !---------------------------------------------------------------------------------------------------
     !!==========================================================================<br />
     !!                  ***  ROUTINE rho_eos  ***                           <br />
     !! ** Purposes : Compute density anomaly and Brunt Vaisala frequency via nonlinear
     !!                                                  Equation Of State (EOS) <br />
     !!==========================================================================<br />
-    USE scm_par
+    USE scm_par, ONLY : grav
     IMPLICIT NONE
     INTEGER, INTENT(IN   )         :: N                  !! number of vertical levels
     REAL(8), INTENT(IN   )         :: temp(1:N)          !! temperature [C]
     REAL(8), INTENT(IN   )         :: salt(1:N)          !! salinity [psu]
     REAL(8), INTENT(IN   )         :: zr (1:N  )         !! depth at cell centers [m]
     REAL(8), INTENT(IN   )         :: zw (0:N  )         !! depth at cell interfaces [m]
+    REAL(8), INTENT(IN   )         :: rhoRef
     REAL(8), INTENT(  OUT)         :: bvf(0:N  )         !! Brunt Vaisala frequancy [s-2]
     REAL(8), INTENT(  OUT)         :: rho(1:N  )         !! density anomaly [kg/m3]
     ! local variables
@@ -543,7 +544,7 @@ CONTAINS
     parameter(E00=+1.045941e-5, E01=-5.782165e-10,E02=+1.296821e-7,  &
               E10=-2.595994e-7, E11=-1.248266e-9, E12=-3.508914e-9)
     !---------------------------------------------------------------------------
-    dr00=r00-rho0
+    dr00=r00-rhoRef
     ! Compute density anomaly via Equation Of State (EOS) for seawater
     DO k=1,N
       Tt       = temp(k)
@@ -566,18 +567,18 @@ CONTAINS
       dpth = -zr(k)
       cff  = K00-0.1*dpth
       cff1 = K0+dpth*(K1+K2*dpth)
-      rho(k) = ( rho1(k)*cff*(K00+cff1)-0.1*dpth*rho0*cff1 )/(cff*(cff+cff1))
+      rho(k) = ( rho1(k)*cff*(K00+cff1)-0.1*dpth*rhoRef*cff1 )/(cff*(cff+cff1))
       ! For bvf computation
       dpth=0.-zw(k)
       K_up(k)=K0+dpth*(K1+K2*dpth)
       dpth=0.-zw(k-1)
       K_dw(k)=K0+dpth*(K1+K2*dpth)
     ENDDO
-    cff=grav/rho0
+    cff=grav/rhoRef
     DO k=1,N-1
       cff1=0.1*(0.-zw(k))
       bvf(k)=-cff *(      (rho1(k+1)-rho1(k))*(K00+K_dw(k+1))*(K00+K_up(k))            &
-             -cff1*( rho0*(K_dw(k+1)-K_up(k)) + K00*(rho1(k+1)-rho1(k))     &
+             -cff1*( rhoRef*(K_dw(k+1)-K_up(k)) + K00*(rho1(k+1)-rho1(k))     &
                     + rho1(k+1)*K_dw(k+1) - rho1(k)*K_up(k)   &
         ) )/(  (K00+K_dw(k+1)-cff1)*(K00+K_up(k)-cff1)      &
                                         *(zr(k+1)-zr(k))  )
@@ -590,19 +591,20 @@ CONTAINS
 
 
   !===================================================================================================
-  SUBROUTINE rho_eos2(temp,salt,zr,N,rho)
+  SUBROUTINE rho_eos2(temp,salt,zr,rhoRef,N,rho)
   !---------------------------------------------------------------------------------------------------
     !!==========================================================================<br />
     !!                  ***  ROUTINE rho_eos  ***                           <br />
     !! ** Purposes : Compute density anomaly and Brunt Vaisala frequency via nonlinear
     !!                                                  Equation Of State (EOS) <br />
     !!==========================================================================<br />
-    USE scm_par
+    USE scm_par, ONLY : grav
     IMPLICIT NONE
     INTEGER, INTENT(IN   )         :: N                  !! number of vertical levels
     REAL(8), INTENT(IN   )         :: temp(1:N)          !! temperature [C]
     REAL(8), INTENT(IN   )         :: salt(1:N)          !! salinity [psu]
     REAL(8), INTENT(IN   )         :: zr (1:N  )         !! depth at cell centers [m]
+    REAL(8), INTENT(IN   )         :: rhoRef
     REAL(8), INTENT(  OUT)         :: rho(1:N  )         !! density anomaly [kg/m3]
     ! local variables
     integer                        :: k
@@ -642,7 +644,7 @@ CONTAINS
     parameter(E00=+1.045941e-5, E01=-5.782165e-10,E02=+1.296821e-7,  &
               E10=-2.595994e-7, E11=-1.248266e-9, E12=-3.508914e-9)
     !---------------------------------------------------------------------------
-    dr00=r00-rho0
+    dr00=r00-rhoRef
     ! Compute density anomaly via Equation Of State (EOS) for seawater
     DO k=1,N
       Tt       = temp(k)
@@ -665,7 +667,7 @@ CONTAINS
       dpth = -zr(k)
       cff  = K00-0.1*dpth
       cff1 = K0+dpth*(K1+K2*dpth)
-      rho(k) = ( rho1(k)*cff*(K00+cff1)-0.1*dpth*rho0*cff1 )/(cff*(cff+cff1))
+      rho(k) = ( rho1(k)*cff*(K00+cff1)-0.1*dpth*rhoRef*cff1 )/(cff*(cff+cff1))
     ENDDO
   !---------------------------------------------------------------------------------------------------
   END SUBROUTINE rho_eos2
