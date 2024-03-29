@@ -114,6 +114,7 @@ class SCM:
         self.ustr_bot           = 0.
         self.vstr_bot           = 0.
         self.DC                 = diurnal_cycle
+        self.Qswmax             = srflx*cff
         ####################################
         # Eddy-diffusion parameters
         #-----------------------------------
@@ -229,6 +230,8 @@ class SCM:
             self.t_avg      = np.zeros((self.nz,self.ntra), order='F')
             self.tke_avg    = np.zeros(self.nz+1)
             self.wt_avg     = np.zeros(self.nz+1)
+            self.akv_avg    = np.zeros(self.nz+1)
+            self.akt_avg    = np.zeros(self.nz+1)
             self.navg       = 0.
 ################################################################################################################
 
@@ -254,6 +257,9 @@ class SCM:
         for kt in range(self.nbsteps):
             # update current time
             time = self.dt*float(kt+1)                   ## time in seconds at the end of the current time-step
+            modulation = 1.
+            if self.DC: modulation = max(np.cos(2.*np.pi*(time/86400. - 0.5)),0.)
+            self.srflx = modulation*self.Qswmax
             #===================================================
             # Advance tracers to n+1 (vertical diffusion only)
             #===================================================
@@ -295,12 +301,14 @@ class SCM:
             #==========================================================
             if time >= self.start_avg and self.do_avg:
               self.do_turb_fluxes (  )
-              self.u_avg[:]   = self.u_avg[:] + self.u_np1[:]
-              self.v_avg[:]   = self.v_avg[:] + self.v_np1[:]
-              self.tke_avg[:] = self.tke_avg[:] + self.tke_np1[:]
-              self.wt_avg[:]  = self.wt_avg[:] - self.wted[:] - self.wtmf[:]
-              self.t_avg[:]   = self.t_avg[:] + self.t_np1[:]
-              self.navg       = self.navg + 1.
+              self.u_avg[:]   += self.u_np1[:]
+              self.v_avg[:]   += self.v_np1[:]
+              self.tke_avg[:] += self.tke_np1[:]
+              self.wt_avg[:]  +=  - (self.wted[:]+self.wtmf[:])
+              self.t_avg[:]   += self.t_np1[:]
+              self.akv_avg[:] += self.akv[:]
+              self.akt_avg[:] += self.akt[:]
+              self.navg       += 1.
             #==========================================================
             # Check for outputs & diagnostics
             #==========================================================
@@ -335,6 +343,8 @@ class SCM:
           self.tke_avg[:] = cff*self.tke_avg[:]
           self.wt_avg[:]  = cff*self.wt_avg[:]
           self.t_avg[:]   = cff*self.t_avg[:]
+          self.akv_avg[:] = cff*self.akv_avg[:]
+          self.akt_avg[:] = cff*self.akt_avg[:]
 #
 
 
