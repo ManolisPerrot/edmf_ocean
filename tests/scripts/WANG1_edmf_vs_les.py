@@ -21,6 +21,7 @@ from netCDF4 import Dataset
 import matplotlib.pyplot as plt
 import numpy as np
 from case_configs import case_params
+import subprocess
 
 ###################################################
 plt.rcParams['text.usetex'] = True
@@ -164,7 +165,7 @@ runs = [
         'mass_flux_tke': True,
         'mass_flux_tke_trplCorr': True,
         'entr_scheme': 'R10corNT',
-        'output_filename': 'run3.nc'
+        'output_filename': 'scm_WANG1_FR.nc'
     }
         ]
 
@@ -391,5 +392,9 @@ plt.savefig(saving_path+saving_name, bbox_inches='tight', dpi=300)
 
 
 print('figure saved at'+saving_path+saving_name)
+
+subprocess.run(["python", "WANG1_LES_vs_SCM_velocities.py"])
+
+
 
 #plt.show()

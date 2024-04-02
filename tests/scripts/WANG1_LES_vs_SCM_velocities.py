@@ -59,7 +59,7 @@ zlim = mld - 50
 zadim = Z/(-mld)
 
 #open scm
-run_params ={'output_filename': 'scm_WANG1_FR_270324.nc'}
+run_params ={'output_filename': 'scm_WANG1_FR.nc'}
 print('opening '+run_params['output_filename'])
 scm = xr.open_dataset(run_params['output_filename'])
 
@@ -196,7 +196,7 @@ def plot_waves_panel():
     print('figure saved at '+saving_path)
 
     #plt.show()
-#plot_waves_panel()
+plot_waves_panel()
 
 
 
@@ -233,4 +233,4 @@ def plot_mean_fluxes():
     plt.savefig(saving_path, bbox_inches='tight', dpi=300)
     print('figure saved at '+saving_path)
 
-plot_mean_fluxes()
+#plot_mean_fluxes()
