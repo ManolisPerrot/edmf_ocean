@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 from scmoce import scm_oce
 from scmtke import scm_tke
 from scmmfc import scm_mfc
+from scmmfc_old import scm_mfc_old
 #from scipy.io import netcdf
 from netCDF4 import Dataset
 ###########################################
@@ -32,11 +33,11 @@ class SCM:
                         mass_flux_dyn = False           , mass_flux_tke = False , mass_flux_tke_trplCorr = False,
                         mass_flux_small_ap     = True   , extrap_ak_surf = True , tke_sfc_dirichlet = False,
                         eddy_diff_tke_const = 'NEMO'    , akvmin   = 1.e-4      , aktmin   = 1.e-5         ,
-                        mxlmin  =                    1.0,
+                        mxlmin  = 10.0,
                         Cent  = 0.55         , Cdet = -1         , wp_a =  1        , wp_b  = 1   ,
                         wp_bp = 0.0002       , up_c = 0.5        , vp_c = 0.5       , bc_ap = 0.1 ,
-                        delta_bkg = 0.       , wp0=-1.e-08       ,  entr_scheme = 'R10'  ,
-                        write_netcdf=False, avg_last_hour=False ):
+                        delta_bkg = 0.       , wp0=-1.e-08       ,
+                        entr_scheme = 'R10'  , write_netcdf=False, avg_last_hour=False ):
         """[summary]
         Args:
             nz: Number of grid points. Defaults to 100.
@@ -147,6 +148,7 @@ class SCM:
         self.z_w   = (hc*Sc_w+Cs_w*h0)*h0/(h0+hc)
         self.z_r   = (hc*Sc_r+Cs_r*h0)*h0/(h0+hc)
         self.Hz    = self.z_w[1:]-self.z_w[:-1]
+        zInvMin    = -self.Hz[-1]
         ####################################
         # define the initial state
         #-----------------------------------
@@ -189,7 +191,8 @@ class SCM:
         ####################################
         # initialize arrays for MASS-FLUX
         #-----------------------------------
-        self.zinv   = np.array(-1.)
+        self.zinvMin = np.array(zInvMin)
+        self.zinv   = self.zinvMin
         self.ap     = np.zeros(self.nz+1); self.wp     = np.zeros(self.nz+1)
         self.tp     = np.zeros((self.nz+1, self.ntraMF), order='F');
         self.Bp     = np.zeros(self.nz+1); self.Fmass  = np.zeros(self.nz+1)
@@ -333,7 +336,7 @@ class SCM:
             # swap arrays
             self.u_n[:] = self.u_np1[:]; self.v_n[:] = self.v_np1[:];
             self.t_n[:,:] = self.t_np1[:,:]; self.tke_n[:] = self.tke_np1[:]
-            self.wtke[:]  = 0.                            ## diagnostics : reset the array containing w'e
+            if kt<self.nbsteps-1: self.wtke[:]  = 0.                            ## diagnostics : reset the array containing w'e
         if self.write_netcdf:
           self.do_turb_fluxes (  )
         if self.do_avg:
@@ -554,13 +557,6 @@ class SCM:
         tkepmin = self.min_Threshold[0]
         mxlpmin = self.min_Threshold[3]
         #
-        #if self.mass_flux_entr=='P09':
-        #  self.ap,self.up,self.vp,self.wp,self.tp,self.Bp,self.ent,self.det  =  scm_mfc.mass_flux_p09(
-        #                            u_mean, v_mean, t_mean, self.z_w, self.Hz       ,
-        #                            tp0   , up0   , vp0   , wp0     , self.mf_params,
-        #                            self.eos_params, self.MF_small_ap,self.zinv ,
-        #                            self.nz , self.ntraMF , len(self.mf_params), len(self.eos_params)  )
-        #
         if self.mass_flux_entr=='R10':
           self.ap,self.up,self.vp,self.wp,self.tp,self.Bp,self.ent,self.det, self.epsPlume = scm_mfc.mass_flux_r10(
                                     u_mean, v_mean, t_mean, self.tke_n, self.z_w, self.Hz,
@@ -573,10 +569,13 @@ class SCM:
                                     tp0   , up0   , vp0   , wp0     , self.mf_params,
                                     self.eos_params, self.fcor, self.ecor, tkepmin, mxlpmin, self.MF_small_ap, self.lineos, self.zinv ,
                                     self.nz , self.ntraMF , len(self.mf_params), len(self.eos_params)   )
+        self.zinv = min(self.zinvMin,self.zinv)
 #
 
-
-
+#
+#  SUBROUTINE mass_flux_R10_cor(u_m,v_m,t_m,tke_m,z_w,Hz,tp0,up0,vp0,wp0,mf_params,alpha,beta,fcor,ecor,   &
+#    small_ap,lin_eos,zinv,N,ntra,nparams)
+#
 #
     def output_init(self):
         fh01 = Dataset(self.output, mode='w',format="NETCDF4")
