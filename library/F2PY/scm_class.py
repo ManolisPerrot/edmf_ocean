@@ -189,7 +189,7 @@ class SCM:
         ####################################
         # initialize arrays for MASS-FLUX
         #-----------------------------------
-        self.zinv   = np.array(-1.)
+        self.zinv   = np.array(-10.)
         self.ap     = np.zeros(self.nz+1); self.wp     = np.zeros(self.nz+1)
         self.tp     = np.zeros((self.nz+1, self.ntraMF), order='F');
         self.Bp     = np.zeros(self.nz+1); self.Fmass  = np.zeros(self.nz+1)
