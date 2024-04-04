@@ -21,6 +21,7 @@ from netCDF4 import Dataset
 import matplotlib.pyplot as plt
 import numpy as np
 from case_configs import case_params
+import subprocess
 
 ###################################################
 plt.rcParams['text.usetex'] = True
@@ -135,17 +136,9 @@ runs = [
         'mass_flux_dyn': False,
         'mass_flux_tke': False,
         'mass_flux_tke_trplCorr': False,
-        'output_filename': 'run1.nc'
+        'output_filename': 'run1.nc',
+    'write_netcdf': False
     },
-    # {
-    #     'eddy_diff': True,
-    #     'evd': False,
-    #     'mass_flux_tra': True,
-    #     'mass_flux_dyn': True,
-    #     'mass_flux_tke': False,
-    #     'mass_flux_tke_trplCorr': False,
-    #     'output_filename': 'run2.nc'
-    # },
             {
         'eddy_diff': True,
         'evd': False,
@@ -154,7 +147,8 @@ runs = [
         'mass_flux_tke': True,
         'mass_flux_tke_trplCorr': True,
         'entr_scheme': 'R10',
-        'output_filename': 'run2.nc'
+        'output_filename': 'run2.nc',
+    'write_netcdf': False
     },
         {
         'eddy_diff': True,
@@ -164,7 +158,8 @@ runs = [
         'mass_flux_tke': True,
         'mass_flux_tke_trplCorr': True,
         'entr_scheme': 'R10corNT',
-        'output_filename': 'run3.nc'
+        'output_filename': 'scm_WANG1_FR.nc',
+    'write_netcdf': True
     }
         ]
 
@@ -181,12 +176,12 @@ for i, run_params in enumerate(runs):
     scm[i].run_direct()
     print("zinv =", scm[i].zinv)
 
-# LOAD outputs
-out = [0]*len(runs)
+# # LOAD outputs
+# out = [0]*len(runs)
 
-for i, run_params in enumerate(runs):
-    print('opening '+run_params['output_filename'])
-    out[i] = xr.open_dataset(run_params['output_filename'])
+# for i, run_params in enumerate(runs):
+#     print('opening '+run_params['output_filename'])
+#     out[i] = xr.open_dataset(run_params['output_filename'])
 
 # choose intant to plot    
 instant = -1
@@ -325,9 +320,9 @@ for i, label in enumerate(run_label):
     ax.plot((scm[i].wtke), scm[i].z_r/mld, linestyle=styles[i], color = colors[i],
             alpha=alpha[i], linewidth=linewidth[i], label=label)
     
-if i==1:
-    ax.plot((out[i]['we'][instant]), out[i].z_w/mld, linestyle=':', color = colors[i],
-            alpha=alpha[i], linewidth=linewidth[i], label=label)
+# if i==1:
+#     ax.plot((out[i]['we'][instant]), out[i].z_w/mld, linestyle=':', color = colors[i],
+#             alpha=alpha[i], linewidth=linewidth[i], label=label)
 
 
 #ax.set_xlim((- 1e-5, 0))
@@ -391,5 +386,9 @@ plt.savefig(saving_path+saving_name, bbox_inches='tight', dpi=300)
 
 
 print('figure saved at'+saving_path+saving_name)
+
+subprocess.run(["python", "WANG1_LES_vs_SCM_velocities.py"])
+
+
 
 #plt.show()

@@ -136,7 +136,7 @@ runs = [
         'mass_flux_tke': True,
         'mass_flux_tke_trplCorr': True,
         'entr_scheme': 'R10corNT',
-        'output_filename': 'run2.nc'
+        'output_filename': 'scm_WANG1_FR.nc'
     }
         ]
 
