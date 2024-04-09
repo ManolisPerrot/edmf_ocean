@@ -207,7 +207,7 @@ CONTAINS
     eps(0)=0.; eps(N)=0.
     !         Store the ED contribution to w'e turbulent flux
     DO k = 1,N
-    wtke(k) = wtke(k) - 0.5*isch*(akv(k)+akv(k-1))*(tke_np1(k)-tke_np1(k-1))/Hz(k)
+      wtke(k) = wtke(k) - 0.5*isch*(akv(k)+akv(k-1))*(tke_np1(k)-tke_np1(k-1))/Hz(k)
     ENDDO
   !---------------------------------------------------------------------------------------------------
   END SUBROUTINE advance_tke

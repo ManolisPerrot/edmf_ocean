@@ -68,6 +68,7 @@ common_params = {
     'btflx': 'no flux',
     'eddy_diff': True,
     'evd': False,
+    'eddy_diff_scheme' : 'TKE',
     'mass_flux_tra': False,
     'mass_flux_dyn': False,
     'mass_flux_tke': False,
@@ -75,7 +76,7 @@ common_params = {
     'mass_flux_small_ap': False,
     'lin_eos': True,
     'extrap_ak_surf': True,
-    'tke_sfc_dirichlet': False,
+    'tke_sfc_dirichlet': True,
     'eddy_diff_tke_const': 'NEMO',
     'entr_scheme': 'R10',
     'Cent': 0.99,
@@ -108,7 +109,9 @@ runs = [
         'mass_flux_tke': False,
         'mass_flux_tke_trplCorr': False,
         'output_filename': 'run1.nc',
-        'mxlmin': 1.
+        'eddy_diff_scheme' : 'TKE',
+        'tke_sfc_dirichlet': False,
+        'mxlmin': 1.0
     },
     {
         'btflx': 'linear_continuation',
@@ -119,7 +122,9 @@ runs = [
         'mass_flux_tke': False,
         'mass_flux_tke_trplCorr': False,
         'output_filename': 'run2.nc',
-        'mxlmin': 0.05
+        'eddy_diff_scheme' : 'Keps',
+        'tke_sfc_dirichlet': False,
+        'mxlmin': 1.0
     }
         ]
 

@@ -24,7 +24,7 @@ CONTAINS
     !! ** Purposes : integrate vertical diffusion term for tracers                <br />
     !!============================================================================<br />
     !! \[ \overline{\phi}^{n+1,*} = \overline{\phi}^n + \Delta t \partial_z \left(  K_m \partial_z  \overline{\phi}^{n+1,*} \right) \]
-    USE scm_par
+    USE scm_par, ONLY: cp, grav
     IMPLICIT NONE
     INTEGER, INTENT(IN   )          :: N                !! number of vertical levels
     INTEGER, INTENT(IN   )          :: ntra             !! number of tracers to integrate
