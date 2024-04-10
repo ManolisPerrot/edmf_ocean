@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 from scmoce import scm_oce
 from scmtke import scm_tke
 from scmmfc import scm_mfc
-from scmmfc_old import scm_mfc_old
+#from scmmfc_old import scm_mfc_old
 #from scipy.io import netcdf
 from netCDF4 import Dataset
 ###########################################
