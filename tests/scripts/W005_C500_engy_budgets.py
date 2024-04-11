@@ -17,6 +17,7 @@ from scm_class import SCM
 from netCDF4 import Dataset
 import matplotlib.pyplot as plt
 import numpy as np
+from unit_tests import is_in_range
 ###################################################
 plt.rcParams['text.usetex'] = True
 plt.rcParams.update({'font.size': 18})
@@ -127,7 +128,13 @@ for i, run_params in enumerate(runs):
     params.update(run_params)  # Update with run_params
     scm[i] = SCM(**params)
     scm[i].run_direct()
-    print("zinv =", scm[i].zinv)
+
+    # do unit tests
+    if scm[i].MF_tra or scm[i].MF_dyn: 
+        zinv_ref = -320.
+        tolerance=10.
+        print(run_label[i])
+        is_in_range(value=scm[i].zinv, value_name='zinv', reference=zinv_ref,tolerance=tolerance )
 
 # LOAD outputs
 
@@ -162,6 +169,12 @@ ax.set_xlabel(r'\rm{time} (hours)')
 ax.set_ylabel(r'${\rm m}^{3}\;{\rm s}^{-3}$')
 ax.plot( (out[2]['Etot'] )[1:] , color='tab:orange' , linewidth=3 , alpha=1, linestyle = '-', label='EDMF-Energy')
 ax.plot( (out[1]['Etot'] )[1:] , color='tab:blue'   , linewidth=3 , alpha=1, linestyle = '-', label='EDMF')
+
+# test Etot
+for i, label in enumerate(run_label):
+    print(label)
+    is_in_range(value=max(np.abs(out[i]['Etot'].data)),value_name='max(abs(Etot vert int))',reference=0.,tolerance=5e-8)
+
 # ===============================================================
 
 ax.legend()

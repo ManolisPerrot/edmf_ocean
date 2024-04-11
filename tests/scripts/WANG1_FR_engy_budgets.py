@@ -18,6 +18,8 @@ from netCDF4 import Dataset
 import matplotlib.pyplot as plt
 import numpy as np
 from case_configs import case_params
+from unit_tests import is_in_range
+
 ###################################################
 plt.rcParams['text.usetex'] = True
 plt.rcParams.update({'font.size': 18})
@@ -127,8 +129,11 @@ for i, run_params in enumerate(runs):
     params.update(run_params)  # Update with run_params
     scm[i] = SCM(**params)
     scm[i].run_direct()
-    if params['mass_flux_tra']==True:
-        print("zinv =", scm[i].zinv)
+    # test zinv
+    if scm[i].MF_tra or scm[i].MF_dyn: 
+        print(run_label[i])
+        reference=-3437.5
+        is_in_range(value=scm[i].zinv, value_name='zinv', reference=reference,tolerance=10 )
 
 # LOAD outputs
 
@@ -164,6 +169,11 @@ ax.set_ylabel(r'${\rm m}^{3}\;{\rm s}^{-3}$')
 ax.plot( (out[2]['Etot'] )[1:] , color='tab:orange' , linewidth=3 , alpha=1, linestyle = '-', label='EDMF-Energy')
 ax.plot( (out[1]['Etot'] )[1:] , color='tab:blue'   , linewidth=3 , alpha=1, linestyle = '-', label='EDMF')
 # ===============================================================
+# test Etot
+for i, label in enumerate(run_label):
+    print(label)
+    is_in_range(value=max(np.abs(out[i]['Etot'].data)),value_name='max(abs(Etot vert int))',reference=0.,tolerance=5e-8)
+
 
 ax.legend()
 

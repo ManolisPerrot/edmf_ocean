@@ -20,7 +20,7 @@ from scm_class import SCM
 from netCDF4 import Dataset
 import matplotlib.pyplot as plt
 import numpy as np
-
+from unit_tests import is_in_range
 
 ###################################################
 plt.rcParams['text.usetex'] = True
@@ -72,6 +72,9 @@ time = ((time_les - time_les[0]) / np.timedelta64(1, 'h')).data.astype(int) + 1
 
 # remap level_les on negative depth values
 z_r_les = (les.level_les - (les.level_les[0] + les.level_les[-1])).data
+instant=-1
+mld = (-z_r_les[(-WTH[instant]).argmax()])
+
 # ===========================================================================
 
 # Define the common parameters:
@@ -175,7 +178,13 @@ for i, run_params in enumerate(runs):
     params.update(run_params)  # Update with run_params
     scm[i] = SCM(**params)
     scm[i].run_direct()
-    print("zinv =", scm[i].zinv)
+
+    # test zinv
+    if scm[i].MF_tra or scm[i].MF_dyn: 
+        print(run_label[i])
+        reference=-320
+        #reference=-mld #LES value
+        is_in_range(value=scm[i].zinv, value_name='zinv', reference=reference,tolerance=10 )
 
 # LOAD outputs
 
