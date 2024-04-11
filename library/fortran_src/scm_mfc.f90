@@ -354,7 +354,7 @@ CONTAINS
           Det_R10(beta1,beta2,wpp,wpm,delta0,hk,wp_min) !! \(   {\rm EmD}_k = \frac{h_k}{a^{\rm p}} \left( E_k - D_k \right) = {\rm Ent\_R10} + {\rm Det\_R10}  \)  <br />
     cff  = 1. / (2.*wpm+EmD)
     cff1 = app *(2.*wpp-EmD)
-    apm = cff*cff1   !! \(  a^{\rm p}_{k-1/2} = a^{\rm p}_{k+1/2} \left(  \frac{2 w^{\rm p}_{k+1/2} - {\rm EmD}_k}{2 w^{\rm p}_{k-1/2} + {\rm EmD}_k}   \right)   \) <br />
+    apm  = MAX(cff*cff1,0.)   !! \(  a^{\rm p}_{k-1/2} = a^{\rm p}_{k+1/2} \left(  \frac{2 w^{\rm p}_{k+1/2} - {\rm EmD}_k}{2 w^{\rm p}_{k-1/2} + {\rm EmD}_k}   \right)   \) <br />
     return
   !---------------------------------------------------------------------------------------------------
   END SUBROUTINE get_a_p_R10
@@ -425,6 +425,46 @@ CONTAINS
     return
   !---------------------------------------------------------------------------------------------------
   END SUBROUTINE get_t_p_R10
+  !===================================================================================================
+
+  !===================================================================================================
+  SUBROUTINE get_vort_p_R10(Vortpm,Vortpp,fcor,apm,app,wpm,wpp,beta1,beta2,hk,delta0,wp_min)
+  !---------------------------------------------------------------------------------------------------
+    !!==========================================================================<br />
+    !!                  ***  ROUTINE get_t_p_R10  ***                           <br />
+    !! ** Purposes : compute plume tracer properties for Rio et al. (2010)
+    !!                        entrainment/detrainement closure                  <br />
+    !!==========================================================================<br />
+    IMPLICIT NONE
+    REAL(8), INTENT(INOUT)      :: Vortpm    !! tracer value at the bottom of the grid cell
+    REAL(8), INTENT(IN   )      :: Vortpp    !! tracer value at the top   of the grid cell
+    REAL(8), INTENT(IN   )      :: fcor      !! environmental value for tracer in the grid cell
+    REAL(8), INTENT(IN   )      :: apm       !! fractional area at the bottom of the grid cell
+    REAL(8), INTENT(IN   )      :: app       !! fractional area at the top   of the grid cell
+    REAL(8), INTENT(IN   )      :: wpm       !! vertical velocity at the bottom of the grid cell [m/s]
+    REAL(8), INTENT(IN   )      :: wpp       !! vertical velocity at the top of the grid cell [m/s]
+    REAL(8), INTENT(IN   )      :: beta1     !! parameter of the MF scheme
+    REAL(8), INTENT(IN   )      :: hk        !! thickness of the grid cell [m]
+    REAL(8), INTENT(IN   )      :: delta0    !! background detrainement in the entrainment zone [m-1]
+    REAL(8), INTENT(IN   )      :: beta2     !! increase the detrainement coefficient beta1 [m-1]
+    REAL(8), INTENT(IN   )      :: wp_min
+    ! local variables
+    REAL(8)                 :: cffm,num,hDet,dwpp,ap,Denom
+    !
+    ap     = 0.5*(app+apm)       !! \(  a^{\rm p}_{k} = \frac{a^{\rm p}_{k+1/2}+a^{\rm p}_{k-1/2}}{2}  \)  <br />
+    hDet   = ap*Det_R10(beta1,beta2,wpp,wpm,delta0,hk,wp_min) != - Dj x hj
+    num    = apm*wpm+app*wpp+hDet
+    IF(ABS(num) > 1.e-20) THEN
+      Denom  = Vortpp*( apm*wpm+app*wpp-hDet ) - 2.*fcor*(app*wpp-apm*wpm)
+      Vortpm = Denom / num
+    ELSE
+      Vortpm = 0.
+    ENDIF
+    !print*,'Vortpm = ',Vortpm
+    !
+    return
+  !---------------------------------------------------------------------------------------------------
+  END SUBROUTINE get_vort_p_R10
   !===================================================================================================
 
   !===================================================================================================
@@ -516,7 +556,8 @@ CONTAINS
 
   !===================================================================================================
   SUBROUTINE mass_flux_R10(u_m,v_m,t_m,tke_m,z_w,Hz,tp0,up0,vp0,wp0,mf_params,eos_params,  &
-                           tkep_min,mxlp_min,small_ap,lin_eos,zinv, N,ntra,nparams,neos,a_p,u_p,v_p,w_p,t_p,B_p,ent,det,eps)
+                           tkep_min,mxlp_min,small_ap,lin_eos,zinv, N,ntra,nparams,neos,   &
+                           a_p,u_p,v_p,w_p,t_p,B_p,ent,det,eps)
   !---------------------------------------------------------------------------------------------------
     !!==========================================================================<br />
     !!                  ***  ROUTINE mass_flux_R10  ***                         <br />
@@ -691,6 +732,7 @@ CONTAINS
       CALL get_dtke_p_R10(t_p(k-1,ntra),t_p(k,ntra),dtke,normVel,w_p(k-1),w_p(k),  &
                                                    Hz(k),epsilon,(1.-cff)*beta1) !! Compute \( e^{\rm p}_{k-1/2}\) :: call \(  {\rm get\_dtke\_p\_R10}  \)
       eps(k)    = epsilon
+      !
     ENDDO
     !=======================================================================
     ! At this point, up and vp contain up-Cu ue  and vp-Cv ve
@@ -712,7 +754,8 @@ CONTAINS
 
   !===================================================================================================
   SUBROUTINE mass_flux_R10_cor(u_m,v_m,t_m,tke_m,z_w,Hz,tp0,up0,vp0,wp0,mf_params,eos_params,fcor,ecor, &
-    tkep_min, mxlp_min, small_ap,lin_eos,zinv,N,ntra,nparams,neos,a_p,u_p,v_p,w_p,t_p,B_p,ent,det,eps)
+    tkep_min, mxlp_min, small_ap,lin_eos,zinv,N,ntra,nparams,neos,  &
+    a_p,u_p,v_p,w_p,t_p,B_p,ent,det,vort_p,eps)
     !---------------------------------------------------------------------------------------------------
     !!==========================================================================<br />
     !!                  ***  ROUTINE mass_flux_R10  ***                         <br />
@@ -764,6 +807,7 @@ CONTAINS
     REAL(8), INTENT(  OUT)                 :: B_p(0:N)              !! buoyancy forcing  [m/s2]
     REAL(8), INTENT(  OUT)                 :: ent(1:N)              !! diagnostics : entrainment [m-1]
     REAL(8), INTENT(  OUT)                 :: det(1:N)              !! diagnostics : detrainment [m-1]
+    REAL(8), INTENT(  OUT)                 :: vort_p(0:N)
     REAL(8), INTENT(  OUT)                 :: eps(1:N)          !! diagnostics : TKE dissipation [m2 s-3]
     REAL(8), INTENT(INOUT)                 :: zinv                  !! depth at which w_p = wmin  [m]
     ! local variables
@@ -798,6 +842,8 @@ CONTAINS
     t_p(N,1:ntra) = tp0(1:ntra)   ; t_p(0:N-1,1:ntra) = 0.
     B_p(0:N) = 0.; ent(1:N) = 0.  ; det(1:N) = 0.  ; eps(1:N) = 0.
     !
+    vort_p(0:N) = 0.
+    !
     DO k = 2,N
       du_m(k) = u_m(k) - u_m(k-1)
       dv_m(k) = v_m(k) - v_m(k-1)
@@ -831,84 +877,88 @@ CONTAINS
     N2sfc  = -(grav/eos_params(1))*(rho_m(N)-rho_m(N-1))/Hz(N)
     !=======================================================================
     DO k=N,1,-1
-    ! Compute B_p
-    temp_p = t_p(k,1); salt_p = t_p(k,2)
-    !
-    IF(lin_eos) THEN; CALL eos_val_lin(temp_p,salt_p,eos_params,neos,rho_p)
-    ELSE; CALL eos_val(temp_p,salt_p,0.5*(z_w(k)+z_w(k-1)),eos_params(1),rho_p); ENDIF
-    !! Compute \( B^{\rm p}_{k} \) \[ B^{\rm p}_{k} = - \frac{g}{\rho_0} \left( \rho^{\rm p}_{k+1/2} - \overline{\rho}_k \right) \]
-    B_p(k) = - grav * ( rho_p - rho_m(k) ) / eos_params(1)
-    ! Wp equation first
-    !! If \( {\rm small\_ap = False} : (b',b) \rightarrow \frac{(b',b)}{1-a^{\rm p}_{k+1/2}} \) <br />
-    cff    = 1.
-    IF(.not.small_ap) cff = 1./(1.-a_p(k))
-    zbb = cff*bb; zbp = cff*bp
-    BpTilde = B_p(k) + (ecor/aa)*u_p(k)
-    !! Compute \( w^{\rm p}_{k-1/2} \) :: call \(  {\rm get\_w\_p\_R10}  \)
-    !  \[ (w^{\rm p})^{2}_{k+1/2} - (w^{\rm p})^{2}_{k-1/2} =
-    !  h_k (b' + b \epsilon_k) \left((w^{\rm p})^{2}_{k+1/2} + (w^{\rm p})^{2}_{k-1/2})\right)
-    ! + 2 a h_k B^{\rm p}_{k}\]
-    CALL get_w_p_R10(w_p(k-1),w_p(k),aa,zbb,zbp,beta1,Hz(k),BpTilde,wpmin,hinv,found)
-    ! diagnostics
-    cff       = (w_p(k)-w_p(k-1))/(0.5*Hz(k)*(w_p(k)+w_p(k-1)))
-    ent  (k)  = MAX(0., -beta1*cff)
-    det  (k)  = MAX(0.,  beta2*cff) + delta0
-    !
-    IF(found) THEN
-      zinv     = z_w(k)-hinv; found = .false.
-    ENDIF
-    !! Compute \( a^{\rm p}_{k-1/2} \) :: call \(  {\rm get\_a\_p\_R10}  \)
-    ! \[  (a^{\rm p} w^{\rm p})_{k-\frac{1}{2}}  =   (a^{\rm p} w^{\rm p})_{k+\frac{1}{2}}
-    ! - \beta_1 \left(\frac{a^{\rm p}_{k+\frac{1}{2}} + a^{\rm p}_{k-\frac{1}{2}} }{2}\right)
-    ! \left(  \max(0, (\delta_z w^{\rm p})_k) + \min\left( \frac{w^{\rm p} h_k}{\beta_1} \delta_0 ,
-    ! (\delta_z w^{\rm p})_k + \frac{w^{\rm p} h_k}{\beta_1} (\delta_1)_k \right) \right) \\  \]
-    CALL get_a_p_R10(a_p(k-1),a_p(k),w_p(k-1),w_p(k),beta1,beta2,Hz(k),delta0,wpmin)
-    cff = a_p(k)/(1.-a_p(k))
-    IF(small_ap) cff = 0.
-    ! Compute tracers (except TKE_p)
-    DO itrc = 1,ntra-1
-      t_env = t_m(k,itrc) + cff*(t_m(k,itrc)-t_p(k,itrc)) !! Compute environment \( \phi^{\rm e}_k\)
-      !!\begin{align*}
-      !! \phi^{\rm e}_k &= \overline{\phi}_k  \hspace{7cm} \mbox{small_ap = True} \\
-      !! \phi^{\rm e}_k &= \overline{\phi}_k + \left( \frac{a^{\rm p}_{k+1/2}}{1-a^{\rm p}_{k+1/2}} \right) ( \overline{\phi}_k - \phi^{\rm p}_{k+1/2} ) \hspace{1cm} \mbox{small_ap = False}
-      !! \end{align*}
-      CALL get_t_p_R10(t_p(k-1,itrc),t_p(k,itrc),t_env,  &
-      a_p(k-1),a_p(k),w_p(k-1),w_p(k),beta1,beta2,Hz(k),delta0,wpmin) !! Compute \( \phi^{\rm p}_{k-1/2}\) :: call \(  {\rm get\_t\_p\_R10}  \)
-    ENDDO
-    !=======
-    u_env = u_m(k); v_env = v_m(k) ! m/s
-    frc_u = Cu*du_m(k)-Hz(k)*ecor  ! m/s
-    frc_v = Cv*dv_m(k)             ! m/s
-    !=======
-    ! Compute up
-    cor_u   =   fcor*Hz(k)*v_p(k) ! m2/s2
-    CALL get_u_p_R10(u_p(k-1),u_p(k),u_env,a_p(k-1),a_p(k),w_p(k-1),w_p(k),   &
+      ! Compute B_p
+      temp_p = t_p(k,1); salt_p = t_p(k,2)
+      !
+      IF(lin_eos) THEN; CALL eos_val_lin(temp_p,salt_p,eos_params,neos,rho_p)
+      ELSE; CALL eos_val(temp_p,salt_p,0.5*(z_w(k)+z_w(k-1)),eos_params(1),rho_p); ENDIF
+      !! Compute \( B^{\rm p}_{k} \) \[ B^{\rm p}_{k} = - \frac{g}{\rho_0} \left( \rho^{\rm p}_{k+1/2} - \overline{\rho}_k \right) \]
+      B_p(k) = - grav * ( rho_p - rho_m(k) ) / eos_params(1)
+      ! Wp equation first
+      !! If \( {\rm small\_ap = False} : (b',b) \rightarrow \frac{(b',b)}{1-a^{\rm p}_{k+1/2}} \) <br />
+      cff    = 1.
+      IF(.not.small_ap) cff = 1./(1.-a_p(k))
+      zbb = cff*bb; zbp = cff*bp
+      BpTilde = B_p(k) + (ecor/aa)*u_p(k)
+      !! Compute \( w^{\rm p}_{k-1/2} \) :: call \(  {\rm get\_w\_p\_R10}  \)
+      !  \[ (w^{\rm p})^{2}_{k+1/2} - (w^{\rm p})^{2}_{k-1/2} =
+      !  h_k (b' + b \epsilon_k) \left((w^{\rm p})^{2}_{k+1/2} + (w^{\rm p})^{2}_{k-1/2})\right)
+      ! + 2 a h_k B^{\rm p}_{k}\]
+      CALL get_w_p_R10(w_p(k-1),w_p(k),aa,zbb,zbp,beta1,Hz(k),BpTilde,wpmin,hinv,found)
+      ! diagnostics
+      cff       = (w_p(k)-w_p(k-1))/(0.5*Hz(k)*(w_p(k)+w_p(k-1)))
+      ent  (k)  = MAX(0., -beta1*cff)
+      det  (k)  = MAX(0.,  beta2*cff) + delta0
+      !
+      IF(found) THEN
+        zinv     = z_w(k)-hinv; found = .false.
+      ENDIF
+      !! Compute \( a^{\rm p}_{k-1/2} \) :: call \(  {\rm get\_a\_p\_R10}  \)
+      ! \[  (a^{\rm p} w^{\rm p})_{k-\frac{1}{2}}  =   (a^{\rm p} w^{\rm p})_{k+\frac{1}{2}}
+      ! - \beta_1 \left(\frac{a^{\rm p}_{k+\frac{1}{2}} + a^{\rm p}_{k-\frac{1}{2}} }{2}\right)
+      ! \left(  \max(0, (\delta_z w^{\rm p})_k) + \min\left( \frac{w^{\rm p} h_k}{\beta_1} \delta_0 ,
+      ! (\delta_z w^{\rm p})_k + \frac{w^{\rm p} h_k}{\beta_1} (\delta_1)_k \right) \right) \\  \]
+      CALL get_a_p_R10(a_p(k-1),a_p(k),w_p(k-1),w_p(k),beta1,beta2,Hz(k),delta0,wpmin)
+      cff = a_p(k)/(1.-a_p(k))
+      IF(small_ap) cff = 0.
+      ! Compute tracers (except TKE_p)
+      DO itrc = 1,ntra-1
+        t_env = t_m(k,itrc) + cff*(t_m(k,itrc)-t_p(k,itrc)) !! Compute environment \( \phi^{\rm e}_k\)
+        !!\begin{align*}
+        !! \phi^{\rm e}_k &= \overline{\phi}_k  \hspace{7cm} \mbox{small_ap = True} \\
+        !! \phi^{\rm e}_k &= \overline{\phi}_k + \left( \frac{a^{\rm p}_{k+1/2}}{1-a^{\rm p}_{k+1/2}} \right) ( \overline{\phi}_k - \phi^{\rm p}_{k+1/2} ) \hspace{1cm} \mbox{small_ap = False}
+        !! \end{align*}
+        CALL get_t_p_R10(t_p(k-1,itrc),t_p(k,itrc),t_env,  &
+        a_p(k-1),a_p(k),w_p(k-1),w_p(k),beta1,beta2,Hz(k),delta0,wpmin) !! Compute \( \phi^{\rm p}_{k-1/2}\) :: call \(  {\rm get\_t\_p\_R10}  \)
+      ENDDO
+      !=======
+      u_env = u_m(k); v_env = v_m(k) ! m/s
+      frc_u = Cu*du_m(k)-Hz(k)*ecor  ! m/s
+      frc_v = Cv*dv_m(k)             ! m/s
+      !=======
+      ! Compute up
+      cor_u   =   fcor*Hz(k)*v_p(k) ! m2/s2
+      CALL get_u_p_R10(u_p(k-1),u_p(k),u_env,a_p(k-1),a_p(k),w_p(k-1),w_p(k),   &
                     beta1,beta2,Hz(k),delta0,frc_u,cor_u,wpmin) !! Compute \( u^{\rm p}_{k-1/2}\) :: call \(  {\rm get\_t\_p\_R10}  \)
-    !if( u_p(k-1).ne.u_p(k-1) ) then
-    !  print*,'NaN in get_u_p_R10 :: ',u_p(k-1),u_p(k),u_env,a_p(k-1),a_p(k)
-    !  stop
-    !endif
-    ! Compute vp
-    cor_v   = -fcor*Hz(k)*u_p(k) ! m2/s2
-    CALL get_u_p_R10(v_p(k-1),v_p(k),v_env,a_p(k-1),a_p(k),w_p(k-1),w_p(k),   &
+      !if( u_p(k-1).ne.u_p(k-1) ) then
+      !  print*,'NaN in get_u_p_R10 :: ',u_p(k-1),u_p(k),u_env,a_p(k-1),a_p(k)
+      !  stop
+      !endif
+      ! Compute vp
+      cor_v   = -fcor*Hz(k)*u_p(k) ! m2/s2
+      CALL get_u_p_R10(v_p(k-1),v_p(k),v_env,a_p(k-1),a_p(k),w_p(k-1),w_p(k),   &
                     beta1,beta2,Hz(k),delta0,frc_v,cor_v,wpmin) !! Compute \( v^{\rm p}_{k-1/2}\) :: call \(  {\rm get\_t\_p\_R10}  \)
-    !if( v_p(k-1).ne.v_p(k-1) ) then
-    !  print*,'NaN in get_v_p_R10 :: ',v_p(k-1),v_p(k),v_env,a_p(k-1),a_p(k)
-    !  stop
-    !endif
-    ! Compute TKEplume - TKEmean
-    cff       = a_p(k)/(1.-a_p(k))
-    IF(small_ap) cff = 0.
-    cffw      = 0.5*(w_p(k)+w_p(k-1))
-    cffu      = 0.5*(u_p(k)+u_p(k-1))
-    cffv      = 0.5*(v_p(k)+v_p(k-1))
-    normVel   = (1.+cff)*(cffu*cffu+cffv*cffv+cffw*cffw)/(1.-cff)
-    dtke      = tke_m(k)-tke_m(k-1)
-    epsilon   = ceps_nemo * (t_p(k,ntra)+tke_m(k))   &
+      !if( v_p(k-1).ne.v_p(k-1) ) then
+      !  print*,'NaN in get_v_p_R10 :: ',v_p(k-1),v_p(k),v_env,a_p(k-1),a_p(k)
+      !  stop
+      !endif
+      ! Compute TKEplume - TKEmean
+      cff       = a_p(k)/(1.-a_p(k))
+      IF(small_ap) cff = 0.
+      cffw      = 0.5*(w_p(k)+w_p(k-1))
+      cffu      = 0.5*(u_p(k)+u_p(k-1))
+      cffv      = 0.5*(v_p(k)+v_p(k-1))
+      normVel   = (1.+cff)*(cffu*cffu+cffv*cffv+cffw*cffw)/(1.-cff)
+      dtke      = tke_m(k)-tke_m(k-1)
+      epsilon   = ceps_nemo * (t_p(k,ntra)+tke_m(k))   &
                 * SQRT(t_p(k,ntra)+tke_m(k)) * imxld0(k)
-    CALL get_dtke_p_R10(t_p(k-1,ntra),t_p(k,ntra),dtke,normVel,w_p(k-1),w_p(k),  &
+      CALL get_dtke_p_R10(t_p(k-1,ntra),t_p(k,ntra),dtke,normVel,w_p(k-1),w_p(k),  &
                             Hz(k),epsilon,(1.-cff)*beta1) !! Compute \( e^{\rm p}_{k-1/2}\) :: call \(  {\rm get\_dtke\_p\_R10}  \)
-    eps(k)    = epsilon
+      eps(k)    = epsilon
+      !
+      CALL get_vort_p_R10(vort_p(k-1),vort_p(k),fcor,a_p(k-1),a_p(k),w_p(k-1),w_p(k), &
+                                                      beta1,beta2,Hz(k),delta0,wpmin)
+      !
     ENDDO
     !=======================================================================
     ! At this point, up and vp contain up-Cu ue  and vp-Cv ve

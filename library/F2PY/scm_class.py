@@ -19,10 +19,11 @@ from netCDF4 import Dataset
 class SCM:
     """Single Column model class"""
 
-    def __init__(self,  nz     = 100                    , dt      =  30.        , h0              =  1000.,
-                        thetas = 6.5                    , hc      = 400.        , T0              =     2.,
-                        N0     = 1.9620001275490499e-6  , mld_ini = -0.         , mld_iniS        =    -0.,
-                        cpoce  = 3985.                  , lin_eos = True                  ,
+    def __init__(self,  nz     = 100                    , dt       =  30.        , h0              =  1000.,
+                        thetas = 6.5                    , hc       = 400.        , T0              =     2.,
+                        N0     = 1.9620001275490499e-6  , gridType = 'analytic'  ,
+                        mld_ini = -0.                   , mld_iniS = -0.,
+                        cpoce  = 3985.                  , lin_eos = True        , rho0            =  1027.,
                         Tcoef  = 0.2048                 , Scoef   =  0.         , SaltCst         =    35.,
                         Tref   = 2.                     , Sref    = 35.         , lat0            =    45.,
                         sustr  = 0.                     , svstr   =  0.         , stflx           =  -500.,
@@ -97,7 +98,7 @@ class SCM:
         self.do_avg    = avg_last_hour
         self.start_avg = (nbhours-1.)*3600.
         # physical constants
-        self.rho0        = 1027; self.cp        = cpoce; self.g         = 9.81
+        self.rho0        = rho0; self.cp        = cpoce; self.g         = 9.81
         self.lineos      = True
         self.alpha       = Tcoef/self.rho0;      self.beta    = Scoef/self.rho0
         self.T0          = Tref           ;      self.S0      = Sref
@@ -168,12 +169,31 @@ class SCM:
         ####################################
         # define vertical grid
         #-----------------------------------
-        Sc_r  = np.arange(-nz+0.5, 0.5, 1) / float(nz)
-        Sc_w  = np.arange(-nz, 1, 1) / float(nz)
-        Cs_r = (1.-np.cosh(thetas*Sc_r))/(np.cosh(thetas)-1.)
-        Cs_w = (1.-np.cosh(thetas*Sc_w))/(np.cosh(thetas)-1.)
-        self.z_w   = (hc*Sc_w+Cs_w*h0)*h0/(h0+hc)
-        self.z_r   = (hc*Sc_r+Cs_r*h0)*h0/(h0+hc)
+        if gridType!='ORCA75':
+          Sc_r  = np.arange(-nz+0.5, 0.5, 1) / float(nz)
+          Sc_w  = np.arange(-nz, 1, 1) / float(nz)
+          Cs_r = (1.-np.cosh(thetas*Sc_r))/(np.cosh(thetas)-1.)
+          Cs_w = (1.-np.cosh(thetas*Sc_w))/(np.cosh(thetas)-1.)
+          self.z_w   = (hc*Sc_w+Cs_w*h0)*h0/(h0+hc)
+          self.z_r   = (hc*Sc_r+Cs_r*h0)*h0/(h0+hc)
+        else:
+          # construct the ORCA 75 levels grid and extract the levels between 0 and h0
+          nz   = 75
+          zsur = -3958.95137127683; za2  = 100.760928500000
+          za0  =  103.953009600000; za1  = 2.41595126900000
+          zkth =  15.3510137000000; zkth2= 48.0298937200000
+          zacr =  7.00000000000000; zacr2= 13.0000000000000
+          Sc_r = np.arange( nz-0.5, 0.5 , -1.)
+          Sc_w = np.arange( nz    , 0.  , -1.)
+          z_w  = -( zsur + za0 * Sc_w + za1 * zacr * np.log(np.cosh((Sc_w-zkth )/zacr) ) + za2 * zacr2* np.log(np.cosh( (Sc_w-zkth2) / zacr2 ) )  )
+          z_r  = -( zsur + za0 * Sc_r + za1 * zacr * np.log(np.cosh((Sc_r-zkth )/zacr) ) + za2 * zacr2* np.log(np.cosh( (Sc_r-zkth2) / zacr2 ) )  )
+          Hz   = z_w[1:]-z_w[:-1]
+          nbot = np.argmin(z_w <= -h0)
+          self.z_w     = z_w[nbot-1:]
+          self.nz      = len(self.z_w) - 1
+          self.z_r     = z_r[nbot-1:]
+          self.z_w[-1] = 0.
+          #
         self.Hz    = self.z_w[1:]-self.z_w[:-1]
         zInvMin    = -self.Hz[-1]
         ####################################
@@ -233,6 +253,7 @@ class SCM:
           self.ent    = np.zeros(self.nz  ); self.det    = np.zeros(self.nz  )
           self.up     = np.zeros(self.nz+1); self.vp     = np.zeros(self.nz+1)
           self.epsPlume = np.zeros(self.nz)  # TKE plume dissipation
+          if self.mass_flux_entr=='R10corNT': self.vortp  = np.zeros(self.nz+1)
         ####################################
         # store MASS-FLUX solution (temperature, velocity)
         # in order to avoid writing a netcdf file
@@ -601,7 +622,7 @@ class SCM:
                                     self.eos_params, tkepmin, mxlpmin, self.MF_small_ap, self.lineos, self.zinv ,
                                     self.nz , self.ntraMF , len(self.mf_params), len(self.eos_params)   )
         if self.mass_flux_entr=='R10corNT':
-          self.ap,self.up,self.vp,self.wp,self.tp,self.Bp,self.ent,self.det, self.epsPlume = scm_mfc.mass_flux_r10_cor(
+          self.ap,self.up,self.vp,self.wp,self.tp,self.Bp,self.ent,self.det, self.vortp, self.epsPlume = scm_mfc.mass_flux_r10_cor(
                                     u_mean, v_mean, t_mean, self.tke_n, self.z_w, self.Hz,
                                     tp0   , up0   , vp0   , wp0     , self.mf_params,
                                     self.eos_params, self.fcor, self.ecor, tkepmin, mxlpmin, self.MF_small_ap, self.lineos, self.zinv ,
@@ -758,6 +779,8 @@ class SCM:
             if self.MF_tke_trplCorr:
                 var = fh01.createVariable('we','f8',('time','z_w')); var[0,:] = self.triple_corr[:]; del var
                 var = fh01.createVariable('tke_p','f8',('time','z_w')); var[0,:] = self.tp[:,self.isalt+1]; del var
+            if self.mass_flux_entr=='R10corNT':
+                var = fh01.createVariable('vort_p','f8',('time','z_w')); var[0,:] = self.vortp[:]; del var
         fh01.close()
 #
 
@@ -828,4 +851,6 @@ class SCM:
             if self.MF_tke_trplCorr:
                 fh01.variables['we'][kout,:] = self.triple_corr[:]
                 fh01.variables['tke_p'][kout,:] = self.tp[:,self.isalt+1]
+            if self.mass_flux_entr=='R10corNT':
+                fh01.variables['vort_p'][kout,:] = self.vortp[:]
         fh01.close()
