@@ -31,7 +31,7 @@ end_time   = 276
 #===========================================================================
 compar_les = 1
 if compar_les==1:
-  les_dir    = "/mnt/c/Users/flori/OneDrive/Bureau/Codes/kets_and_edmf/3d_runs/WANG1_FR/"
+  les_dir    = "../data/WANG1_FR/"
   les_file   = les_dir+"GN_01.1.OC_01.000.nc"
   mean_var   =  '/LES_budgets/Mean/Cartesian/Not_time_averaged/Not_normalized/cart'
   subg_var   =  '/LES_budgets/Subgrid/Cartesian/Not_time_averaged/Not_normalized/cart'
@@ -156,7 +156,7 @@ for i, run_params in enumerate(runs):
     params.update(run_params)  # Update with run_params
     scm[i] = SCM(**params)
     scm[i].run_direct()
-    print("zinv =", scm[i].zinv)
+    if scm[i].MF_tra or scm[i].MF_dyn: print("zinv =", scm[i].zinv)
 #===========================================================================
 vscale = 1./3750.
 if compar_les==1: vscale = 1./hinv_les
