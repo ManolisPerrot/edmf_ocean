@@ -120,14 +120,15 @@ common_params = {
     'entr_scheme': 'R10',
     'Cent': 0.9,
     'Cdet': 1.95,       # 'Cdet': 2.5,
-    'wp_a': 1.,
-    'wp_b': 1.,      # 'wp_b': 1.
-    'wp_bp': 0.005*250,     #      0.002,
+    'wp_a': .2,
+    'wp_b': .2,      # 'wp_b': 1.
+    'wp_bp': 0.0055*250,     #      0.002,
     'up_c': 0.25,
     'vp_c': 0.25,
     'bc_ap': 0.2,    #0.3,
-    'delta_bkg': 0.0025*250,   # 0.006,
+    'delta_bkg': 0.006*250,   # 0.006,
     'output_filename': 'run',
+    'wp0':-1.e-08,
     'write_netcdf': True
 }
 
@@ -217,7 +218,7 @@ linewidth_les = 4
 
 
 #============================================ WC ===============================================
-fig, axes = plt.subplots(nrows=2, ncols=3, sharex=False,
+fig, axes = plt.subplots(nrows=3, ncols=3, sharex=False,
                          sharey=True, figsize=(15, 12))
 
 ax_index=-1
@@ -363,16 +364,43 @@ ax.plot(-WU[instant], z_r_les/mld, style_les,alpha=alpha_les, linewidth=linewidt
 
 ax.set_ylim((-1.3, 0))
 
+# ===============================================================
+ax_index+=1
+ax = axes.flat[ax_index]
 
+ax.set_xlabel(r'$s^{-1}$')
+ax.set_title(r'$\omega_p$')
+
+
+for i, label in enumerate(run_label):
+    if label=='EDMF-Energy-cor':
+        ax.plot((scm[i].vortp), scm[i].z_w/mld, linestyle=styles[i], color = colors[i],
+            alpha=alpha[i], linewidth=linewidth[i], label=label)
+
+ax.set_ylim((-1.3, 0))
+
+# ===============================================================
+
+ax_index+=1
+ax = axes.flat[ax_index]
+
+ax.set_xlabel(r'$m s^{-1}$')
+ax.set_title(r'$w_p$')
+
+
+for i, label in enumerate(run_label):
+    if (label=='EDMF-Energy-cor') or (label=='EDMF-Energy'):
+        ax.plot((scm[i].wp), scm[i].z_w/mld, linestyle=styles[i], color = colors[i],
+            alpha=alpha[i], linewidth=linewidth[i], label=label)
+
+ax.set_ylim((-1.3, 0))
 
 # ===============================================================
 
 
-
-
 # adding subplot labels
 subplot_label = [r'\rm{(a)}', r'\rm{(b)}', r'\rm{(c)}',
-                r'\rm{(d)}', r'\rm{(e)}', r'\rm{(f)}']
+                r'\rm{(d)}', r'\rm{(e)}', r'\rm{(f)}',r'\rm{(g)}',r'\rm{(h)}',r'\rm{(i)}']
 
 for i,ax in enumerate(axes.flat):
     ax.set_box_aspect(1)
