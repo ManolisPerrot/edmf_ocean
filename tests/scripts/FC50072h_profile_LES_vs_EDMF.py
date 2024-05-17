@@ -34,7 +34,7 @@ plt.rcParams.update({'savefig.facecolor': 'white'})
 blue, orange, magenta, grey, green = '#0db4c3', '#eea021', '#ff0364', '#606172', '#3fb532'
 
 # ===========================================================================
-case = 'W005_C500_NO_COR'
+case = 'FC500'
 
 
 saving_path = '../figures/'
@@ -43,7 +43,7 @@ saving_name = case+'72h_profile_LES_vs_EDMF.png'
 
 # loading LES output once before using the function
 
-file = 'GN_01.1.OC_01.000_copy.nc'
+file = 'GN_01.1.OC_01.000.nc'
 
 
 path = '../data/'+case+'/'
@@ -66,6 +66,10 @@ TKE = (LG_RES.RES_KE + LG_SBG.SBG_TKE).data + corr_tke_les
 WTKE = (LG_RES.RES_WKE + LG_SBG.SBG_WTKE).data
 
 time_les = les.time_les
+
+# plt.plot(WTKE[-1], z_r_les)
+# plt.plot(WTKE[-1]-WPHI_over_RHO_0[-1], z_r_les, 'ko')
+# plt.show()
 
 # numpy array of integer hours, starting at inital time + 1h
 time = ((time_les - time_les[0]) / np.timedelta64(1, 'h')).data.astype(int) + 1
@@ -103,24 +107,12 @@ common_params = {
     'mass_flux_dyn': True,
     'mass_flux_tke': True,
     'mass_flux_tke_trplCorr': True,
-    'mass_flux_small_ap': False,
+    'mass_flux_small_ap': True,
     'lin_eos': True,
     'extrap_ak_surf': True,
     'tke_sfc_dirichlet': False,
     'eddy_diff_tke_const': 'NEMO',
     'entr_scheme': 'R10',
-    # 'Cent': 0.99,
-    # 'Cdet': 1.99,       # 'Cdet': 2.5,
-    # 'wp_a': 1.,
-    # 'wp_b': 1.,      # 'wp_b': 1.
-    # 'wp_bp': 0.003*250,     #      0.002,
-    # 'up_c': 0.5,
-    # 'vp_c': 0.5,
-    # 'bc_ap': 0.2,    #0.3,
-    # 'delta_bkg': 0.005*250,   # 0.006,
-    # 'wp0' : -0.5e-03,
-    # 'output_filename': 'run',
-    # 'write_netcdf': True
     'Cent': 0.999,
     'Cdet': 1.99,       # 'Cdet': 2.5,
     'wp_a': 1.3,
@@ -249,7 +241,7 @@ if case == 'W005_C500_NO_COR':
         ax.plot(scm[i].t_np1[:, 0], scm[i].z_r/mld, linestyle=styles[i], color = colors[i],
                 alpha=alpha[i], linewidth=linewidth[i], label=label)
 
-    ax.set_xlim((1.65, 1.77))
+    ax.set_xlim((1.55, 1.8))
     ax.set_ylim((-1.3, 0))
 
 
@@ -280,24 +272,25 @@ if case == 'W005_C500_NO_COR':
     ax.plot(WTH[instant], z_r_les/mld, style_les,
             alpha=alpha_les, linewidth=linewidth_les, label='LES')
 
-    for i, label in enumerate(run_label):
-       if run_label == 'EVD':
-           ax.plot(-(scm[i].wted), scm[i].z_w/mld, styles[i], color = colors[i],
-                   alpha=alpha[i], linewidth=linewidth[i], label=label)
-       else:
-           ax.plot(-(scm[i].wted + scm[i].wtmf), scm[i].z_w/mld, styles[i], color = colors[i],
-                   alpha=alpha[i], linewidth=linewidth[i], label=label)
-    ax.ticklabel_format(style='sci', axis='x', scilimits=(0, 0))
-
-    # for i, label in enumerate(run_label[1:]):
-    #     ax.plot(-(scm[i].wted ), scm[i].z_w/mld, linestyle='--', color = colors[i],
+    #for i, label in enumerate(run_label):
+    #    if run_label == 'ED':
+    #        ax.plot(-(scm[i].wted), scm[i].z_w/mld, styles[i], color = colors[i],
     #                alpha=alpha[i], linewidth=linewidth[i], label=label)
-    # ax.ticklabel_format(style='sci', axis='x', scilimits=(0, 0))
+    #    else:
+    #        ax.plot(-(scm[i].wted + scm[i].wtmf), scm[i].z_w/mld, styles[i], color = colors[i],
+    #                alpha=alpha[i], linewidth=linewidth[i], label=label)
+    #ax.ticklabel_format(style='sci', axis='x', scilimits=(0, 0))
+    #for i, label in enumerate(run_label):
+    #    if run_label == 'ED':
+    #        ax.plot(-(scm[i].wted), scm[i].z_w/mld, linestyle=styles[i], color = colors[i],
+    #                alpha=alpha[i], linewidth=linewidth[i], label=label)
+    #    else:
+    #        ax.plot(-(scm[i].wted + scm[i].wtmf), scm[i].z_w/mld, linestyle=styles[i], color = colors[i],
+    #                alpha=alpha[i], linewidth=linewidth[i], label=label)
+    #ax.ticklabel_format(style='sci', axis='x', scilimits=(0, 0))
 
-    ax.plot( -scm[1].wted, scm[1].z_w/mld, color ='tab:blue'  , linestyle ='--', alpha=1.0 , linewidth=3 )
-    ax.plot( -scm[2].wted, scm[2].z_w/mld, color ='tab:orange', linestyle ='--', alpha=1.0 , linewidth=3 )
-    # ax.plot( -out[1]['WT_ED'][-1,:], out[1].z_w/mld, color ='tab:blue'  , linestyle ='--', alpha=1.0 , linewidth=3 )
-    # ax.plot( -out[2]['WT_ED'][-1,:], out[2].z_w/mld, color ='tab:orange', linestyle ='--', alpha=1.0 , linewidth=3 )
+    #ax.plot( -out[1]['WT_ED'][-1,:], out[1].z_w/mld, color ='tab:blue'  , linestyle ='--', alpha=1.0 , linewidth=3 )
+    #ax.plot( -out[2]['WT_ED'][-1,:], out[2].z_w/mld, color ='tab:orange', linestyle ='--', alpha=1.0 , linewidth=3 )
 
 
     ax.set_ylim((-1.3, 0))
@@ -327,20 +320,17 @@ if case == 'W005_C500_NO_COR':
 
     ax = axes.flat[5]
     ax.set_title(r'$\overline{w^\prime \frac{u^{\prime 2}}{2}  }$')
-#add velocity-pressure correlation
-    cond_samp = xr.open_dataset(path+    'W005_C500_NO_COR_Cw_m1_72h.nc')  
 
-    ax.plot(WTKE[instant]-cond_samp['TOT_intra_WPHI_over_RHO_0'][-1], z_r_les/mld, style_les,
+   
+    ax.plot(WTKE[instant], z_r_les/mld, style_les,
             alpha=alpha_les, linewidth=linewidth_les, label='LES')
-    # ax.plot(WTKE[instant], z_r_les/mld, style_les,
-    #         alpha=alpha_les, linewidth=linewidth_les, label='LES')
 
     for i, label in enumerate(run_label):
         ax.plot((scm[i].wtke), scm[i].z_r/mld, linestyle=styles[i], color = colors[i],
                 alpha=alpha[i], linewidth=linewidth[i], label=label)
 
 
-    ax.set_xlim((- 1.5e-5, 0))
+    ax.set_xlim((- 1e-5, 0))
     ax.set_ylim((-1.3, 0))
 
     ax.set_xlabel(r'${\rm m}^3\;{\rm s}^{-3}$')
@@ -354,14 +344,14 @@ if case == 'W005_C500_NO_COR':
     ax.plot(-WU[instant], z_r_les/mld, style_les,alpha=alpha_les, linewidth=linewidth_les, label='LES')
 
 
-    for i, label in enumerate(run_label):
-            ax.plot((scm[i].wued + scm[i].wumf), scm[i].z_w/mld, linestyle=styles[i], color = colors[i],
-                    alpha=alpha[i], linewidth=linewidth[i], label=label)
+    # for i, label in enumerate(run_label):
+    #         ax.plot((scm[i].wued + scm[i].wumf), scm[i].z_w/mld, linestyle=styles[i], color = colors[i],
+    #                 alpha=alpha[i], linewidth=linewidth[i], label=label)
 
-    ax.ticklabel_format(style='sci', axis='x', scilimits=(0, 0))
+    # ax.ticklabel_format(style='sci', axis='x', scilimits=(0, 0))
 
-    ax.plot( scm[1].wued, scm[1].z_w/mld, color ='tab:blue'  , linestyle ='--', alpha=1.0 , linewidth=3 )
-    ax.plot( scm[2].wued, scm[2].z_w/mld, color ='tab:orange', linestyle ='--', alpha=1.0 , linewidth=3 )
+    # ax.plot( scm[1].wued, scm[1].z_w/mld, color ='tab:blue'  , linestyle ='--', alpha=1.0 , linewidth=3 )
+    # ax.plot( scm[2].wued, scm[2].z_w/mld, color ='tab:orange', linestyle ='--', alpha=1.0 , linewidth=3 )
 
     ax.set_ylim((-1.3, 0))
 
@@ -386,7 +376,7 @@ if case == 'W005_C500_NO_COR':
 
     handles, labels = ax.get_legend_handles_labels()
     fig.legend(handles, labels, loc='upper center', bbox_to_anchor=(
-        0.5, -0.008), fancybox=False, shadow=False, ncol=4)
+        0.5, -0.05), fancybox=False, shadow=False, ncol=4)
 
     fig.tight_layout()
 
@@ -465,17 +455,21 @@ if case == 'FC500':
 
     # ===============================================================
     ax = axes.flat[3]
-    ax.set_title(r'$\overline{w^\prime \frac{u^{\prime 2}}{2}  }$')
+    ax.set_title(r'$\overline{w^\prime \frac{u^{\prime 2}}{2}  } + \frac{1}{\rho_0} \overline{w^\prime p^{\dagger \prime} }$')
 
-    ax.plot(WTKE[instant], z_r_les/mld, style_les,
+    #add velocity-pressure correlation
+    cond_samp = xr.open_dataset(path+    'FC500_object_diags_Cw_m1_72h.nc')  
+
+    ax.plot(WTKE[instant]+cond_samp['TOT_intra_WPHI_over_RHO_0'][-1], z_r_les/mld, style_les,
             alpha=alpha_les, linewidth=linewidth_les, label='LES')
+
 
     for i, label in enumerate(run_label):
         ax.plot((scm[i].wtke), scm[i].z_r/mld, linestyle=styles[i], color = colors[i],
                 alpha=alpha[i], linewidth=linewidth[i], label=label)
 
 
-    ax.set_xlim((- 1.1e-5, 0))
+    ax.set_xlim((- 1.3e-5, 0))
     ax.set_ylim((-1.3, 0))
 
     ax.set_xlabel(r'$m^3.s^{-3}$')
