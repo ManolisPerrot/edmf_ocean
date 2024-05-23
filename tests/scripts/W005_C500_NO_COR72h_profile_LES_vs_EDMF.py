@@ -109,27 +109,15 @@ common_params = {
     'tke_sfc_dirichlet': False,
     'eddy_diff_tke_const': 'NEMO',
     'entr_scheme': 'R10',
-    # 'Cent': 0.99,
-    # 'Cdet': 1.99,       # 'Cdet': 2.5,
-    # 'wp_a': 1.,
-    # 'wp_b': 1.,      # 'wp_b': 1.
-    # 'wp_bp': 0.003*250,     #      0.002,
-    # 'up_c': 0.5,
-    # 'vp_c': 0.5,
-    # 'bc_ap': 0.2,    #0.3,
-    # 'delta_bkg': 0.005*250,   # 0.006,
-    # 'wp0' : -0.5e-03,
-    # 'output_filename': 'run',
-    # 'write_netcdf': True
     'Cent': 0.999,
     'Cdet': 1.99,       # 'Cdet': 2.5,
     'wp_a': 1.3,
     'wp_b': 1.3,      # 'wp_b': 1.
-    'wp_bp': 0.0002*250,     #      0.002,
+    'wp_bp': 0.003*250,     #      0.002,
     'up_c': 0.5,
     'vp_c': 0.5,
     'bc_ap': 0.2,    #0.3,
-    'delta_bkg': 0.0099*250,   # 0.006,
+    'delta_bkg': 0.006*250,   # 0.006,
     'wp0' : -0.5e-08,
     'output_filename': 'run',
     'write_netcdf': True
@@ -147,7 +135,7 @@ if case == 'W005_C500_NO_COR':
 
 # Define parameters specific to each run (overwrite common parameters):
 
-run_label = ['EVD', 'EDMF', 'EDMF-Energy']
+run_label = ['ED+EVD', 'EDMF', 'EDMF-Energy']
 runs = [
     {
         'eddy_diff': True,
@@ -326,7 +314,7 @@ if case == 'W005_C500_NO_COR':
 
 
     ax = axes.flat[5]
-    ax.set_title(r'$\overline{w^\prime \frac{u^{\prime 2}}{2}  }$')
+    ax.set_title(r'$\overline{w^\prime \frac{\mathbf{u}^{\prime 2}}{2}  } + \frac{1}{\rho_0} \overline{w^\prime p^{\dagger \prime} }$')
 #add velocity-pressure correlation
     cond_samp = xr.open_dataset(path+    'W005_C500_NO_COR_Cw_m1_72h.nc')  
 
