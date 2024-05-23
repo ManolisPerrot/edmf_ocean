@@ -105,7 +105,7 @@ CONTAINS
   !===================================================================================================
 
   !===================================================================================================
-  SUBROUTINE compute_tripleCorr(tke,tke_p,Fmass,u_p,v_p,w_p,u_np1,v_np1,Hz,zr,wtke,N,trplCorr,tke_env)
+  SUBROUTINE compute_tripleCorr(tke,tke_p,Fmass,u_p,v_p,w_p,u_np1,v_np1,Hz,zr,opt,wtke,N,trplCorr)
   !---------------------------------------------------------------------------------------------------
     !!==========================================================================<br />
     !!                  ***  ROUTINE compute_tripleCorr  ***                    <br />
@@ -126,9 +126,9 @@ CONTAINS
     REAL(8), INTENT(IN   )         ::  v_np1(1:N)          !! mean meridional velocity [m/s]
     REAL(8), INTENT(IN   )         ::  Hz  (1:N)           !! layer thickness [m]
     REAL(8), INTENT(IN   )         ::  zr  (1:N)           !! depth of cell centers [m]
+    INTEGER, INTENT(IN   )         ::  opt                 !! option for the computation of wtke (=0 PL24, =1 HB09, = 2 Wi11)
     REAL(8), INTENT(INOUT)         ::  wtke(1:N)           !! turbulent w'e flux [m3/s3]
     REAL(8), INTENT(  OUT)         ::  trplCorr(0:N)       !! contribution of mass flux to divergence of w'e flux [m2/s3]
-    REAL(8), INTENT(  OUT)         ::  tke_env (0:N)       !! diagnostics : environmental TKE [m2/s2]
     ! local variables
     INTEGER                        :: k
     REAL(8)                        :: cff, cff1, cff2, cff3
@@ -140,7 +140,6 @@ CONTAINS
     FC(N) = 0.5*Fmass(N)*(w_p(N))**2 ! attention Fmass=-apwp
     wtke(N) = wtke(N) - FC(N)
     trplCorr(0:N) = 0.
-    tke_env (0:N) = 0.
     !
     DO k = 1,N-1
       Fm    = Fmass(k  )
@@ -148,11 +147,16 @@ CONTAINS
       upr   = u_p(k  )
       vpr   = v_p(k  )
       !
-      FC(k) = Fm*( tke_p(k)-tke(k-1) ) !! \( F_{k} = (a^{\rm p} w^{\rm p})_{k+1/2} ( k^{\rm p}_{k+1/2} - k_{k-1/2}^n ) \)<br />
-      FC(k) = FC(k) + 0.5*Fm*(              &
-                                (upr-u_np1(k))**2  &
-                             +  (vpr-v_np1(k))**2  &
-                             +   wpr*wpr ) !! \( F_{k} = F_{k} + \frac{(a^{\rm p} w^{\rm p})_{k+1/2}}{2}\left(  \mathbf{v}^{\rm p}_{k+1/2} - \mathbf{v}^{n+1}_{k} \right)^2  \) <br />
+      SELECT CASE( opt )
+      CASE( 0  ) ! all terms
+        FC(k) = Fm*( tke_p(k)-tke(k-1) ) !! \( F_{k} = (a^{\rm p} w^{\rm p})_{k+1/2} ( k^{\rm p}_{k+1/2} - k_{k-1/2}^n ) \)<br />
+        FC(k) = FC(k) + 0.5*Fm*( (upr-u_np1(k))**2 +  (vpr-v_np1(k))**2   +   wpr*wpr ) !! \( F_{k} = F_{k} + \frac{(a^{\rm p} w^{\rm p})_{k+1/2}}{2}\left(  \mathbf{v}^{\rm p}_{k+1/2} - \mathbf{v}^{n+1}_{k} \right)^2  \) <br />
+      CASE( 1  ) ! only MF on tke
+        FC(k) = Fm*( tke_p(k)-tke(k-1) ) !! \( F_{k} = (a^{\rm p} w^{\rm p})_{k+1/2} ( k^{\rm p}_{k+1/2} - k_{k-1/2}^n ) \)<br />
+      CASE( 2  ) ! only ap wp^3 term
+        FC(k) = 0.5*Fm*( wpr*wpr )
+      END SELECT
+      !
       wtke(k) = wtke(k) - FC(k)
     ENDDO
     !
@@ -166,7 +170,7 @@ CONTAINS
     !  wpr        = w_p(k)
     !  tke_env(k) = tke(k) - a_p(k)*( tke_p(k) + wpr*wpr + upr*upr + vpr*vpr )
     !ENDDO
-    tke_env(0:N) = 0.
+    !tke_env(0:N) = 0.
   !---------------------------------------------------------------------------------------------------
   END SUBROUTINE compute_tripleCorr
   !===================================================================================================
@@ -556,7 +560,7 @@ CONTAINS
 
   !===================================================================================================
   SUBROUTINE mass_flux_R10(u_m,v_m,t_m,tke_m,z_w,Hz,tp0,up0,vp0,wp0,mf_params,eos_params,  &
-                           tkep_min,mxlp_min,small_ap,lin_eos,zinv, N,ntra,nparams,neos,   &
+                           tkep_min,mxlp_min,small_ap,lin_eos,opt,zinv, N,ntra,nparams,neos,   &
                            a_p,u_p,v_p,w_p,t_p,B_p,ent,det,eps)
   !---------------------------------------------------------------------------------------------------
     !!==========================================================================<br />
@@ -599,6 +603,7 @@ CONTAINS
     REAL(8), INTENT(IN   )                 :: eos_params(1:neos)    !! parameters in the EOS (for lin eos only)
     LOGICAL, INTENT(IN   )                 :: small_ap              !! (T) small area approximation (F) no approximation
     LOGICAL, INTENT(IN   )                 :: lin_eos               !!
+    INTEGER, INTENT(IN   )                 ::  opt                 !! option for the computation of wtke (=0 PL24, =1 HB09, = 2 Wi11)
     REAL(8), INTENT(  OUT)                 :: a_p(0:N)              !! fractional area occupied by the plume
     REAL(8), INTENT(  OUT)                 :: w_p(0:N)              !! vertical velocity in the plume [m/s]
     REAL(8), INTENT(  OUT)                 :: u_p(0:N)              !! zonal velocity in the plume [m/s]
@@ -729,6 +734,9 @@ CONTAINS
       dtke      = tke_m(k)-tke_m(k-1)
       epsilon   = ceps_nemo * (t_p(k,ntra)+tke_m(k))   &
                                         * SQRT(t_p(k,ntra)+tke_m(k)) * imxld0(k)
+      IF(opt==1) THEN  ! HB09 tke_p equation is simply   d tke_p / dz = E tke - D tke_p
+        epsilon = 0.; normVel = 0.
+      ENDIF
       CALL get_dtke_p_R10(t_p(k-1,ntra),t_p(k,ntra),dtke,normVel,w_p(k-1),w_p(k),  &
                                                    Hz(k),epsilon,(1.-cff)*beta1) !! Compute \( e^{\rm p}_{k-1/2}\) :: call \(  {\rm get\_dtke\_p\_R10}  \)
       eps(k)    = epsilon

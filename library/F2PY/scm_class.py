@@ -141,7 +141,8 @@ class SCM:
             self.pnm[0] = 3.0; self.pnm[1] = -1.0; self.pnm[2] = 1.5
             self.betaCoef   = np.zeros(4)
             self.betaCoef[0] = 1.44 ; self.betaCoef[1] = 1.92
-            self.betaCoef[2] = -0.4 ; self.betaCoef[3] = 1.00
+            #self.betaCoef[2] = -0.4 ; self.betaCoef[3] = 1.00
+            self.betaCoef[2] = -1.83 ; self.betaCoef[3] = -1.83
             Sch_k = 1.; Sch_eps = 1.3  # Schmidt numbers
             self.OneOverSig_k   = 1./Sch_k; self.OneOverSig_psi = 1./Sch_eps
             c1 = 5.; c2 = 0.8; c3 = 1.968; c4 = 1.136
@@ -163,7 +164,10 @@ class SCM:
         #-----------------------------------
         self.MF_tra      = mass_flux_tra  ; self.MF_dyn          = mass_flux_dyn
         self.MF_tke      = mass_flux_tke  ; self.MF_tke_trplCorr = mass_flux_tke_trplCorr
-        self.mass_flux_entr = entr_scheme ; self.MF_small_ap     = mass_flux_small_ap
+        self.mass_flux_entr  = entr_scheme ; self.MF_small_ap     = mass_flux_small_ap
+        self.triple_corr_opt = 0
+        if self.mass_flux_entr == 'R10_HB09': self.triple_corr_opt = 1
+        if self.mass_flux_entr == 'R10_Wi11': self.triple_corr_opt = 2
         self.mf_params  = np.array([Cent,Cdet,wp_a,wp_b,wp_bp,up_c,vp_c,bc_ap,delta_bkg])
         self.wp0 = wp0                    ; self.bc_ap = bc_ap
         ####################################
@@ -225,7 +229,6 @@ class SCM:
         self.bvf      = np.zeros(self.nz+1); self.eps_n      = np.zeros(self.nz+1)
         if self.ED:
           self.tke_n    = np.zeros(self.nz+1); self.tke_n[:]   = tkemin
-          self.tke_env  = np.zeros(self.nz+1); self.tke_env[:] = tkemin
           self.tke_np1  = np.zeros(self.nz+1); self.tke_np1[:] = tkemin
           self.lupw     = np.zeros(self.nz+1); self.lupw[:]    = mxlmin
           self.ldwn     = np.zeros(self.nz+1); self.ldwn[:]    = mxlmin
@@ -236,6 +239,9 @@ class SCM:
           if self.ED_scheme=='Keps':
             self.cmu      = np.zeros(self.nz+1); self.cmu     [:] = 0.1
             self.cmu_prim = np.zeros(self.nz+1); self.cmu_prim[:] = 0.1
+            self.cmu_star = np.zeros(self.nz+1); self.cmu_star[:] = 0.1
+            self.varT_n   = np.zeros(self.nz+1); self.varT_n  [:] = 1.e-14
+            self.varT_np1 = np.zeros(self.nz+1); self.varT_np1[:] = 1.e-14
         else:
           self.ED_scheme = 'None'
         # MLD computation params
@@ -392,7 +398,9 @@ class SCM:
             #===================================================================
             self.u_n[:] = self.u_np1[:]; self.v_n[:] = self.v_np1[:];
             self.t_n[:,:] = self.t_np1[:,:]; self.tke_n[:] = self.tke_np1[:]
-            if self.ED_scheme=='Keps': self.eps_n[:] = self.eps_np1[:]
+            if self.ED_scheme=='Keps':
+                self.eps_n [:] = self.eps_np1 [:]
+                self.varT_n[:] = self.varT_np1[:]
             #===================================================================
             if kt<self.nbsteps-1: self.wtke[:]  = 0.                            ## diagnostics : reset the array containing w'e
         if self.write_netcdf:
@@ -552,11 +560,11 @@ class SCM:
         #================================================
         # Triple correlation term
         if self.MF_tke_trplCorr:
-          self.triple_corr, self.tke_env = scm_mfc.compute_triplecorr(
+          self.triple_corr = scm_mfc.compute_triplecorr(
                                         self.tke_n, self.tp[:,self.isalt+1], self.Fmass,
                                         self.up   , self.vp   ,self.wp  ,
                                         self.u_np1, self.v_np1, self.Hz ,
-                                        self.z_r  , self.wtke, self.nz  )
+                                        self.z_r  , self.triple_corr_opt, self.wtke, self.nz  )
         #=========================
         # Advance TKE
         self.tke_np1, self.Prdtl, self.eps_n, self.residual = scm_tke.advance_tke(
@@ -615,11 +623,11 @@ class SCM:
         tkepmin = self.min_Threshold[0]
         mxlpmin = self.min_Threshold[3]
         #
-        if self.mass_flux_entr=='R10':
+        if self.mass_flux_entr=='R10' or self.mass_flux_entr=='R10_HB09' or self.mass_flux_entr=='R10_Wi11':
           self.ap,self.up,self.vp,self.wp,self.tp,self.Bp,self.ent,self.det, self.epsPlume = scm_mfc.mass_flux_r10(
                                     u_mean, v_mean, t_mean, self.tke_n, self.z_w, self.Hz,
                                     tp0   , up0   , vp0   , wp0     , self.mf_params,
-                                    self.eos_params, tkepmin, mxlpmin, self.MF_small_ap, self.lineos, self.zinv ,
+                                    self.eos_params, tkepmin, mxlpmin, self.MF_small_ap, self.lineos, self.triple_corr_opt, self.zinv,
                                     self.nz , self.ntraMF , len(self.mf_params), len(self.eos_params)   )
         if self.mass_flux_entr=='R10corNT':
           self.ap,self.up,self.vp,self.wp,self.tp,self.Bp,self.ent,self.det, self.vortp, self.epsPlume = scm_mfc.mass_flux_r10_cor(
@@ -693,10 +701,13 @@ class SCM:
                                 epsmin, self.bdy_eps_sfc,self.bdy_eps_bot,  self.nz)
         #=========================
         akvmin = self.min_Threshold[1]; aktmin = self.min_Threshold[2]
-        self.akv,self.akt,self.cmu,self.cmu_prim = scm_gls.compute_ev_ed_filt(
+        self.akv,self.akt,self.cmu,self.cmu_prim, self.cmu_star = scm_gls.compute_ev_ed_filt_ng(
                         self.tke_np1, self.eps_np1, self.bvf,
                         self.shear2 , self.pnm, akvmin, aktmin, epsmin, self.nz )
-        #
+        #=========================
+        self.varT_np1[:] = scm_gls.advance_turb_vart(self.varT_n,self.akv,self.akt,self.t_np1[:,self.itemp],
+                                                     self.eps_np1,self.tke_np1,self.cmu_star,
+                                                     self.Hz, self.dt, self.alpha, 1.e-14, self.nz)
 #
 #
     def output_init(self):
@@ -759,6 +770,8 @@ class SCM:
             var  = fh01.createVariable('WV_ED','f8',('time','z_w')); var[0,:] = self.wved[:]; var.units = 'm2 s-2'; del var
             var  = fh01.createVariable('Prdtl','f8',('time','z_w')); var[0,:] = self.akv[:]/self.akt[:]; var.units = 'none'; del var
             var  = fh01.createVariable('epsil','f8',('time','z_w')); var[0,:] = self.eps_n[:]; var.units = 'm2 s-3'; del var
+            if self.ED_scheme=='Keps':
+                var = fh01.createVariable('varT','f8',('time','z_w')); var[0,:] = self.varT_n[:]; del var
         if self.MF_tra:
             var = fh01.createVariable('a_p','f8',('time','z_w')); var[0,:] = self.ap[:]; del var
             var = fh01.createVariable('zinv','f8',('time')); var[0] = self.zinv
@@ -831,6 +844,8 @@ class SCM:
             fh01.variables['WV_ED'][kout,:] = self.wved[:]
             fh01.variables['Prdtl'][kout,:] = self.akv[:]/self.akt[:]
             fh01.variables['epsil'][kout,:] = self.eps_n[:]
+            if self.ED_scheme=='Keps':
+                fh01.variables['varT'][kout,:] = self.varT_n[:]
         if self.MF_tra:
             fh01.variables['zinv'][kout]  = self.zinv
             fh01.variables['a_p'][kout,:] = self.ap[:]
