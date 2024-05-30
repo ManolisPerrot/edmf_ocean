@@ -120,8 +120,8 @@ common_params = {
     'entr_scheme': 'R10',
     'Cent': 0.9,
     'Cdet': 1.95,       # 'Cdet': 2.5,
-    'wp_a': .2,
-    'wp_b': .2,      # 'wp_b': 1.
+    'wp_a': 1,#.2,
+    'wp_b': 1,#.2,      # 'wp_b': 1.
     'wp_bp': 0.0055*250,     #      0.002,
     'up_c': 0.25,
     'vp_c': 0.25,

@@ -761,6 +761,21 @@ CONTAINS
   !===================================================================================================
 
   !===================================================================================================
+  REAL(8) FUNCTION modulation(vort,fcor) !! Empirical function to modulate Ent/Det 
+                                         !! based on abs(vorticity)/f  
+    IMPLICIT NONE
+    REAL(8), INTENT(IN)    :: vort  !! vorticity
+    REAL(8), INTENT(IN)    :: fcor  !! Coriolis frequency [s-1]
+    ! local variables
+    REAL(8)                :: a
+    REAL(8)                :: b
+    a=0.1
+    b=1.
+    modulation = a*exp(- b*abs(vort)/(fcor) )
+  END FUNCTION modulation
+  !===================================================================================================
+
+  !===================================================================================================
   SUBROUTINE mass_flux_R10_cor(u_m,v_m,t_m,tke_m,z_w,Hz,tp0,up0,vp0,wp0,mf_params,eos_params,fcor,ecor, &
     tkep_min, mxlp_min, small_ap,lin_eos,zinv,N,ntra,nparams,neos,  &
     a_p,u_p,v_p,w_p,t_p,B_p,ent,det,vort_p,eps)
@@ -885,6 +900,11 @@ CONTAINS
     N2sfc  = -(grav/eos_params(1))*(rho_m(N)-rho_m(N-1))/Hz(N)
     !=======================================================================
     DO k=N,1,-1
+      ! Modulate ent/det by vorticity
+      !beta1 = modulation(vort_p(k),fcor)*mf_params(1)
+      !beta2 = modulation(vort_p(k),fcor)*mf_params(2)
+      bb    = modulation(vort_p(k),fcor)*mf_params(4)
+      aa    = modulation(vort_p(k),fcor)*mf_params(3)
       ! Compute B_p
       temp_p = t_p(k,1); salt_p = t_p(k,2)
       !
