@@ -122,11 +122,11 @@ common_params = {
     'Cdet': 1.95,       # 'Cdet': 2.5,
     'wp_a': 1,#.2,
     'wp_b': 1,#.2,      # 'wp_b': 1.
-    'wp_bp': 0.0055*250,     #      0.002,
+    'wp_bp': 0.0055*250*0,     #      0.002,
     'up_c': 0.25,
     'vp_c': 0.25,
     'bc_ap': 0.2,    #0.3,
-    'delta_bkg': 0.006*250,   # 0.006,
+    'delta_bkg': 0.006*250*0,   # 0.006,
     'output_filename': 'run',
     'wp0':-1.e-08,
     'write_netcdf': True
@@ -147,7 +147,7 @@ runs = [
         'mass_flux_tke': False,
         'mass_flux_tke_trplCorr': False,
         'output_filename': 'run1.nc',
-    'write_netcdf': False
+    'write_netcdf': True
     },
             {
         'eddy_diff': True,
@@ -158,7 +158,7 @@ runs = [
         'mass_flux_tke_trplCorr': True,
         'entr_scheme': 'R10',
         'output_filename': 'run2.nc',
-    'write_netcdf': False
+    'write_netcdf': True
     },
         {
         'eddy_diff': True,
@@ -275,22 +275,15 @@ ax.set_title(r'$\overline{w^\prime \theta^\prime}$')
 ax.plot(WTH[instant], z_r_les/mld, style_les,
         alpha=alpha_les, linewidth=linewidth_les, label='LES')
 
-#for i, label in enumerate(run_label):
-#    if run_label == 'ED':
-#        ax.plot(-(scm[i].wted), scm[i].z_w/mld, styles[i], color = colors[i],
-#                alpha=alpha[i], linewidth=linewidth[i], label=label)
-#    else:
-#        ax.plot(-(scm[i].wted + scm[i].wtmf), scm[i].z_w/mld, styles[i], color = colors[i],
-#                alpha=alpha[i], linewidth=linewidth[i], label=label)
-#ax.ticklabel_format(style='sci', axis='x', scilimits=(0, 0))
-#for i, label in enumerate(run_label):
-#    if run_label == 'ED':
-#        ax.plot(-(scm[i].wted), scm[i].z_w/mld, linestyle=styles[i], color = colors[i],
-#                alpha=alpha[i], linewidth=linewidth[i], label=label)
-#    else:
-#        ax.plot(-(scm[i].wted + scm[i].wtmf), scm[i].z_w/mld, linestyle=styles[i], color = colors[i],
-#                alpha=alpha[i], linewidth=linewidth[i], label=label)
-#ax.ticklabel_format(style='sci', axis='x', scilimits=(0, 0))
+for i, label in enumerate(run_label):
+    if run_label == 'ED':
+        continue
+        # ax.plot(-(scm[i].wted), scm[i].z_w/mld, linestyle=styles[i], color = colors[i],
+        #         alpha=alpha[i], linewidth=linewidth[i], label=label)
+    else:
+        ax.plot(-(scm[i].wted + scm[i].wtmf), scm[i].z_w/mld, linestyle=styles[i], color = colors[i],
+                alpha=alpha[i], linewidth=linewidth[i], label=label)
+ax.ticklabel_format(style='sci', axis='x', scilimits=(0, 0))
 
 #ax.plot( -out[1]['WT_ED'][-1,:], out[1].z_w/mld, color ='tab:blue'  , linestyle ='--', alpha=1.0 , linewidth=3 )
 #ax.plot( -out[2]['WT_ED'][-1,:], out[2].z_w/mld, color ='tab:orange', linestyle ='--', alpha=1.0 , linewidth=3 )
@@ -324,10 +317,18 @@ ax.set_xlabel(r'${\rm m}^2\;{\rm s}^{-2}$')
 
 ax_index+=1
 ax = axes.flat[ax_index]
-ax.set_title(r'$\overline{w^\prime \frac{u^{\prime 2}}{2}  }$')
+#ax.set_title(r'$\overline{w^\prime \frac{u^{\prime 2}}{2}  }$')
+ax.set_title(r'$\overline{w^\prime \frac{\mathbf{u}^{\prime 2}}{2}  } + \frac{1}{\rho_0} \overline{w^\prime p^{\dagger \prime} }$')
+#add velocity-pressure correlation
 
-ax.plot(WTKE[instant], z_r_les/mld, style_les,
-        alpha=alpha_les, linewidth=linewidth_les, label='LES')
+#add velocity-pressure correlation
+cond_samp = xr.open_dataset(path+    'WANG1_FR_object_diags_Cw_m1_276h.nc')  
+
+ax.plot(WTKE[instant]+cond_samp['TOT_intra_WPHI_over_RHO_0'][-1], z_r_les/mld, style_les,
+            alpha=alpha_les, linewidth=linewidth_les, label='LES')
+
+#ax.plot(WTKE[instant], z_r_les/mld, style_les,
+#        alpha=alpha_les, linewidth=linewidth_les, label='LES')
 
 for i, label in enumerate(run_label):
     ax.plot((scm[i].wtke), scm[i].z_r/mld, linestyle=styles[i], color = colors[i],
@@ -380,13 +381,11 @@ for i, label in enumerate(run_label):
 ax.set_ylim((-1.3, 0))
 
 # ===============================================================
-
 ax_index+=1
 ax = axes.flat[ax_index]
 
 ax.set_xlabel(r'$m s^{-1}$')
 ax.set_title(r'$w_p$')
-
 
 for i, label in enumerate(run_label):
     if (label=='EDMF-Energy-cor') or (label=='EDMF-Energy'):
@@ -394,9 +393,22 @@ for i, label in enumerate(run_label):
             alpha=alpha[i], linewidth=linewidth[i], label=label)
 
 ax.set_ylim((-1.3, 0))
-
 # ===============================================================
+ax_index+=1
+ax = axes.flat[ax_index]
 
+ax.set_xlabel(r'$s^{-1}$')
+ax.set_title(r'$E,D$')
+
+for i, label in enumerate(run_label):
+    if (label=='EDMF-Energy-cor') or (label=='EDMF-Energy'):
+        ax.plot((scm[i].ent), scm[i].z_r/mld, linestyle='-', color = colors[i],
+            alpha=alpha[i], linewidth=linewidth[i], label='ent')
+        ax.plot((scm[i].det), scm[i].z_r/mld, linestyle='--', color = colors[i],
+            alpha=0.5, linewidth=linewidth[i],label='det')
+ax.set_xlim((0, 0.1))
+ax.set_ylim((-1.3, 0))
+# ===============================================================
 
 # adding subplot labels
 subplot_label = [r'\rm{(a)}', r'\rm{(b)}', r'\rm{(c)}',

@@ -767,11 +767,11 @@ CONTAINS
     REAL(8), INTENT(IN)    :: vort  !! vorticity
     REAL(8), INTENT(IN)    :: fcor  !! Coriolis frequency [s-1]
     ! local variables
-    REAL(8)                :: a
-    REAL(8)                :: b
-    a=0.1
-    b=1.
-    modulation = a*exp(- b*abs(vort)/(fcor) )
+    REAL(8)                :: c1
+    REAL(8)                :: c2
+    c1=0.5
+    c2=1.
+    modulation = c1*exp(- c2*abs(vort)/(fcor) )
   END FUNCTION modulation
   !===================================================================================================
 
@@ -901,10 +901,13 @@ CONTAINS
     !=======================================================================
     DO k=N,1,-1
       ! Modulate ent/det by vorticity
-      !beta1 = modulation(vort_p(k),fcor)*mf_params(1)
-      !beta2 = modulation(vort_p(k),fcor)*mf_params(2)
-      bb    = modulation(vort_p(k),fcor)*mf_params(4)
-      aa    = modulation(vort_p(k),fcor)*mf_params(3)
+      beta1 = modulation(vort_p(k),fcor)*mf_params(1)
+      beta2 = modulation(vort_p(k),fcor)*mf_params(2)
+      !bb    = modulation(vort_p(k),fcor)*mf_params(4)
+      !aa    = modulation(vort_p(k),fcor)*mf_params(3)
+      !delta0 = mf_params(9)/ABS(zinv)*modulation(vort_p(k),fcor)
+      !bp     = mf_params(5)/ABS(zinv)*modulation(vort_p(k),fcor)
+
       ! Compute B_p
       temp_p = t_p(k,1); salt_p = t_p(k,2)
       !
