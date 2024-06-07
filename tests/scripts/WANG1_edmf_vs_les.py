@@ -120,13 +120,13 @@ common_params = {
     'entr_scheme': 'R10',
     'Cent': 0.9,
     'Cdet': 1.95,       # 'Cdet': 2.5,
-    'wp_a': 1,#.2,
-    'wp_b': 1,#.2,      # 'wp_b': 1.
-    'wp_bp': 0.0055*250*0,     #      0.002,
-    'up_c': 0.25,
-    'vp_c': 0.25,
+    'wp_a': 1,
+    'wp_b': 1,      # 'wp_b': 1.
+    'wp_bp': 0.003*250*1,     #      0.002,
+    'up_c': 0.2,
+    'vp_c': 0.2,
     'bc_ap': 0.2,    #0.3,
-    'delta_bkg': 0.006*250*0,   # 0.006,
+    'delta_bkg': 0.006*250*1,   # 0.006,
     'output_filename': 'run',
     'wp0':-1.e-08,
     'write_netcdf': True
@@ -385,10 +385,11 @@ ax_index+=1
 ax = axes.flat[ax_index]
 
 ax.set_xlabel(r'$m s^{-1}$')
-ax.set_title(r'$w_p$')
+ax.set_title(r'$ w_p$')
 
 for i, label in enumerate(run_label):
     if (label=='EDMF-Energy-cor') or (label=='EDMF-Energy'):
+        # ax.plot((scm[i].ap*scm[i].wp), scm[i].z_w/mld, linestyle=styles[i], color = colors[i],
         ax.plot((scm[i].wp), scm[i].z_w/mld, linestyle=styles[i], color = colors[i],
             alpha=alpha[i], linewidth=linewidth[i], label=label)
 
@@ -398,15 +399,19 @@ ax_index+=1
 ax = axes.flat[ax_index]
 
 ax.set_xlabel(r'$s^{-1}$')
-ax.set_title(r'$E,D$')
+ax.set_title(r'$E-D$')
 
 for i, label in enumerate(run_label):
     if (label=='EDMF-Energy-cor') or (label=='EDMF-Energy'):
-        ax.plot((scm[i].ent), scm[i].z_r/mld, linestyle='-', color = colors[i],
-            alpha=alpha[i], linewidth=linewidth[i], label='ent')
-        ax.plot((scm[i].det), scm[i].z_r/mld, linestyle='--', color = colors[i],
-            alpha=0.5, linewidth=linewidth[i],label='det')
-ax.set_xlim((0, 0.1))
+        # ax.plot((scm[i].ent), scm[i].z_r/mld, linestyle='-', color = colors[i],
+        #     alpha=alpha[i], linewidth=linewidth[i], label='ent')
+        # ax.plot((scm[i].det), scm[i].z_r/mld, linestyle='--', color = colors[i],
+        #     alpha=0.5, linewidth=linewidth[i],label='det')
+        ax.plot( (scm[i].ent - scm[i].det), scm[i].z_r/mld, linestyle='-', color = colors[i],
+            alpha=0.5, linewidth=linewidth[i],label='E-D')
+        ax.plot( (scm[i].ent), scm[i].z_r/mld, linestyle=':', color = colors[i],
+            alpha=0.5, linewidth=linewidth[i],label='E')
+ax.set_xlim((-0.001, 0.001))
 ax.set_ylim((-1.3, 0))
 # ===============================================================
 

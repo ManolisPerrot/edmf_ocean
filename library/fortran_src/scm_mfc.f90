@@ -769,9 +769,9 @@ CONTAINS
     ! local variables
     REAL(8)                :: c1
     REAL(8)                :: c2
-    c1=0.5
+    c1=1.
     c2=1.
-    modulation = c1*exp(- c2*abs(vort)/(fcor) )
+    modulation = c1*exp(- c2*vort/(fcor) )
   END FUNCTION modulation
   !===================================================================================================
 
@@ -901,8 +901,11 @@ CONTAINS
     !=======================================================================
     DO k=N,1,-1
       ! Modulate ent/det by vorticity
-      beta1 = modulation(vort_p(k),fcor)*mf_params(1)
-      beta2 = modulation(vort_p(k),fcor)*mf_params(2)
+      ! beta1 = modulation(vort_p(k),fcor)*mf_params(1)
+      ! beta2 = modulation(vort_p(k),fcor)*mf_params(2)
+
+      ! beta1 = modulation((ent(k+1)-det(k+1))*0.01,fcor)*mf_params(1)
+      ! beta2 = modulation((ent(k+1)-det(k+1))*0.01,fcor)*mf_params(2)      
       !bb    = modulation(vort_p(k),fcor)*mf_params(4)
       !aa    = modulation(vort_p(k),fcor)*mf_params(3)
       !delta0 = mf_params(9)/ABS(zinv)*modulation(vort_p(k),fcor)
@@ -931,6 +934,7 @@ CONTAINS
       ent  (k)  = MAX(0., -beta1*cff)
       det  (k)  = MAX(0.,  beta2*cff) + delta0
       !
+
       IF(found) THEN
         zinv     = z_w(k)-hinv; found = .false.
       ENDIF
@@ -958,6 +962,8 @@ CONTAINS
       frc_v = Cv*dv_m(k)             ! m/s
       !=======
       ! Compute up
+      ! beta1 = modulation(abs(ent(k)-det(k))*0.1,fcor)*mf_params(1)
+      ! beta2 = modulation(abs(ent(k)-det(k))*0.1,fcor)*mf_params(2)
       cor_u   =   fcor*Hz(k)*v_p(k) ! m2/s2
       CALL get_u_p_R10(u_p(k-1),u_p(k),u_env,a_p(k-1),a_p(k),w_p(k-1),w_p(k),   &
                     beta1,beta2,Hz(k),delta0,frc_u,cor_u,wpmin) !! Compute \( u^{\rm p}_{k-1/2}\) :: call \(  {\rm get\_t\_p\_R10}  \)
