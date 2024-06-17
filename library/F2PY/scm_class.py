@@ -613,6 +613,12 @@ class SCM:
                                       self.t_np1[-2:,:], self.tke_n[-2:],
                                       self.Hz[-2:]     , self.ntra, 2 )
         wp0=self.wp0
+        # Pergaud 2009 boundary conditions
+        if self.bc_P09:
+            SqrTKE = np.sqrt(self.tke_n[-1]) # surface value of TKE
+            Tmean  = tp0
+            wp0    = -np.sqrt(0.66666667)*SqrTKE
+            tp0    = Tmean + 0.3*self.stflx/SqrTKE
         #=================================================================
         # Compute the mean quantities used to constrain the mass flux eqns
         u_mean,v_mean,t_mean,dtke_m = scm_mfc.compute_mf_forcing(
