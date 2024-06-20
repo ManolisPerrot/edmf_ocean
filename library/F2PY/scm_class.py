@@ -349,6 +349,9 @@ class SCM:
                   self.Fmass = -(self.ap[:]*self.wp[:])
                 else:
                   self.Fmass = -(self.ap[:]*self.wp[:])/(1.-self.ap[:])
+                
+                if  time % self.outfreq == 0:
+                  print(self.wp)    
             # apply the MF term to the tracer equation
             if self.MF_tra: scm_oce.advance_tra_mf(
                                       self.t_np1, self.tp, self.Fmass, self.Hz,
@@ -381,7 +384,6 @@ class SCM:
               self.t_history[:,kout-1] = self.t_np1[:,self.itemp]
               self.u_history[:,kout-1] = self.u_np1[:]
               self.v_history[:,kout-1] = self.v_np1[:]
-
               if self.write_netcdf:
                 # compute diagnostics
                 if self.ED: self.do_diags_energy(  )

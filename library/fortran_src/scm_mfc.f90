@@ -285,7 +285,7 @@ CONTAINS
 
 
   !===================================================================================================
-  SUBROUTINE get_w_p_R10(wpm,wpp,aa,bb,bpr,beta1,Hz,Bp,wp_min,h,found)
+  SUBROUTINE get_w_p_R10(wpm,wpm_anal,wpp,aa,bb,bpr,beta1,Hz,Bp,wp_min,h,found,zinv,zz)
   !---------------------------------------------------------------------------------------------------
     !!==========================================================================<br />
     !!                  ***  ROUTINE get_w_p_R10  ***                           <br />
@@ -294,6 +294,7 @@ CONTAINS
     !!==========================================================================<br />
     IMPLICIT NONE
     REAL(8), INTENT(INOUT)      :: wpm          !! vertical velocity at the bottom of the grid cell [m/s]
+    REAL(8), INTENT(INOUT)      :: wpm_anal         !! vertical velocity at the bottom of the grid cell [m/s]
     REAL(8), INTENT(INOUT)      :: h            !! distance from the top of the grid cell where w_p = w_p_min [m]
     LOGICAL, INTENT(INOUT)      :: found        !! (=T) the bottom of the plume is reached
     REAL(8), INTENT(IN   )      :: wpp          !! vertical velocity at the top of the grid cell [m/s]
@@ -304,10 +305,16 @@ CONTAINS
     REAL(8), INTENT(IN   )      :: bb           !! parameter of the MF scheme
     REAL(8), INTENT(IN   )      :: bpr          !! parameter of the MF scheme
     REAL(8), INTENT(IN   )      :: beta1        !! parameter of the MF scheme
+    !TEST ----------------------------------
+    REAL(8), INTENT(IN   )      :: zinv         
+    REAL(8), INTENT(IN   )      :: zz
+    !---------------------------------------
+
     !REAL(8), INTENT(IN   )      :: wpmin        !! minimum vertical velociy
 
     ! local variables
     REAL(8)                     :: cff1,cff,rhsw,wpm2
+    REAL(8)                     :: hh,c5,c4,c3,c2,c1,c0
     !
     rhsw = bpr*(wpp*wpp+wpp*wpp)+2.*aa*Bp       !! \(   {\rm rhs}_{k}^{\star} = 2 b'( w^{\rm p}_{k+1/2} )^2 + 2 a B_{k}^{\rm p}  \)  <br />
     cff  = 1.; IF(rhsw < 0.) cff = 1. + bb*beta1 !! if \( {\rm rhs}_{k}^{\star} < 0 \Rightarrow \alpha_w = 1 + b \beta_1 \), \( \alpha_w = 1 \) otherwise <br />
@@ -319,7 +326,28 @@ CONTAINS
     cff1 = 1./(cff+Hz*bpr)
     wpm2 = cff1*( (cff-Hz*bpr)*wpp*wpp - aa*Hz*2.*Bp ) !! \(  ( w^{\rm p}_{k-1/2} )^2 = \frac{ (\alpha_w - h_k b') ( w^{\rm p}_{k+1/2} )^2 - 2 a h_k B_{k}^{\rm p} }{\alpha_w + h_k b'}\) <br />
     ! finalize computation
-    wpm  = -SQRT( MAX(wpm2,wp_min*wp_min) )
+    !wpm  = -SQRT( MAX(wpm2,wp_min*wp_min) )
+    
+    ! TESTS : analytical w_p-------------------
+    hh  = 4000
+    c5 = 4.07116866e-19  
+    c4 = 5.84714712e-15
+    c3 = 2.99782893e-11
+    c2 = 6.96434890e-08
+    c1 = 6.94326580e-05
+    c0 = -1.91559674e-02
+    
+    if (zz > zinv) then
+      wpm_anal = c5*(hh*zz/ABS(hh))**5 + c4*(hh*zz/ABS(hh))**4 & 
+      + c3*(hh*zz/ABS(hh))**3 + c2*(hh*zz/ABS(hh))**2        &
+      + c1*(hh*zz/ABS(hh)) + c0
+    else
+      wpm_anal=0
+    endif
+    ! Print "(f10.7)", wpm
+  
+    !---------------------------------
+    
     !
     IF(cff==1.) THEN                    ! the bottom of the plume is reached only if we are in the detrainment zone
       h = (wpp*wpp-wp_min*wp_min) /   &
@@ -561,7 +589,7 @@ CONTAINS
   !===================================================================================================
   SUBROUTINE mass_flux_R10(u_m,v_m,t_m,tke_m,z_w,Hz,tp0,up0,vp0,wp0,mf_params,eos_params,  &
                            tkep_min,mxlp_min,small_ap,lin_eos,opt,zinv, N,ntra,nparams,neos,   &
-                           a_p,u_p,v_p,w_p,t_p,B_p,ent,det,eps)
+                           a_p,u_p,v_p,w_p,t_p,B_p,ent,det,eps,wpm_anal)
   !---------------------------------------------------------------------------------------------------
     !!==========================================================================<br />
     !!                  ***  ROUTINE mass_flux_R10  ***                         <br />
@@ -614,6 +642,8 @@ CONTAINS
     REAL(8), INTENT(  OUT)                 :: det(1:N)              !! diagnostics : detrainment [m-1]
     REAL(8), INTENT(  OUT)                 :: eps(1:N)          !! diagnostics : TKE dissipation [m2 s-3]
     REAL(8), INTENT(INOUT)                 :: zinv                  !! depth at which w_p = wmin  [m]
+    REAL(8), INTENT(INOUT)                 :: wpm_anal                  !! 
+
     ! local variables
     REAL(8)                                :: delta0
     INTEGER                                :: k,itrc,iter
@@ -686,7 +716,9 @@ CONTAINS
       !  \[ (w^{\rm p})^{2}_{k+1/2} - (w^{\rm p})^{2}_{k-1/2} =
       !  h_k (b' + b \epsilon_k) \left((w^{\rm p})^{2}_{k+1/2} + (w^{\rm p})^{2}_{k-1/2})\right)
       ! + 2 a h_k B^{\rm p}_{k}\]
-      CALL get_w_p_R10(w_p(k-1),w_p(k),aa,zbb,zbp,beta1,Hz(k),B_p(k),wpmin,hinv,found)
+      ! CALL get_w_p_R10(w_p(k-1),w_p(k),aa,zbb,zbp,beta1,Hz(k),B_p(k),wpmin,hinv,found)
+      CALL get_w_p_R10(w_p(k-1),wpm_anal,w_p(k),aa,zbb,zbp,beta1,Hz(k),B_p(k),wpmin,hinv,found,zinv,z_w(k))
+      w_p(k-1) = wpm_anal
       ! diagnostics
       cff       = (w_p(k)-w_p(k-1))/(0.5*Hz(k)*(w_p(k)+w_p(k-1)))
       ent  (k)  = MAX(0., -beta1*cff)
@@ -778,7 +810,7 @@ CONTAINS
   !===================================================================================================
   SUBROUTINE mass_flux_R10_cor(u_m,v_m,t_m,tke_m,z_w,Hz,tp0,up0,vp0,wp0,mf_params,eos_params,fcor,ecor, &
     tkep_min, mxlp_min, small_ap,lin_eos,zinv,N,ntra,nparams,neos,  &
-    a_p,u_p,v_p,w_p,t_p,B_p,ent,det,vort_p,eps)
+    a_p,u_p,v_p,w_p,t_p,B_p,ent,det,vort_p,eps,wpm_anal)
     !---------------------------------------------------------------------------------------------------
     !!==========================================================================<br />
     !!                  ***  ROUTINE mass_flux_R10  ***                         <br />
@@ -833,6 +865,8 @@ CONTAINS
     REAL(8), INTENT(  OUT)                 :: vort_p(0:N)
     REAL(8), INTENT(  OUT)                 :: eps(1:N)          !! diagnostics : TKE dissipation [m2 s-3]
     REAL(8), INTENT(INOUT)                 :: zinv                  !! depth at which w_p = wmin  [m]
+    REAL(8), INTENT(INOUT)                 :: wpm_anal                  !! 
+
     ! local variables
     REAL(8)                                :: du_m(0:N)          ! generalized up - Cu*ubar + z fperp
     REAL(8)                                :: dv_m(0:N)          ! generalized vp - Cv*vbar
@@ -848,6 +882,7 @@ CONTAINS
     REAL(8)                                :: mxld(0:N), imxld0(1:N)
     REAL(8)                                :: lup, ldwn, epsilon, dtke, rn2
     REAL(8)                                :: BpTilde,cor_u,cor_v,frc_u,frc_v
+    REAL(8)                                :: h,c5,c4,c3,c2,c1,c0
     !======================================================================
     !print*,'in mass_flux_R10_cor **',zinv
     ! unpack parameters (mf_params  = [Cent,Cdet,wp_a,wp_b,wp_bp,up_c,vp_c,bc_ap,delta0]
@@ -900,7 +935,7 @@ CONTAINS
     N2sfc  = -(grav/eos_params(1))*(rho_m(N)-rho_m(N-1))/Hz(N)
     !=======================================================================
     DO k=N,1,-1
-      ! Modulate ent/det by vorticity
+      ! TESTS : Modulate ent/det by vorticity
       ! beta1 = modulation(vort_p(k),fcor)*mf_params(1)
       ! beta2 = modulation(vort_p(k),fcor)*mf_params(2)
 
@@ -928,7 +963,11 @@ CONTAINS
       !  \[ (w^{\rm p})^{2}_{k+1/2} - (w^{\rm p})^{2}_{k-1/2} =
       !  h_k (b' + b \epsilon_k) \left((w^{\rm p})^{2}_{k+1/2} + (w^{\rm p})^{2}_{k-1/2})\right)
       ! + 2 a h_k B^{\rm p}_{k}\]
-      CALL get_w_p_R10(w_p(k-1),w_p(k),aa,zbb,zbp,beta1,Hz(k),BpTilde,wpmin,hinv,found)
+
+
+
+      CALL get_w_p_R10(w_p(k-1),wpm_anal,w_p(k),aa,zbb,zbp,beta1,Hz(k),B_p(k),wpmin,hinv,found,zinv,z_w(k))
+      w_p(k-1) = wpm_anal
       ! diagnostics
       cff       = (w_p(k)-w_p(k-1))/(0.5*Hz(k)*(w_p(k)+w_p(k-1)))
       ent  (k)  = MAX(0., -beta1*cff)
