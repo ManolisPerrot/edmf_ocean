@@ -170,7 +170,7 @@ if case == 'W005_C500_NO_COR':
 
 
 
-run_label = [r'New', r'Witek et al. (2011)', r'Han \& Bretherton (2019) ']
+run_label = [r'ED-only',r'Witek et al. (2011)', r'Han \& Bretherton (2019) ',r'New']
 runs = [
     {
         'eddy_diff': True,
@@ -178,11 +178,12 @@ runs = [
         'mass_flux_tra': True,
         'mass_flux_dyn': True,
         'mass_flux_tke': True,
-        'mass_flux_tke_trplCorr': True,
+        'mass_flux_tke_trplCorr': False,
         'mass_flux_small_ap': True,
         'entr_scheme': 'R10',
         'output_filename': 'run1.nc'
-    },
+    }
+,
     {
         'eddy_diff': True,
         'evd': False,
@@ -203,6 +204,17 @@ runs = [
         'mass_flux_tke_trplCorr': True,
         'mass_flux_small_ap': True,
         'entr_scheme': 'R10_HB09',
+        'output_filename': 'run1.nc'
+    },
+    {
+        'eddy_diff': True,
+        'evd': False,
+        'mass_flux_tra': True,
+        'mass_flux_dyn': True,
+        'mass_flux_tke': True,
+        'mass_flux_tke_trplCorr': True,
+        'mass_flux_small_ap': True,
+        'entr_scheme': 'R10',
         'output_filename': 'run1.nc'
     }
         ]
@@ -244,23 +256,12 @@ instant = 71
 mld = (-z_r_les[(-WTH[instant]).argmax()]).data
 
 
-################################# PLOTTING
-styles = ['-', '-', '-']
-#colors = ['k',blue,orange]
-colors = ['k','tab:blue','tab:orange']
-alpha = [0.5,1,1]
-linewidth = [4]*(len(run_label))
-
-style_les = 'ko'
-alpha_les = 1
-linewidth_les = 4
-
 
 ################################# PLOTTING
-styles = ['-', '-', '-']
+styles = ['-', '-', '-','-']
 #colors = ['k',blue,orange]
-colors = ['k','tab:blue','tab:orange']
-alpha = [0.5,1,1]
+colors = ['k','tab:blue','tab:orange','tab:green']
+alpha = [0.5,1,1,1]
 linewidth = [4]*(len(run_label))
 
 style_les = 'ko'
@@ -378,7 +379,7 @@ if case == 'W005_C500_NO_COR':
                 alpha=alpha[i], linewidth=linewidth[i], label=label)
 
 
-    ax.set_xlim((- 1.5e-5, 0))
+    ax.set_xlim((- 1.5e-5, 2e-6))
     ax.set_ylim((-1.3, 0))
 
     ax.set_xlabel(r'${\rm m}^3\;{\rm s}^{-3}$')
@@ -524,20 +525,76 @@ if case == 'FC500':
     for ax in axes.flat:
         ax.set_box_aspect(1)
 
-
-
     fig.tight_layout()
 
     # ===============================================================
 
-
-
-
-
-
 plt.savefig(saving_path+saving_name, bbox_inches='tight', dpi=300)
 
 
+################### PLOT ONLY k and wtke:
+#============================================ WC ===============================================
+if case == 'W005_C500_NO_COR':
+    fig, axes = plt.subplots(nrows=1, ncols=2, sharex=False,
+                         sharey=True, figsize=(15, 8))
+    i=-1
+    # ===============================================================
+    # ===============================================================
+    i+=1
+    ax = axes.flat[0]
+    ax.set_title(r'$k / \textrm{max}(k^{\rm LES})$')
+
+    max_k = TKE[instant].max()
+    ax.plot(TKE[instant]/max_k, z_r_les/mld, style_les,
+            alpha=alpha_les, linewidth=linewidth_les, label='LES')
+
+    for i, label in enumerate(run_label):
+        ax.plot(scm[i].tke_np1/max_k, scm[i].z_w/mld, linestyle=styles[i], color = colors[i],
+                alpha=alpha[i], linewidth=linewidth[i], label=label)
+    ax.ticklabel_format(style='sci', axis='x', scilimits=(0, 0))
+
+    #ax.set_xlim((-0.0001, 0.001))
+    ax.set_ylim((-1.3, 0))
+    ax.set_ylabel(r'$z/h$')
+    # ax.set_xlabel(r'${\rm m}^2\;{\rm s}^{-2}$')
+    # ===============================================================
+    i+=1
+    ax = axes.flat[1]
+    ax.set_title(r'$T_k / |\textrm{min} (T_k^{\rm LES}) |$')
+#add velocity-pressure correlation
+    cond_samp = xr.open_dataset(path+    'W005_C500_NO_COR_Cw_m1_72h.nc')  
+    les = WTKE[instant]-cond_samp['TOT_intra_WPHI_over_RHO_0'][-1]
+    adim = -les.min().data
+    ax.plot(les/adim, z_r_les/mld, style_les,
+            alpha=alpha_les, linewidth=linewidth_les, label='LES')
+    # ax.plot(WTKE[instant], z_r_les/mld, style_les,
+    #         alpha=alpha_les, linewidth=linewidth_les, label='LES')
+
+    for i, label in enumerate(run_label):
+        ax.plot((scm[i].wtke)/adim, scm[i].z_r/mld, linestyle=styles[i], color = colors[i],
+                alpha=alpha[i], linewidth=linewidth[i], label=label)
+    # ax.set_xlim((- 1.5e-5, 0))
+    ax.set_ylim((-1.3, 0))
+    # ax.set_xlabel(r'${\rm m}^3\;{\rm s}^{-3}$')
+
+    # adding subplot labels
+    subplot_label = [r'\rm{(a)}', r'\rm{(b)}', r'\rm{(c)}',
+                    r'\rm{(d)}', r'\rm{(e)}', r'\rm{(f)}']
+
+    for i,ax in enumerate(axes.flat):
+        ax.set_box_aspect(1)
+        ax.text(0.15, 0.98, subplot_label[i], transform=ax.transAxes,
+                fontsize=16, bbox=dict(facecolor='1.', edgecolor='none', pad=3.0), fontweight='bold', va='top', ha='right')
+
+    handles, labels = ax.get_legend_handles_labels()
+    fig.legend(handles, labels, loc='upper center', bbox_to_anchor=(
+        0.5, -0.008), fancybox=False, shadow=False, ncol=5)
+
+    fig.tight_layout()
+    # ===============================================================
+saving_name='W005_C500_NO_COR72h_k_wtke_sensitivity.png'
+plt.savefig(saving_path+saving_name, bbox_inches='tight', dpi=300)
+#plt.show()
 print('figure saved at'+saving_path+saving_name)
 
 #plt.show()
