@@ -29,9 +29,9 @@ saving_name = case+'72h_profile_VR18_DC.png'
 ###########################################
 end_time   = 72
 #===========================================================================
-compar_les = 0
+compar_les = 1
 if compar_les==1:
-  les_dir    = "/mnt/c/Users/flori/Data/lesNetcdf/"
+  les_dir    = "../data/data_van_roekel_2018/lesNetcdf/"
   les_file   = les_dir+"noMLdiurnal_av.nc"
   ## read temperature reference data from LES results
   fh1       = Dataset(les_file, mode='r')
@@ -143,7 +143,7 @@ for i, run_params in enumerate(runs):
     params.update(run_params)  # Update with run_params
     scm[i] = SCM(**params)
     scm[i].run_direct()
-    print("zinv =", scm[i].zinv)
+    # print("zinv =", scm[i].zinv)
 #===========================================================================
 vscale = 1./30.
 zmax   = -1.2
