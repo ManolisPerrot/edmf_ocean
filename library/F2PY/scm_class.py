@@ -39,7 +39,7 @@ class SCM:
                         Cent  = 0.55         , Cdet = -1         , wp_a =  1        , wp_b  = 1   ,
                         wp_bp = 0.0002       , up_c = 0.5        , vp_c = 0.5       , bc_ap = 0.1 ,
                         delta_bkg = 0.       , wp0=-1.e-08       ,
-                        entr_scheme = 'R10'  , write_netcdf=False, avg_last_hour=False ):
+                        entr_scheme = 'R10'  , write_netcdf=False, avg_last_hour=False, bc_P09=False ):
         """[summary]
         Args:
             nz: Number of grid points. Defaults to 100.
@@ -119,6 +119,7 @@ class SCM:
         self.z0b                = 1.e-14
         self.DC                 = diurnal_cycle
         self.Qswmax             = srflx*cff
+        self.bc_P09             = bc_P09
         ####################################
         # Eddy-diffusion parameters
         #-----------------------------------
@@ -613,6 +614,17 @@ class SCM:
                                       self.t_np1[-2:,:], self.tke_n[-2:],
                                       self.Hz[-2:]     , self.ntra, 2 )
         wp0=self.wp0
+
+        # Pergaud 2009 boundary conditions
+        if self.bc_P09:
+            SqrTKE = np.sqrt(self.tke_n[-1]) # surface value of TKE
+            Tmean  = tp0[self.itemp]
+            Smean  = tp0[self.isalt]
+            wp0    = -np.sqrt(0.66666667)*SqrTKE
+            # wp0    = -SqrTKE
+            tp0[self.itemp]    = Tmean + 0.3*self.stflx[self.itemp]/SqrTKE
+            tp0[self.isalt]    = Smean + 0.3*self.stflx[self.isalt]/SqrTKE
+
         #=================================================================
         # Compute the mean quantities used to constrain the mass flux eqns
         u_mean,v_mean,t_mean,dtke_m = scm_mfc.compute_mf_forcing(
