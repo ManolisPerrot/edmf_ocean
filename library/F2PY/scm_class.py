@@ -39,7 +39,7 @@ class SCM:
                         Cent  = 0.55         , Cdet = -1         , wp_a =  1        , wp_b  = 1   ,
                         wp_bp = 0.0002       , up_c = 0.5        , vp_c = 0.5       , bc_ap = 0.1 ,
                         delta_bkg = 0.       , wp0=-1.e-08       ,
-                        entr_scheme = 'R10'  , write_netcdf=False, avg_last_hour=False, bc_P09=False ):
+                        entr_scheme = 'R10'  , write_netcdf=False, avg_last_hour=False, bc_P09='false', beta_bc_P09=0.3 ):
         """[summary]
         Args:
             nz: Number of grid points. Defaults to 100.
@@ -78,6 +78,7 @@ class SCM:
             tke_sfc_dirichlet (bool): nature of the surface boundary condition for TKE. Defaults to True
             eddy_diff_tke_const: constants to be used in the TKE scheme ('NEMO', 'MNH' or 'RS81').    Defaults to 'NEMO'
             write_netcdf (bool): Do we write a netcdf file (containing detailed energy diagnostics, but slower to run)? Default to False
+            bc_P09 (str): Do you want to use Pergaud (2009) temperature boundary condition? Defaults to 'false'; options are 'inconsistent' (original version) or 'consistent' (fixed version) 
         """
 ################################################################################################################
         ## simulation parameters
@@ -120,6 +121,7 @@ class SCM:
         self.DC                 = diurnal_cycle
         self.Qswmax             = srflx*cff
         self.bc_P09             = bc_P09
+        self.beta_bc_P09        = beta_bc_P09
         ####################################
         # Eddy-diffusion parameters
         #-----------------------------------
@@ -329,8 +331,17 @@ class SCM:
             #===================================================
             # Advance tracers to n+1 (vertical diffusion only)
             #===================================================
+            #
+            stflx = self.stflx
+            if self.bc_P09 !='false': 
+                SqrTKE = np.sqrt(self.tke_n[-1]) # surface value of TKE
+                self.wp0=-np.sqrt(0.66666667)*SqrTKE
+            ### Pergaud consistent flux correction
+            if self.bc_P09 == 'consistent':
+                stflx = (1- self.ap[-1]*self.wp0*self.beta_bc_P09 / SqrTKE)*self.stflx
+
             self.t_np1  = scm_oce.advance_tra_ed(
-                                        self.t_n, self.stflx, self.srflx,
+                                        self.t_n, stflx, self.srflx,
                                         swr_frac, self.btflx, self.Hz   , self.akt  ,
                                         self.z_w, self.eps_n, self.eos_params[1],
                                         self.dt , self.nz   , self.ntra  )
@@ -616,14 +627,15 @@ class SCM:
         wp0=self.wp0
 
         # Pergaud 2009 boundary conditions
-        if self.bc_P09:
+        if self.bc_P09 != 'false':
             SqrTKE = np.sqrt(self.tke_n[-1]) # surface value of TKE
             Tmean  = tp0[self.itemp]
             Smean  = tp0[self.isalt]
             wp0    = -np.sqrt(0.66666667)*SqrTKE
+            self.wp0 = wp0
             # wp0    = -SqrTKE
-            tp0[self.itemp]    = Tmean + 0.3*self.stflx[self.itemp]/SqrTKE
-            tp0[self.isalt]    = Smean + 0.3*self.stflx[self.isalt]/SqrTKE
+            tp0[self.itemp]    = Tmean + self.beta_bc_P09*self.stflx[self.itemp]/SqrTKE
+            tp0[self.isalt]    = Smean + self.beta_bc_P09*self.stflx[self.isalt]/SqrTKE
 
         #=================================================================
         # Compute the mean quantities used to constrain the mass flux eqns

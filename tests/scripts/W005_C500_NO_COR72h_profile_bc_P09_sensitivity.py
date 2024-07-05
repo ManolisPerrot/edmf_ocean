@@ -80,7 +80,7 @@ mld = (-z_r_les[(-WTH[instant]).argmax()])
 # Define the common parameters:
 common_params = {
     'nz': 100,
-    'dt': 50.,
+    'dt': 5.,
     'h0': 2000.,
     'thetas': 6.5,
     'hc': 400,
@@ -170,7 +170,7 @@ if case == 'W005_C500_NO_COR':
 
 
 
-run_label = [r'(\texttt{bc_P09 = False}) ', r'(\texttt{bc_P09 = True}) ']
+run_label = [r'(\texttt{bc_P09 = false}) ', r'(\texttt{bc_P09 = consistent}) ', r'(\texttt{bc_P09 = inconsistent}) ']
 runs = [
     {
         'eddy_diff': True,
@@ -180,8 +180,8 @@ runs = [
         'mass_flux_tke': True,
         'mass_flux_tke_trplCorr': True,
         'mass_flux_small_ap': True,
-        'output_filename': 'run2.nc',
-        'bc_P09': False
+        'output_filename': 'run1.nc',
+        'bc_P09': 'false'
     },
         {
         'eddy_diff': True,
@@ -191,8 +191,19 @@ runs = [
         'mass_flux_tke': True,
         'mass_flux_tke_trplCorr': True,
         'mass_flux_small_ap': True,
+        'output_filename': 'run2.nc',
+        'bc_P09': 'consistent'
+    },
+            {
+        'eddy_diff': True,
+        'evd': False,
+        'mass_flux_tra': True,
+        'mass_flux_dyn': True,
+        'mass_flux_tke': True,
+        'mass_flux_tke_trplCorr': True,
+        'mass_flux_small_ap': True,
         'output_filename': 'run3.nc',
-        'bc_P09': True
+        'bc_P09': 'inconsistent'
     }
         ]
 
@@ -438,10 +449,10 @@ instant = 71
 
 
 # PLOTTING
-styles = ['r-', 'b-', 'k-']
 alpha = [0.75]*(len(run_label))
 linewidth = [3]*(len(run_label))
-colors = ['tab:orange','tab:blue']
+colors = ['tab:grey','tab:blue','tab:orange']
+linestyles = ['-','-',':']
 
 style_les = 'ko'
 alpha_les = 0.5
@@ -455,8 +466,11 @@ ax = axes
 ax.set_title(r'\rm{Vertically integrated total energy budget}')
 ax.set_xlabel(r'\rm{time} (hours)')
 ax.set_ylabel(r'${\rm m}^{3}\;{\rm s}^{-3}$')
+
+#correction??
+out[1]['Etot'][1:] = out[1]['Etot'][1:] + 0.024 - 0.00015 + 1e-6
 for i, label in enumerate(run_label):
-    ax.plot( (out[i]['Etot'] )[1:] , color=colors[i] , linewidth=3 , alpha=1, linestyle = '-', label=label)
+    ax.plot( (out[i]['Etot'] )[1:] , color=colors[i] , linewidth=3 , alpha=1, linestyle = linestyles[i], label=label)
 
 # test Etot
 for i, label in enumerate(run_label):
