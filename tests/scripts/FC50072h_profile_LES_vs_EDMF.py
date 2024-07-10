@@ -159,7 +159,7 @@ runs = [
         'mass_flux_dyn': True,
         'mass_flux_tke': True,
         'mass_flux_tke_trplCorr': True,
-        'output_filename': 'run3.nc'
+        'output_filename': 'FC500_edmf_ocean.nc'
     }
         ]
 
