@@ -21,7 +21,7 @@ class SCM:
 
     def __init__(self,  nz     = 100                    , dt       =  30.        , h0              =  1000.,
                         thetas = 6.5                    , hc       = 400.        , T0              =     2.,
-                        N0     = 1.9620001275490499e-6  , gridType = 'analytic'  ,
+                        N0     = 1.9620001275490499e-6  , gridType = 'croco_new'  ,
                         mld_ini = -0.                   , mld_iniS = -0.,
                         cpoce  = 3985.                  , lin_eos = True        , rho0            =  1027.,
                         Tcoef  = 0.2048                 , Scoef   =  0.         , SaltCst         =    35.,
@@ -49,6 +49,7 @@ class SCM:
             hc: Stretching parameter for the vertical grid. Resolution is almost constant between 0 and hc. Defaults to 400.
             T0: Initial surface temperature. Defaults to 2 (Celsius).
             N0: Initial stratification. Defaults to 1.9620001275490499E-6.
+            gridType: which type of vertical grid? Defaults to 'croco_new'; variants: 'croco_old', 'ORCA75'
             mld_ini: initial mixed layer depth (m, NEGATIVE). Default to 0. m.
             mld_iniS: initial mixed layer depth for Salinity (m, NEGATIVE). Default to 0. m.
             lin_eos (bool): use a linear equation of state. Defaults to True
@@ -176,14 +177,21 @@ class SCM:
         ####################################
         # define vertical grid
         #-----------------------------------
-        if gridType!='ORCA75':
-          Sc_r  = np.arange(-nz+0.5, 0.5, 1) / float(nz)
-          Sc_w  = np.arange(-nz, 1, 1) / float(nz)
-          Cs_r = (1.-np.cosh(thetas*Sc_r))/(np.cosh(thetas)-1.)
-          Cs_w = (1.-np.cosh(thetas*Sc_w))/(np.cosh(thetas)-1.)
-          self.z_w   = (hc*Sc_w+Cs_w*h0)*h0/(h0+hc)
-          self.z_r   = (hc*Sc_r+Cs_r*h0)*h0/(h0+hc)
-        else:
+        if gridType=='croco_old':
+          self.z_r    = np.zeros(nz)
+          self.z_w    = np.zeros(nz+1)
+          # Hz     = np.zeros(nz)   
+          self.z_w[0] = -h0
+          ds  = 1./nz
+          cff = (h0-hc)/np.sinh(thetas)
+          for k in range(nz,0,-1):
+              sc_w     = ds * float(k-nz)
+              self.z_w[k  ] = hc*sc_w + cff*np.sinh(thetas*sc_w)
+              sc_r     = ds*(float(k-nz)-0.5)
+              self.z_r[k-1]   = hc*sc_r + cff*np.sinh(thetas*sc_r)
+          # for k in range(nz):
+          #     Hz[k] = z_w[k+1]-z_w[k]
+        if gridType=='ORCA75':          
           # construct the ORCA 75 levels grid and extract the levels between 0 and h0
           nz   = 75
           zsur = -3958.95137127683; za2  = 100.760928500000
@@ -201,6 +209,14 @@ class SCM:
           self.z_r     = z_r[nbot-1:]
           self.z_w[-1] = 0.
           #
+        if gridType=='croco_new':
+          Sc_r  = np.arange(-nz+0.5, 0.5, 1) / float(nz)
+          Sc_w  = np.arange(-nz, 1, 1) / float(nz)
+          Cs_r = (1.-np.cosh(thetas*Sc_r))/(np.cosh(thetas)-1.)
+          Cs_w = (1.-np.cosh(thetas*Sc_w))/(np.cosh(thetas)-1.)
+          self.z_w   = (hc*Sc_w+Cs_w*h0)*h0/(h0+hc)
+          self.z_r   = (hc*Sc_r+Cs_r*h0)*h0/(h0+hc)
+        #
         self.Hz    = self.z_w[1:]-self.z_w[:-1]
         zInvMin    = -self.Hz[-1]
         ####################################
