@@ -22,9 +22,10 @@ class SCM:
     def __init__(self,  nz     = 100                    , dt       =  30.        , h0              =  1000.,
                         thetas = 6.5                    , hc       = 400.        , T0              =     2.,
                         N0     = 1.9620001275490499e-6  , gridType = 'croco_new'  ,
-                        mld_ini = -0.                   , mld_iniS = -0.,
+                        mld_ini_temp = -0.                   , mld_iniS = -0.,
                         cpoce  = 3985.                  , lin_eos = True        , rho0            =  1027.,
-                        Tcoef  = 0.2048                 , Scoef   =  0.         , SaltCst         =    35.,
+                        Tcoef  = 0.2048                 , Scoef   =  0.         , alpha = 2e-4, 
+                        beta = 8e-4                     , SaltCst =  35.        ,
                         Tref   = 2.                     , Sref    = 35.         , lat0            =    45.,
                         sustr  = 0.                     , svstr   =  0.         , stflx           =  -500.,
                         srflx  = 0.                     , ssflx   =  0.         , diurnal_cycle   = False ,
@@ -50,11 +51,13 @@ class SCM:
             T0: Initial surface temperature. Defaults to 2 (Celsius).
             N0: Initial stratification. Defaults to 1.9620001275490499E-6.
             gridType: which type of vertical grid? Defaults to 'croco_new'; variants: 'croco_old', 'ORCA75'
-            mld_ini: initial mixed layer depth (m, NEGATIVE). Default to 0. m.
-            mld_iniS: initial mixed layer depth for Salinity (m, NEGATIVE). Default to 0. m.
+            mld_ini_temp: initial mixed layer depth (m, NEGATIVE). Default to 0. m.
+            mld_iniS: initial mixed layer depth for Salinity (m, NEGATIVE). Default to 0. m. TODO! 
             lin_eos (bool): use a linear equation of state. Defaults to True
-            Tcoef: Thermal expansion coefficient to define initial temperature profile. Defaults is 0.2048
-            Scoef: Thermal expansion coefficient to define initial temperature profile. Defaults is 0.2048
+            Tcoef: Thermal expansion coefficient to define initial temperature profile. Defaults is 0.2048 #WARNING, deprecated, not used anymore!
+            Scoef: Thermal expansion coefficient to define initial temperature profile. Defaults is 0.2048 #WARNING, deprecated, not used anymore!
+            alpha: Thermal expansion coefficient for linear eos. Defaults is 2e-4
+            beta:  Haline contraction coefficient for linear eso. Defaults to 8e-4
             SaltCst: constant salinity value for the initial conditions. Default is 35.
             Tref: reference temperature in linear EOS
             Sref: reference salinity in linear EOS
@@ -102,7 +105,8 @@ class SCM:
         # physical constants
         self.rho0        = rho0; self.cp        = cpoce; self.g         = 9.81
         self.lineos      = True
-        self.alpha       = Tcoef/self.rho0;      self.beta    = Scoef/self.rho0
+        # self.alpha       = Tcoef/self.rho0;      self.beta    = Scoef/self.rho0
+        self.alpha       = alpha;      self.beta    = beta
         self.T0          = Tref           ;      self.S0      = Sref
         self.eos_params  = np.array([self.rho0,self.alpha,self.beta,self.T0,self.S0])
         ####################################
@@ -234,9 +238,9 @@ class SCM:
         self.t_n  [:,self.itemp] = T0
         self.t_np1[:,self.itemp] = T0
         for k in range(0, self.nz):
-          if self.z_w[k] < mld_ini :
-            self.t_n  [k,self.itemp] = T0 + 0.5*strat*( self.z_w[k+1]+self.z_w[k] ) + strat*(-mld_ini)
-            self.t_np1[k,self.itemp] = T0 + 0.5*strat*( self.z_w[k+1]+self.z_w[k] ) + strat*(-mld_ini)
+          if self.z_w[k] < mld_ini_temp :
+            self.t_n  [k,self.itemp] = T0 + 0.5*strat*( self.z_w[k+1]+self.z_w[k] ) + strat*(-mld_ini_temp)
+            self.t_np1[k,self.itemp] = T0 + 0.5*strat*( self.z_w[k+1]+self.z_w[k] ) + strat*(-mld_ini_temp)
         self.btflx[self.itemp]  = 0.
         if btflx=='linear_continuation': self.btflx[self.itemp] = aktmin * N0 / (self.g * self.alpha )
         self.btflx[self.isalt]  = 0.
