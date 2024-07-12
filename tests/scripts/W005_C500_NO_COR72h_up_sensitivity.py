@@ -106,7 +106,7 @@ common_params = {
     'mass_flux_dyn': True,
     'mass_flux_tke': True,
     'mass_flux_tke_trplCorr': True,
-    'mass_flux_small_ap': False,
+    'mass_flux_small_ap': True,
     'lin_eos': True,
     'extrap_ak_surf': True,
     'tke_sfc_dirichlet': False,
@@ -114,13 +114,13 @@ common_params = {
     'entr_scheme': 'R10',
     'Cent': 0.99,
     'Cdet': 1.99,       # 'Cdet': 2.5,
-    'wp_a': 1.,
-    'wp_b': 1.25,      # 'wp_b': 1.
-    'wp_bp': 0.003*300,     #      0.002,
+    'wp_a': 1.3,
+    'wp_b': 1.3,      # 'wp_b': 1.
+    'wp_bp': 0.0025*250,     #      0.002,
     'up_c': 0.5,
     'vp_c': 0.5,
-    'bc_ap': 0.2,    #0.3,
-    'delta_bkg': 0.005*300,   # 0.006,
+    'bc_ap': 0.3,    #0.3,
+    'delta_bkg': 0.006*250,   # 0.006,
     'wp0' : -0.5e-08,
     'output_filename': 'run',
     'write_netcdf': True

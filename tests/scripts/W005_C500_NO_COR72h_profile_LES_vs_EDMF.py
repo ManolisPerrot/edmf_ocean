@@ -109,7 +109,7 @@ common_params = {
     'tke_sfc_dirichlet': False,
     'eddy_diff_tke_const': 'NEMO',
     'entr_scheme': 'R10',
-    'Cent': 0.999,
+    'Cent': 0.99,
     'Cdet': 1.99,       # 'Cdet': 2.5,
     'wp_a': 1.3,
     'wp_b': 1.3,      # 'wp_b': 1.
@@ -117,7 +117,7 @@ common_params = {
     'up_c': 0.5,
     'vp_c': 0.5,
     'bc_ap': 0.2,    #0.3,
-    'delta_bkg': 0.006*250,   # 0.006,
+    'delta_bkg': 0.009*250,   # 0.006,
     'wp0' : -0.5e-08,
     'output_filename': 'run',
     'write_netcdf': True
@@ -491,4 +491,4 @@ plt.savefig(saving_path+saving_name, bbox_inches='tight', dpi=300)
 
 print('figure saved at'+saving_path+saving_name)
 
-#plt.show()
+plt.show()

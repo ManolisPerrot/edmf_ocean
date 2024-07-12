@@ -90,7 +90,7 @@ common_params = {
     'nbhours': 72,
     'outfreq': 1,
     'output_filename': "scm_output.nc",
-    'T0': 2.,
+    'T0': 2., 
     'N0': 1.9620001275490499e-6,
     'Tcoef': 0.2048,
     'SaltCst': 35.,
