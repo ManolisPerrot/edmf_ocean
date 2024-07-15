@@ -62,7 +62,7 @@ CONTAINS
   END SUBROUTINE compute_tke_bdy
   !=============================================================================
 
-  SUBROUTINE compute_shear(u_n, v_n, u_np1, v_np1, Akv, zr, N, shear2)
+  SUBROUTINE compute_shear_old(u_n, v_n, u_np1, v_np1, Akv, zr, N, shear2)
     !!==========================================================================<br />
     !!                  ***  ROUTINE compute_shear  ***                         <br />
     !! ** Purposes : compute shear production term for TKE equation             <br />
@@ -86,9 +86,43 @@ CONTAINS
       shear2(k) = du + dv
     ENDDO
   !---------------------------------------------------------------------------------------------------
-  END SUBROUTINE compute_shear
+END SUBROUTINE compute_shear_old
   !===================================================================================================
   !
+
+  SUBROUTINE compute_shear(u_n, v_n, u_np1, v_np1, u_np1_star, v_np1_star, Akv, zr, N, shear2)
+    !!==========================================================================<br />
+    !!                  ***  ROUTINE compute_shear  ***                         <br />
+    !! ** Purposes : compute shear production term for TKE equation             <br />
+    !!==========================================================================<br />
+    IMPLICIT NONE
+    INTEGER, INTENT(IN   )              :: N                      !! number of vertical levels
+    REAL(8), INTENT(IN   )              :: u_n  (1:N),v_n  (1:N)  !! velocity components at time n    [m/s]
+    REAL(8), INTENT(IN   )              :: u_np1(1:N),v_np1(1:N)  !! velocity components at time n+1  [m/s]
+    REAL(8), INTENT(IN   )              :: u_np1_star(1:N),v_np1_star(1:N)  !! velocity components at time n+1  [m/s]
+    REAL(8), INTENT(IN   )              :: zr(1:N)                !! depth at cell centers [m]
+    REAL(8), INTENT(IN   )              :: Akv(0:N)               !! eddy-viscosity [m2/s]
+    REAL(8), INTENT(  OUT)              :: shear2(0:N)            !! shear production term [m2/s3]
+    ! local variables
+    INTEGER                             :: k
+    REAL(8)                             :: du,dv,cff
+    shear2(0:N) = 0.
+    DO k=1,N-1
+      cff       = Akv(k) / ( zr(k+1)-zr(k) )**2
+      du        = cff*( u_np1_star(k+1)-u_np1_star(k) )*0.5*( u_n(k+1)+u_np1(k+1)-u_n(k)-u_np1(k) ) !! Shear production term using discretization from Burchard (2002) <br />
+      !! \( {\rm Sh}_{k+1/2} = \frac{ (K_m)_{k+1/2} }{ \Delta z_{k+1/2}^2 } ( u_{k+1}^n - u_{k}^n ) ( u_{k+1}^{n+1/2} - u_{k}^{n+1/2} )  \)
+      dv        = cff*( v_np1_star(k+1)-v_np1_star(k) )*0.5*( v_n(k+1)+v_np1(k+1)-v_n(k)-v_np1(k) )
+      shear2(k) = du + dv
+    ENDDO
+  !---------------------------------------------------------------------------------------------------
+END SUBROUTINE compute_shear
+  !===================================================================================================
+
+
+
+
+
+
   SUBROUTINE advance_tke( tke_n, lup, ldwn, Akv, Akt, Hz, zr, bvf, buoyMF, shear2,       &
                           shear2MF, trpl_corrMF, wtke, dt, tke_sfc, tke_bot, flux_sfc,   &
                           dirichlet_bdy_sfc, tke_const, tkemin, N, tke_np1, pdlr, eps, residual )
@@ -129,6 +163,7 @@ CONTAINS
     INTEGER                  :: k
     REAL(8)                  :: mxld(0:N),mxlm(0:N),ff(0:N), cff, Ric, isch
     REAL(8)                  :: sh2,buoy,Ri,cff1,cff2,cff3,rhs,rhsmin,ceps,ct,cm
+    REAL(8)                  :: vint_sh2
     ! Initialization
     tke_np1(  N  ) = tkemin
     IF(dirichlet_bdy_sfc) tke_np1(  N  ) = tke_sfc
@@ -153,12 +188,12 @@ CONTAINS
     !====================================================================
     pdlr(:) = 0. !! Inverse Prandtl number function of Richardson number <br />
     !IF(tke_const==0) THEN
-      DO k = 1,N-1
-        sh2     = shear2(k) ! shear2 is already multiplied by Akv
-        buoy    = bvf(k)
-        Ri      = MAX( buoy, 0. ) * Akv(k) / ( sh2 + bshear )  !! \( {\rm Ri}_{k+1/2} = (K_m)_{k+1/2} (N^2)_{k+1/2} / {\rm Sh}_{k+1/2} \) <br />
-        pdlr(k) = MAX(  pdlrmin,  Ric / MAX( Ric , Ri ) )      !! \( ({\rm Pr}_t)^{-1}_{k+1/2} = \max\left( {\rm Pr}_{\min}^{-1} , \frac{{\rm Ri}_c}{ \max( {\rm Ri}_c, {\rm Ri}_{k+1/2}  ) } \right)     \) <br />
-      END DO
+    DO k = 1,N-1
+      sh2     = shear2(k) ! shear2 is already multiplied by Akv
+      buoy    = bvf(k)
+      Ri      = MAX( buoy, 0. ) * Akv(k) / ( sh2 + bshear )  !! \( {\rm Ri}_{k+1/2} = (K_m)_{k+1/2} (N^2)_{k+1/2} / {\rm Sh}_{k+1/2} \) <br />
+      pdlr(k) = MAX(  pdlrmin,  Ric / MAX( Ric , Ri ) )      !! \( ({\rm Pr}_t)^{-1}_{k+1/2} = \max\left( {\rm Pr}_{\min}^{-1} , \frac{{\rm Ri}_c}{ \max( {\rm Ri}_c, {\rm Ri}_{k+1/2}  ) } \right)     \) <br />
+    END DO
     !ELSE
     !  DO k = 1,N-1
     !    buoy    = bvf(k)
@@ -168,11 +203,12 @@ CONTAINS
     !ENDIF
     !====================================================================
     ! constants for TKE dissipation term
-    cff1   =  0.5; cff2   =  1.5; cff3   =  cff1/cff2
+    cff1   =  0.; cff2   =  1.0; cff3   =  cff1/cff2
     !
     eps(0:N) = 0.
     ff (0:N) = 0.
     residual = 0.
+    vint_sh2 = 0.
     !
     DO k = 1,N-1
       ! construct the right hand side

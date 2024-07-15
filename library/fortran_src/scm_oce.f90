@@ -42,7 +42,7 @@ CONTAINS
     REAL(8), INTENT(  OUT)          :: t_np1(1:N,ntra)  !! tracer at time step n+1
     ! local variables
     INTEGER                         :: k,itrc
-    REAL(8)                         :: FC(0:N), ff(1:N),cffp,cffm
+    REAL(8)                         :: FC(0:N), ff(1:N),cffp,cffm,vint_Eps
     !
     DO itrc=1,ntra
       FC(0) = 0.; FC(N) = 0.
@@ -62,8 +62,8 @@ CONTAINS
       ENDDO
       IF(itrc.eq.1) then
         DO k=1,N
-          cffp  = eps(k  ) / ( cp-alpha*grav*zw(k  ) )
-          cffm  = eps(k-1) / ( cp-alpha*grav*zw(k-1) )
+          cffp  = eps(k  ) / ( cp-alpha*grav*0.5*(zw(k  )+zw(k-1)) )
+          cffm  = eps(k-1) / ( cp-alpha*grav*0.5*(zw(k  )+zw(k-1)) )
           t_np1(k,itrc)=t_np1(k,itrc)+dt*0.5*Hz(k)*(cffp+cffm)
         ENDDO
       ENDIF
@@ -86,7 +86,7 @@ CONTAINS
 
 
   !===================================================================================================
-  SUBROUTINE advance_tra_MF(t_np1,t_p,Fmass,Hz,dt,N,ntra)
+  SUBROUTINE advance_tra_MF_old(t_np1,t_p,Fmass,Hz,dt,N,ntra)
   !---------------------------------------------------------------------------------------------------
     !!============================================================================<br />
     !!                  ***  ROUTINE advance_tra_MF  ***                          <br />
@@ -119,11 +119,119 @@ CONTAINS
     ENDDO
     !
   !---------------------------------------------------------------------------------------------------
+END SUBROUTINE advance_tra_MF_old
+  !===================================================================================================
+
+
+  !===================================================================================================
+  SUBROUTINE advance_tra_MF(t_np1_star,t_p,Fmass,Akt,Hz,dt,N,ntra,t_np1,tFlx)
+  !---------------------------------------------------------------------------------------------------
+    !!============================================================================<br />
+    !!                  ***  ROUTINE advance_tra_MF  ***                          <br />
+    !! ** Purposes : integrate mass flux term for tracers                         <br />
+    !!============================================================================<br />
+    USE scm_par
+    IMPLICIT NONE
+    INTEGER, INTENT(IN   )          :: N                  !! number of vertical levels
+    INTEGER, INTENT(IN   )          :: ntra               !! number of tracers to integrate
+    REAL(8), INTENT(IN   )          :: dt                 !! time-step [s]
+    REAL(8), INTENT(IN   )          :: t_p  (0:N,ntra+1)  !! tracer properties in the plume
+    REAL(8), INTENT(IN   )          :: Hz      (1:N)      !! layer thickness [m]
+    REAL(8), INTENT(IN   )          :: Fmass (0:N       ) !! mass flux [m/s]
+    REAL(8), INTENT(IN   )          :: t_np1_star (1:N,ntra  ) !! tracer at time step n+1
+    REAL(8), INTENT(IN   )          :: Akt     (0:N)
+    REAL(8), INTENT(  OUT)          :: t_np1 (1:N,ntra  ) !! tracer at time step n+1
+    REAL(8), INTENT(  OUT)          :: tFlx  (0:N)
+    ! local variables
+    INTEGER                         :: k,itrc
+    REAL(8)                         :: cff, FC(0:N)
+    !
+    tFlx  (0:N) = 0.
+    !
+    DO itrc=1,ntra
+      FC(0) = 0. !; FC(N) = 0.
+      ! Compute fluxes associated to mass flux
+      DO k = 1,N
+        FC(k) = Fmass(k)*(t_p(k,itrc)-t_np1_star(k,itrc))  !! Compute fluxes associated to mass flux \( F_{k+1/2}^{\rm MF} = (a^{\rm p}w^{\rm p})_{k+1/2}\left( \phi^{\rm p}_{k+1/2} - \overline{\phi}_k^{n+1,\star} \right)  \) <br />
+      ENDDO
+      FC(N) = 0.
+      ! Apply flux divergence
+      DO k = 1,N
+        t_np1(k,itrc)=t_np1_star(k,itrc)+dt*(FC(k)-FC(k-1))/Hz(k) !! \(   \overline{\phi}_k^{n+1} = \overline{\phi}_k^{n+1,\star} + \frac{\Delta t}{\Delta z_k} ( F_{k+1/2}^{\rm MF}-F_{k-1/2}^{\rm MF} )   \)
+      ENDDO
+    ENDDO
+    !
+    DO k = 1,N-1
+      tFlx(k) = -Akt(k)*(t_np1_star(k+1,1)-t_np1_star(k,1))/( 0.5 * (Hz(k)+Hz(k+1)) )
+      tFlx(k) = tFlx(k)-Fmass(k)*(t_p(k,1)-t_np1_star(k,1))
+    ENDDO
+    !
+  !---------------------------------------------------------------------------------------------------
   END SUBROUTINE advance_tra_MF
   !===================================================================================================
 
+
+
   !===================================================================================================
-  SUBROUTINE advance_dyn_MF(u_np1,v_np1,shear2_MF,u_n,v_n,u_p,v_p,Fmass,Hz,dt,N)
+  SUBROUTINE advance_dyn_MF(u_np1_star,v_np1_star,shear2_MF,u_n,v_n,u_p,v_p,Fmass,Hz,dt,N,u_np1,v_np1)
+  !---------------------------------------------------------------------------------------------------
+    !!==========================================================================<br />
+    !!                  ***  ROUTINE advance_dyn_MF  ***                        <br />
+    !! ** Purposes : integrate mass flux term for dynamics and compute transfer
+    !!                         of KE to TKE related to the mass flux            <br />
+    !!==========================================================================<br />
+    !! \[ \mathbf{u}^{n+1} = \mathbf{u}^{n+1,\star \star} - \Delta t \partial_z\left( a^{\rm p} w^{\rm p} \left( \mathbf{u}^{\rm p} - \mathbf{u}^{n+1,\star \star}  \right)   \right) \]
+    !! Compute the shear term associated with mass flux
+    !! \[ {\rm Sh}^{\rm p} = - a^{\rm p} w^{\rm p} \left( \mathbf{u}^{\rm p} - \mathbf{u}^{n+1,\star \star}  \right) \cdot \frac{1}{2} \left( \partial_z \mathbf{u}^n + \partial_z \mathbf{u}^{n+1}  \right) \]
+    USE scm_par
+    IMPLICIT NONE
+    INTEGER, INTENT(IN   )          :: N                  !! number of vertical levels
+    REAL(8), INTENT(IN   )          :: dt                 !! time-step [s]
+    REAL(8), INTENT(IN   )          :: u_np1_star(1:N )       !! u-velocity component at time n+1 [m/s]
+    REAL(8), INTENT(IN   )          :: v_np1_star(1:N )       !! v-velocity component at time n+1 [m/s]
+    REAL(8), INTENT(INOUT)          :: shear2_MF(0:N)     !! TKE production term associated to mass flux [m2/s3]
+    REAL(8), INTENT(IN   )          :: u_n   (1:N )       !! u-velocity component at time n [m/s]
+    REAL(8), INTENT(IN   )          :: v_n   (1:N )       !! v-velocity component at time n [m/s]
+    REAL(8), INTENT(IN   )          :: u_p   (0:N )       !! u-velocity component in the plume [m/s]
+    REAL(8), INTENT(IN   )          :: v_p   (0:N )       !! v-velocity component in the plume [m/s]
+    REAL(8), INTENT(IN   )          :: Hz      (1:N)      !! layer thickness [m]
+    REAL(8), INTENT(IN   )          :: Fmass (0:N       ) !! mass flux [m/s]
+    REAL(8), INTENT(  OUT)          :: u_np1 (1:N )       !! u-velocity component at time n+1 [m/s]
+    REAL(8), INTENT(  OUT)          :: v_np1 (1:N )       !! v-velocity component at time n+1 [m/s]
+    ! local variables
+    INTEGER                         :: k
+    REAL(8)                         :: cff, FCu(0:N), FCv(0:N)
+    REAL(8)                         :: cffu,cffv
+    !
+    FCu(0) = 0. ; FCv(0) = 0.
+    ! Compute fluxes associated to mass flux
+    DO k = 1,N
+      FCu(k) = Fmass(k)*(u_p(k)-u_np1_star(k))
+      FCv(k) = Fmass(k)*(v_p(k)-v_np1_star(k))
+    ENDDO
+    FCu(N) = 0. ; FCv(N) = 0.
+    ! Apply flux divergence
+    DO k = 1,N
+      u_np1(k)=u_np1_star(k)+dt*(FCu(k)-FCu(k-1))/Hz(k)
+      v_np1(k)=v_np1_star(k)+dt*(FCv(k)-FCv(k-1))/Hz(k)
+    ENDDO
+    ! Compute shear term for TKE
+    shear2_MF(0) = 0.
+    shear2_MF(N) = 0.
+    !
+    DO k = 1,N-1   ! use upwind value for u_np1/v_np1
+          cffu = Fcu(k)*0.5*( (u_np1(k+1)+u_n(k+1))-(u_np1(k)+u_n(k)) )
+          cffv = FCv(k)*0.5*( (v_np1(k+1)+v_n(k+1))-(v_np1(k)+v_n(k)) )
+          shear2_MF(k) = 2.*(cffu+cffv)/(Hz(k+1)+Hz(k))
+    ENDDO
+  !---------------------------------------------------------------------------------------------------
+END SUBROUTINE advance_dyn_MF
+  !===================================================================================================
+
+
+
+  !===================================================================================================
+  SUBROUTINE advance_dyn_MF_old(u_np1,v_np1,shear2_MF,u_n,v_n,u_p,v_p,Fmass,Hz,dt,N)
   !---------------------------------------------------------------------------------------------------
     !!==========================================================================<br />
     !!                  ***  ROUTINE advance_dyn_MF  ***                        <br />
@@ -173,7 +281,7 @@ CONTAINS
           shear2_MF(k) = 2.*(cffu+cffv)/(Hz(k+1)+Hz(k))
     ENDDO
   !---------------------------------------------------------------------------------------------------
-  END SUBROUTINE advance_dyn_MF
+END SUBROUTINE advance_dyn_MF_old
   !===================================================================================================
 
 
@@ -383,7 +491,7 @@ CONTAINS
     ! find 150m depth
     kstart = N
     do while( zr(kstart) > -295.  )
-      kstart = kstart - 1.
+      kstart = kstart - 1
     enddo
     !
     bvf_c = rhoc300*(grav/rhoRef)
@@ -589,6 +697,70 @@ CONTAINS
     bvf(N) = 0.
   !---------------------------------------------------------------------------------------------------
   END SUBROUTINE rho_eos
+  !===================================================================================================
+
+
+  !===================================================================================================
+  SUBROUTINE Eip_budget(t_n,t_np1,Hz,zr,zw,eps,tFlx,alpha,dt,N,Eip)
+  !---------------------------------------------------------------------------------------------------
+    !!============================================================================<br />
+    !!                  ***  ROUTINE advance_tra_ED  ***                          <br />
+    !! ** Purposes : integrate vertical diffusion term for tracers                <br />
+    !!============================================================================<br />
+    !! \[ \overline{\phi}^{n+1,*} = \overline{\phi}^n + \Delta t \partial_z \left(  K_m \partial_z  \overline{\phi}^{n+1,*} \right) \]
+    USE scm_par, ONLY: cp, grav
+    IMPLICIT NONE
+    INTEGER, INTENT(IN   )          :: N                !! number of vertical levels
+    REAL(8), INTENT(IN   )          :: dt               !! time-step [s]
+    REAL(8), INTENT(IN   )          :: t_n  (1:N)       !! tracer at time step n
+    REAL(8), INTENT(IN   )          :: t_np1(1:N)       !! tracer at time step n+1
+    REAL(8), INTENT(IN   )          :: Hz      (1:N)    !! layer thickness [m]
+    REAL(8), INTENT(IN   )          :: tFlx    (0:N)    !! eddy-diffusivity [m2/s]
+    REAL(8), INTENT(IN   )          :: eps     (0:N)    !! TKE dissipation [m2/s3]
+    REAL(8), INTENT(IN   )          :: zw      (0:N)    !! depth at cell interfaces [m]
+    REAL(8), INTENT(IN   )          :: zr      (1:N)
+    REAL(8), INTENT(IN   )          :: alpha            !! thermal expension coefficient [C-1]
+    REAL(8), INTENT(  OUT)          :: Eip              !! tracer at time step n+1
+    ! local variables
+    INTEGER                         :: k
+    REAL(8)                         :: vint_Eip,vint_Eps,vint_Bprod,sfc_Eip,sfc_buoy
+    REAL(8)                         :: vint_tFlx,vint_temp,vint_tFlx2,vint_Eps2
+    !
+    !print*,'Test decomposition 1 : ',zr(N-1)-( -0.5*(zr(N)-zr(N-1)) + zw(N-1) )
+    !print*,'Test decomposition 2 : ',zr(N-1)-(  0.5*(zr(N-1)-zr(N-2)) + zw(N-2) )
+    !
+    vint_Eip   = 0.
+    vint_Eps   = 0.
+    vint_Bprod = 0.
+    vint_tFlx  = 0.
+    vint_tFlx2 = 0.
+    vint_temp  = 0.
+    DO k = 1,N
+      vint_Eip   = vint_Eip   + (Hz(k)/dt)*( (1.-alpha*(grav/cp)*zr(k))*(t_np1(k)-t_n(k)) )
+      vint_temp  = vint_temp  + alpha*grav*(Hz(k)/dt)*( t_np1(k)-t_n(k) )
+      vint_tFlx  = vint_tFlx  + (1.-alpha*(grav/cp)*zr(k))*(tFlx(k)-tFlx(k-1))
+      vint_tFlx2 = vint_tFlx2 + alpha*grav*(tFlx(k)-tFlx(k-1))
+      vint_Eps  = vint_Eps  + 0.5*(Hz(k)/cp)*(eps(k)+eps(k-1))
+      vint_Eps2 = vint_Eps2 + 0.5*Hz(k)*alpha*grav*(eps(k)+eps(k-1))/(cp-alpha*grav*0.5*(zw(k)+zw(k-1)))
+    ENDDO
+    DO k = 1,N-1
+      vint_Bprod = vint_Bprod + ((zr(k+1)-zr(k))/cp)*alpha*grav*tFlx(k)
+    ENDDO
+    !sfc_Eip = tFlx(N) + 0.5*Hz(N)*(grav/cp)*alpha*tFlx(N)
+    !print*,'sfc_Eip = ',sfc_Eip
+    !print*,'vint_Bprod = ',vint_Bprod
+    !print*,'vint_Eps = ',vint_Eps-vint_Bprod
+    !Eip = vint_Eip-sfc_Eip-vint_Eps+vint_Bprod
+    !print*,vint_Eip, vint_tFlx, vint_Eps
+    !Eip = vint_temp + vint_tFlx2 - vint_Eps2
+    !print*,'tamere fortran = ',vint_temp,alpha*grav*tFlx(N),vint_Eps2
+    sfc_buoy = alpha*grav*tFlx(N)
+    print*,'Temp budget fortran = ',vint_temp - sfc_buoy - vint_Eps2
+    !Eip = vint_temp - sfc_buoy - vint_Eps2
+    !print*,'New budget = ',vint_temp - alpha*grav*tFlx(N) - vint_Eps2
+    Eip = 0.
+  !---------------------------------------------------------------------------------------------------
+  END SUBROUTINE Eip_budget
   !===================================================================================================
 
 
