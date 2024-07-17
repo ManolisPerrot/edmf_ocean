@@ -471,6 +471,30 @@ CONTAINS
   END SUBROUTINE get_vort_p_R10
   !===================================================================================================
 
+
+  !===================================================================================================
+  SUBROUTINE get_tke_p_R10( tkep_m,tkep_p, tke_m, tke_p, wpm,wpp,normvel,epsilon,hk,beta1 )
+  !---------------------------------------------------------------------------------------------------
+    IMPLICIT NONE
+    REAL(8), INTENT(INOUT)      :: tkep_m    !! plume TKE value at the bottom of the grid cell
+    REAL(8), INTENT(IN   )      :: tkep_p    !! plume TKE value at the top   of the grid cell
+    REAL(8), INTENT(IN   )      :: tke_m     !! external forcing for the plume TKE
+    REAL(8), INTENT(IN   )      :: tke_p     !! external forcing for the plume TKE
+    REAL(8), INTENT(IN   )      :: wpm       !! vertical velocity at the bottom of the grid cell [m/s]
+    REAL(8), INTENT(IN   )      :: wpp       !! vertical velocity at the top of the grid cell [m/s]
+    REAL(8), INTENT(IN   )      :: normvel   !! \( \| \mathbf{u}^{\rm p} - \mathbf{u} \|^2  \) [m2/s-2]
+    REAL(8), INTENT(IN   )      :: hk        !! thickness of the grid cell [m]
+    REAL(8), INTENT(IN   )      :: epsilon   !! plume TKE dissipation term [m2/s-3]
+    REAL(8), INTENT(IN   )      :: beta1     !! parameter of the MF scheme
+    REAL(8)                     :: ent,cff
+    !---------------------------------------------------------------------------------------------------
+    ent    = beta1*MAX(wpp-wpm,0.)
+    cff    = 1./( wpp + wpm - ent )
+    tkep_m = cff*( 2.*hk*epsilon+tkep_p*(wpp + wpm)-ent*( tke_m+tke_p-tkep_p+normvel )  )
+    return
+  END SUBROUTINE get_tke_p_R10
+  !===================================================================================================
+
   !===================================================================================================
   SUBROUTINE get_dtke_p_R10(tkep_m,tkep_p,dtke_m,normvel,wpm,wpp,hk,epsilon,beta1)
   !---------------------------------------------------------------------------------------------------
@@ -616,7 +640,7 @@ CONTAINS
     REAL(8), INTENT(INOUT)                 :: zinv                  !! depth at which w_p = wmin  [m]
     ! local variables
     REAL(8)                                :: delta0
-    INTEGER                                :: k,itrc,iter
+    INTEGER                                :: k,itrc,iter,tke_comput
     REAL(8)                                :: cff,cff1, rho_m(1:N), N2sfc
     REAL(8)                                :: tke_env, u_env,v_env,t_env
     REAL(8)                                :: aa,bb,bp,beta1,zbb,zbp
@@ -627,7 +651,8 @@ CONTAINS
     REAL(8)                                :: mxld(0:N), imxld0(1:N)
     REAL(8)                                :: lup, ldwn, epsilon, dtke, rn2,cffp
     !REAL(8)                                :: wpmin
-    !print*,'INPUT :: ',zinv
+    !=======================================================================
+    tke_comput = 1
     !=======================================================================
     beta1 = mf_params(1); aa     = mf_params(3)
     bb    = mf_params(4); bp     = mf_params(5)/ABS(zinv)
@@ -642,7 +667,11 @@ CONTAINS
     t_p(N,1:ntra) = tp0(1:ntra)   ; t_p(0:N-1,1:ntra) = 0.
     B_p(0:N) = 0.; ent(1:N) = 0.  ; det(1:N) = 0.  ; eps(1:N) = 0.
     !
-    t_p(N,ntra) = 0.  ! in this case t_p(ntra) contains t_p - tke
+    IF(tke_comput == 0) THEN
+        t_p(N,ntra) = 0.  ! in this case t_p(ntra) contains t_p - tke
+    ELSE
+        t_p(N,ntra) = tke_m(N)
+    ENDIF
     !
     DO k = 1,N
       cff       = 0.5*(z_w(k)+z_w(k-1))
@@ -725,22 +754,38 @@ CONTAINS
       CALL get_t_p_R10(v_p(k-1),v_p(k),v_env,a_p(k-1),a_p(k),w_p(k-1),w_p(k),   &
                                                       beta1,beta2,Hz(k),delta0,wpmin) !! Compute \( v^{\rm p}_{k-1/2}\) :: call \(  {\rm get\_t\_p\_R10}  \)
       ! Compute TKEplume - TKEmean
-      cff       = a_p(k)/(1.-a_p(k))
-      IF(small_ap) cff = 0.
-      cffw      = 0.5*(w_p(k)+w_p(k-1))
-      cffu      = 0.5*(u_p(k)+u_p(k-1)) + (Cu-1.)*u_m(k)
-      cffv      = 0.5*(v_p(k)+v_p(k-1)) + (Cv-1.)*v_m(k)
-      normVel   = (1.+cff)*(cffu*cffu+cffv*cffv+cffw*cffw)/(1.-cff)
-      dtke      = tke_m(k)-tke_m(k-1)
-      epsilon   = ceps_nemo * (t_p(k,ntra)+tke_m(k))   &
+      IF(tke_comput == 0) THEN
+        cff       = a_p(k)/(1.-a_p(k))
+        IF(small_ap) cff = 0.
+        cffw      = 0.5*(w_p(k)+w_p(k-1))                    ! corresponds to wp
+        cffu      = 0.5*(u_p(k)+u_p(k-1)) + (Cu-1.)*u_m(k)   ! corresponds to up-um
+        cffv      = 0.5*(v_p(k)+v_p(k-1)) + (Cv-1.)*v_m(k)   ! corresponds to vp-vm
+        normVel   = (1.+cff)*(cffu*cffu+cffv*cffv+cffw*cffw)/(1.-cff)  !
+        dtke      = tke_m(k)-tke_m(k-1)
+        epsilon   = ceps_nemo * (t_p(k,ntra)+tke_m(k))   &
                                         * SQRT(t_p(k,ntra)+tke_m(k)) * imxld0(k)
-      IF(opt==1) THEN  ! HB09 tke_p equation is simply   d tke_p / dz = E tke - D tke_p
-        epsilon = 0.; normVel = 0.
-      ENDIF
-      CALL get_dtke_p_R10(t_p(k-1,ntra),t_p(k,ntra),dtke,normVel,w_p(k-1),w_p(k),  &
+        IF(opt==1) THEN  ! HB09 tke_p equation is simply   d tke_p / dz = E tke - D tke_p
+          epsilon = 0.; normVel = 0.
+        ENDIF
+        CALL get_dtke_p_R10(t_p(k-1,ntra),t_p(k,ntra),dtke,normVel,w_p(k-1),w_p(k),  &
                                                    Hz(k),epsilon,(1.-cff)*beta1) !! Compute \( e^{\rm p}_{k-1/2}\) :: call \(  {\rm get\_dtke\_p\_R10}  \)
-      eps(k)    = epsilon
-      !
+        eps(k)    = epsilon
+      ELSE
+      !=====================================================================
+        cff = 1./(1.-a_p(k))
+        IF(small_ap) cff = 1.  ! small ap limit
+        cffw      = 0.5*(w_p(k)+w_p(k-1))                    ! corresponds to wp
+        cffu      = 0.5*(u_p(k)+u_p(k-1)) + (Cu-1.)*u_m(k)   ! corresponds to up-um
+        cffv      = 0.5*(v_p(k)+v_p(k-1)) + (Cv-1.)*v_m(k)   ! corresponds to vp-vm
+        normVel   = (cffu*cffu+cffv*cffv+cffw*cffw)          !
+        epsilon   = ceps_nemo * t_p(k,ntra) * SQRT(t_p(k,ntra)) * imxld0(k)
+        IF(opt==1) THEN  ! HB09 tke_p equation is simply   d tke_p / dz = E tke - D tke_p
+          epsilon = 0.; normVel = 0.
+        ENDIF
+        CALL get_tke_p_R10( t_p(k-1,ntra),t_p(k,ntra), tke_m(k-1), tke_m(k), w_p(k-1),w_p(k),normVel,epsilon,Hz(k),cff*beta1 )
+        eps(k)    = epsilon
+      ENDIF
+      !=====================================================================
     ENDDO
     !=======================================================================
     ! At this point, up and vp contain up-Cu ue  and vp-Cv ve
@@ -750,10 +795,15 @@ CONTAINS
       v_p(k) = v_p(k) + Cv*v_m(k)
     ENDDO
     u_p(0) = u_p(1); v_p(0) = v_p(1)
-    !
-    DO k = 0,N
-      t_p(k,ntra) = MAX( t_p(k,ntra) + tke_m(k), tkep_min )
-    ENDDO
+    IF(tke_comput == 0) THEN
+      DO k = 0,N
+        t_p(k,ntra) = MAX( t_p(k,ntra) + tke_m(k), tkep_min )
+      ENDDO
+    ELSE
+      DO k = 0,N
+        t_p(k,ntra) = MAX( t_p(k,ntra), tkep_min )
+      ENDDO
+    ENDIF
   !---------------------------------------------------------------------------------------------------
   END SUBROUTINE mass_flux_R10
   !===================================================================================================
