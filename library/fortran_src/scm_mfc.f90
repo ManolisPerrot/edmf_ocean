@@ -625,7 +625,7 @@ CONTAINS
     REAL(8)                                :: temp_p,salt_p, Cu, Cv, tpm, apm, beta2, cffmax
     LOGICAL                                :: found    = .false.
     REAL(8)                                :: mxld(0:N), imxld0(1:N)
-    REAL(8)                                :: lup, ldwn, epsilon, dtke, rn2
+    REAL(8)                                :: lup, ldwn, epsilon, dtke, rn2,cffp
     !REAL(8)                                :: wpmin
     !print*,'INPUT :: ',zinv
     !=======================================================================
@@ -754,8 +754,6 @@ CONTAINS
     DO k = 0,N
       t_p(k,ntra) = MAX( t_p(k,ntra) + tke_m(k), tkep_min )
     ENDDO
-    !print*,'OUTPUT :: ',zinv
-    !print*,'================'
   !---------------------------------------------------------------------------------------------------
   END SUBROUTINE mass_flux_R10
   !===================================================================================================
