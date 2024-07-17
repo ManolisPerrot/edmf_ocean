@@ -560,7 +560,7 @@ class SCM:
         self.vint_Ekin = self.vint_Ekin - sfc_KE
         self.vint_TKE  = self.vint_TKE  - (-vint_eps_TKE-self.wtke[-1]+self.wtke[0]+self.residual)
         self.vint_Etot = self.vint_Epot + self.vint_TKE + self.vint_Ekin
-        print("vint_Etot = ",self.vint_Etot)
+        #print("vint_Etot = ",self.vint_Etot)
 #
 #rhsTKE         =  vint_Sh2_TKE + vint_Bprod_TKE-vint_eps_TKE-self.wtke[-1]+self.wtke[0]+self.residual
 #rhsKE          = -vint_Sh2_KE  + sfc_KE
