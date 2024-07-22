@@ -116,11 +116,11 @@ common_params = {
     'Cdet': 1.99,       # 'Cdet': 2.5,
     'wp_a': 1.3,
     'wp_b': 1.3,      # 'wp_b': 1.
-    'wp_bp': 0.0025*250,     #      0.002,
+    'wp_bp': 0.003*250,     #      0.002,
     'up_c': 0.5,
     'vp_c': 0.5,
     'bc_ap': 0.3,    #0.3,
-    'delta_bkg': 0.006*250,   # 0.006,
+    'delta_bkg': 0.007*250,   # 0.006,
     'wp0' : -0.5e-08,
     'output_filename': 'run',
     'write_netcdf': True
@@ -481,4 +481,4 @@ plt.savefig(saving_path+saving_name, bbox_inches='tight', dpi=300)
 
 print('figure saved at'+saving_path+saving_name)
 
-#plt.show()
+plt.show()
