@@ -17,7 +17,7 @@ MODULE scm_oce
 
 CONTAINS
   !===================================================================================================
-  SUBROUTINE advance_tra_ED(t_n,stflx,srflx,swr_frac,btflx,Hz,Akt,zw,eps,alpha,dt,N,ntra,t_np1)
+  SUBROUTINE advance_tra_ED(t_n,stflx,srflx,swr_frac,btflx,Hz,Akt,zr,eps,alpha,dt,N,ntra,t_np1,tFlx)
   !---------------------------------------------------------------------------------------------------
     !!============================================================================<br />
     !!                  ***  ROUTINE advance_tra_ED  ***                          <br />
@@ -37,15 +37,16 @@ CONTAINS
     REAL(8), INTENT(IN   )          :: Hz      (1:N)    !! layer thickness [m]
     REAL(8), INTENT(IN   )          :: Akt     (0:N)    !! eddy-diffusivity [m2/s]
     REAL(8), INTENT(IN   )          :: eps     (0:N)    !! TKE dissipation [m2/s3]
-    REAL(8), INTENT(IN   )          :: zw      (0:N)    !! depth at cell interfaces [m]
+    REAL(8), INTENT(IN   )          :: zr      (1:N)    !! depth at cell centers [m]
     REAL(8), INTENT(IN   )          :: alpha            !! thermal expension coefficient [C-1]
     REAL(8), INTENT(  OUT)          :: t_np1(1:N,ntra)  !! tracer at time step n+1
+    REAL(8), INTENT(  OUT)          :: tFlx(0:N)
     ! local variables
     INTEGER                         :: k,itrc
-    REAL(8)                         :: FC(0:N), ff(1:N),cffp,cffm
+    REAL(8)                         :: FC(0:N), ff(1:N),cffp,cffm,vint_eps,rhs(1:N)
     !
     DO itrc=1,ntra
-      FC(0) = 0.; FC(N) = 0.
+      FC(0) = 0.; FC(N) = 0.; rhs(1:N) = 0.
       !=======================================================================
       !! 1 - Compute fluxes associated to solar penetration and surface bdy condition <br />
       !=======================================================================
@@ -58,26 +59,34 @@ CONTAINS
       ENDIF
       ! Apply flux divergence
       DO k=1,N
-        t_np1(k,itrc)=Hz(k)*t_n(k,itrc)+dt*(FC(k  )-FC(k-1))
+        rhs(k)=Hz(k)*t_n(k,itrc)+dt*(FC(k  )-FC(k-1))
       ENDDO
       IF(itrc.eq.1) then
+        !vint_eps = 0.
         DO k=1,N
-          cffp  = eps(k  ) / ( cp-alpha*grav*zw(k  ) )
-          cffm  = eps(k-1) / ( cp-alpha*grav*zw(k-1) )
-          t_np1(k,itrc)=t_np1(k,itrc)+dt*0.5*Hz(k)*(cffp+cffm)
+          cffp  = eps(k  ) / ( cp-alpha*grav*zr(k) )
+          cffm  = eps(k-1) / ( cp-alpha*grav*zr(k) )
+          rhs(k)=rhs(k)+dt*0.5*Hz(k)*(cffp+cffm)
+        !  vint_eps = vint_eps + 0.5*Hz(k)*( eps(k  )+eps(k-1)  )
         ENDDO
+        !print*,'vint_eps (TRA) = ',vint_eps
       ENDIF
       !=======================================================================
       !! 2 - Implicit integration for vertical diffusion <br />
       !=======================================================================
       ! right hand side for the tridiagonal problem
-      ff(1:N) = t_np1(1:N,itrc)
+      ff(1:N) = rhs(1:N)
       ff(1  ) = ff(1) - dt*btflx(itrc)
       ! solve tridiagonal problem
       CALL tridiag_solve(N,Hz,Akt,ff,dt)
       ! update tracer
       t_np1(1:N,itrc) = ff(1:N)
       !-----------
+    ENDDO
+    !----
+    tFlx(N) = - stflx(1)
+    DO k = 1,N-1
+      tFlx(k) = - Akt(k)*(t_np1(k+1,1)-t_np1(k,1))/(zr(k+1)-zr(k))
     ENDDO
   !---------------------------------------------------------------------------------------------------
   END SUBROUTINE advance_tra_ED
@@ -86,7 +95,7 @@ CONTAINS
 
 
   !===================================================================================================
-  SUBROUTINE advance_tra_MF(t_np1,t_p,Fmass,Hz,dt,N,ntra)
+  SUBROUTINE advance_tra_MF(t_np1_star,t_p,Fmass,tFlx,Hz,dt,N,ntra,t_np1)
   !---------------------------------------------------------------------------------------------------
     !!============================================================================<br />
     !!                  ***  ROUTINE advance_tra_MF  ***                          <br />
@@ -100,7 +109,9 @@ CONTAINS
     REAL(8), INTENT(IN   )          :: t_p  (0:N,ntra+1)  !! tracer properties in the plume
     REAL(8), INTENT(IN   )          :: Hz      (1:N)      !! layer thickness [m]
     REAL(8), INTENT(IN   )          :: Fmass (0:N       ) !! mass flux [m/s]
-    REAL(8), INTENT(INOUT)          :: t_np1 (1:N,ntra  ) !! tracer at time step n+1
+    REAL(8), INTENT(IN   )          :: t_np1_star (1:N,ntra  ) !! tracer at time step n+1 (*)
+    REAL(8), INTENT(INOUT)          :: tFlx   (0:N)
+    REAL(8), INTENT(  OUT)          :: t_np1  (1:N,ntra  ) !! tracer at time step n+1
     ! local variables
     INTEGER                         :: k,itrc
     REAL(8)                         :: cff, FC(0:N)
@@ -109,13 +120,19 @@ CONTAINS
       FC(0) = 0. !; FC(N) = 0.
       ! Compute fluxes associated to mass flux
       DO k = 1,N
-        FC(k) = Fmass(k)*(t_p(k,itrc)-t_np1(k,itrc))  !! Compute fluxes associated to mass flux \( F_{k+1/2}^{\rm MF} = (a^{\rm p}w^{\rm p})_{k+1/2}\left( \phi^{\rm p}_{k+1/2} - \overline{\phi}_k^{n+1,\star} \right)  \) <br />
+        FC(k) = Fmass(k)*(t_p(k,itrc)-t_np1_star(k,itrc))  !! Compute fluxes associated to mass flux \( F_{k+1/2}^{\rm MF} = (a^{\rm p}w^{\rm p})_{k+1/2}\left( \phi^{\rm p}_{k+1/2} - \overline{\phi}_k^{n+1,\star} \right)  \) <br />
       ENDDO
-      FC(N) = 0.
+      !FC(N) = 0.
       ! Apply flux divergence
       DO k = 1,N
-        t_np1(k,itrc)=t_np1(k,itrc)+dt*(FC(k)-FC(k-1))/Hz(k) !! \(   \overline{\phi}_k^{n+1} = \overline{\phi}_k^{n+1,\star} + \frac{\Delta t}{\Delta z_k} ( F_{k+1/2}^{\rm MF}-F_{k-1/2}^{\rm MF} )   \)
+        t_np1(k,itrc)=t_np1_star(k,itrc)+dt*(FC(k)-FC(k-1))/Hz(k) !! \(   \overline{\phi}_k^{n+1} = \overline{\phi}_k^{n+1,\star} + \frac{\Delta t}{\Delta z_k} ( F_{k+1/2}^{\rm MF}-F_{k-1/2}^{\rm MF} )   \)
       ENDDO
+      !
+    ENDDO
+    !
+    tFlx(N) = tFlx(N) - Fmass(N)*(t_p(N,1)-t_np1_star(N,1))
+    DO k = 1,N-1
+      tFlx(k) = tFlx(k) - Fmass(k)*(t_p(k,1)-t_np1_star(k,1))
     ENDDO
     !
   !---------------------------------------------------------------------------------------------------
@@ -123,7 +140,7 @@ CONTAINS
   !===================================================================================================
 
   !===================================================================================================
-  SUBROUTINE advance_dyn_MF(u_np1,v_np1,shear2_MF,u_n,v_n,u_p,v_p,Fmass,Hz,dt,N)
+  SUBROUTINE advance_dyn_MF(u_np1_star,v_np1_star,shear2_MF,u_n,v_n,u_p,v_p,Fmass,uFlx,vFlx,Hz,dt,N,u_np1,v_np1)
   !---------------------------------------------------------------------------------------------------
     !!==========================================================================<br />
     !!                  ***  ROUTINE advance_dyn_MF  ***                        <br />
@@ -137,8 +154,8 @@ CONTAINS
     IMPLICIT NONE
     INTEGER, INTENT(IN   )          :: N                  !! number of vertical levels
     REAL(8), INTENT(IN   )          :: dt                 !! time-step [s]
-    REAL(8), INTENT(INOUT)          :: u_np1 (1:N )       !! u-velocity component at time n+1 [m/s]
-    REAL(8), INTENT(INOUT)          :: v_np1 (1:N )       !! v-velocity component at time n+1 [m/s]
+    REAL(8), INTENT(IN   )          :: u_np1_star (1:N )       !! u-velocity component at time n+1 (*) [m/s]
+    REAL(8), INTENT(IN   )          :: v_np1_star (1:N )       !! v-velocity component at time n+1 (*) [m/s]
     REAL(8), INTENT(INOUT)          :: shear2_MF(0:N)     !! TKE production term associated to mass flux [m2/s3]
     REAL(8), INTENT(IN   )          :: u_n   (1:N )       !! u-velocity component at time n [m/s]
     REAL(8), INTENT(IN   )          :: v_n   (1:N )       !! v-velocity component at time n [m/s]
@@ -146,6 +163,10 @@ CONTAINS
     REAL(8), INTENT(IN   )          :: v_p   (0:N )       !! v-velocity component in the plume [m/s]
     REAL(8), INTENT(IN   )          :: Hz      (1:N)      !! layer thickness [m]
     REAL(8), INTENT(IN   )          :: Fmass (0:N       ) !! mass flux [m/s]
+    REAL(8), INTENT(INOUT)          :: uFlx (0:N)
+    REAL(8), INTENT(INOUT)          :: vFlx (0:N)
+    REAL(8), INTENT(  OUT)          :: u_np1(1:N)              !! u-velocity component at time n [m/s]
+    REAL(8), INTENT(  OUT)          :: v_np1(1:N)              !! v-velocity component at time n [m/s]
     ! local variables
     INTEGER                         :: k
     REAL(8)                         :: cff, FCu(0:N), FCv(0:N)
@@ -154,14 +175,14 @@ CONTAINS
     FCu(0) = 0. ; FCv(0) = 0.
     ! Compute fluxes associated to mass flux
     DO k = 1,N
-      FCu(k) = Fmass(k)*(u_p(k)-u_np1(k))
-      FCv(k) = Fmass(k)*(v_p(k)-v_np1(k))
+      FCu(k) = Fmass(k)*(u_p(k)-u_np1_star(k))
+      FCv(k) = Fmass(k)*(v_p(k)-v_np1_star(k))
     ENDDO
     FCu(N) = 0. ; FCv(N) = 0.
     ! Apply flux divergence
     DO k = 1,N
-      u_np1(k)=u_np1(k)+dt*(FCu(k)-FCu(k-1))/Hz(k)
-      v_np1(k)=v_np1(k)+dt*(FCv(k)-FCv(k-1))/Hz(k)
+      u_np1(k)=u_np1_star(k)+dt*(FCu(k)-FCu(k-1))/Hz(k)
+      v_np1(k)=v_np1_star(k)+dt*(FCv(k)-FCv(k-1))/Hz(k)
     ENDDO
     ! Compute shear term for TKE
     shear2_MF(0) = 0.
@@ -172,13 +193,18 @@ CONTAINS
           cffv = FCv(k)*0.5*( (v_np1(k+1)+v_n(k+1))-(v_np1(k)+v_n(k)) )
           shear2_MF(k) = 2.*(cffu+cffv)/(Hz(k+1)+Hz(k))
     ENDDO
+    !
+    DO k = 1,N-1
+      uFlx(k) = uFlx(k) - Fmass(k)*(u_p(k)-u_np1_star(k))
+      vFlx(k) = vFlx(k) - Fmass(k)*(v_p(k)-v_np1_star(k))
+    ENDDO
   !---------------------------------------------------------------------------------------------------
   END SUBROUTINE advance_dyn_MF
   !===================================================================================================
 
 
   !===================================================================================================
-  SUBROUTINE advance_dyn_Cor_ED(u_n,v_n,ustr_sfc,vstr_sfc,ustr_bot,vstr_bot,Hz,Akv,fcor,dt,N,u_np1,v_np1)
+  SUBROUTINE advance_dyn_Cor_ED(u_n,v_n,ustr_sfc,vstr_sfc,ustr_bot,vstr_bot,Hz,Akv,zr,fcor,dt,N,u_np1,v_np1,uFlx,vFlx)
   !---------------------------------------------------------------------------------------------------
     !!============================================================================<br />
     !!                  ***  ROUTINE advance_dyn_Cor_ED  ***                      <br />
@@ -207,8 +233,11 @@ CONTAINS
     REAL(8), INTENT(IN   )          :: vstr_sfc              !! meridional surface stress [m2/s2]
     REAL(8), INTENT(IN   )          :: ustr_bot              !! zonal surface stress      [m2/s2]
     REAL(8), INTENT(IN   )          :: vstr_bot              !! meridional surface stress [m2/s2]
+    REAL(8), INTENT(IN   )          :: zr      (1:N)    !! depth at cell centers [m]
     REAL(8), INTENT(  OUT)          :: u_np1 (1:N )       !! u-velocity component at time n+1 [m/s]
     REAL(8), INTENT(  OUT)          :: v_np1 (1:N )       !! v-velocity component at time n+1 [m/s]
+    REAL(8), INTENT(  OUT)          :: uFlx  (0:N )       !! u-velocity component at time n+1 [m/s]
+    REAL(8), INTENT(  OUT)          :: vFlx  (0:N )       !! v-velocity component at time n+1 [m/s]
     ! local variables
     INTEGER                         :: k
     REAL(8)                         :: ff(1:N), cff, cff1
@@ -261,6 +290,12 @@ CONTAINS
     ff(1:N) = v_np1(1:N)
     CALL tridiag_solve(N,Hz,Akv,ff,dt)    ! Invert tridiagonal matrix
     v_np1(1:N) = ff(1:N)
+    !----
+    uFlx(N) = ustr_sfc; vFlx(N) = vstr_sfc
+    DO k = 1,N-1
+      uFlx(k) = - Akv(k)*(u_np1(k+1)-u_np1(k))/(zr(k+1)-zr(k))
+      vFlx(k) = - Akv(k)*(v_np1(k+1)-v_np1(k))/(zr(k+1)-zr(k))
+    ENDDO
   !---------------------------------------------------------------------------------------------------
   END SUBROUTINE advance_dyn_Cor_ED
   !===================================================================================================

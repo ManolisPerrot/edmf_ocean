@@ -30,8 +30,8 @@ case        = 'asicsmed'
 common_params = {
     'nz': 75,
     'dt': 1200.,
-    'initial_filename': '../../data/asicsmed/init_ASICS_m01d15.nc',
-    'sfcforc_filename': '../../data/asicsmed/forc_ASICS_y2013.nc',
+    'initial_filename': '../data/asicsmed/init_ASICS_m01d15.nc',
+    'sfcforc_filename': '../data/asicsmed/forc_ASICS_y2013.nc',
     'nbhours': 720,
     'outfreq': 1,
     'output_filename': 'run',
@@ -65,19 +65,13 @@ common_params = {
 }
 #===========================================================================
 # Define parameters specific to each run (overwrite common parameters):
-run_label = ['ED+EVD', r'$k$-$\epsilon$', 'EDMF']
+run_label = ['ED+EVD', 'EDMF-Energy']
 runs = [
     {
         'eddy_diff': True,
         'evd': True,
         'eddy_diff_scheme' : 'TKE',
         'output_filename': 'run_asics1.nc'
-    },
-        {
-        'eddy_diff': True,
-        'evd': False,
-        'eddy_diff_scheme' : 'Keps',
-        'output_filename': 'run_asics2.nc'
     },
         {
         'eddy_diff': True,
@@ -91,9 +85,9 @@ runs = [
     },
         ]
 #
-colors    = ['0.5','0.5','k']
+colors    = ['0.5','k']
 linewidth = [3]*(len(run_label))
-linestyle = ['solid','dashed','solid']
+linestyle = ['solid','solid']
 #
 scm       = [0]*len(runs)
 # Run the SCM
@@ -104,7 +98,7 @@ for i, run_params in enumerate(runs):
     scm[i].run_direct()
     print('results stored in ',scm[i].output)
 #===========================================================================
-data_file = '../../data/asicsmed/LION_data_ASICSMED.nc'
+data_file = '../data/asicsmed/LION_data_ASICSMED.nc'
 #===========================================================================
 nd = 3
 tdays = ["25-jan-2013","04-feb-2013","09-feb-2013"]

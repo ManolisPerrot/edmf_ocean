@@ -20,8 +20,8 @@ class SCM:
     """Single Column model class"""
 
     def __init__(self,  nz     = 75  ,   dt =  1200. ,
-                        initial_filename="../../data/asicsmed/init_ASICS_m01d15.nc",
-                        sfcforc_filename="../../data/asicsmed/forc_ASICS_y2013.nc",
+                        initial_filename="../data/asicsmed/init_ASICS_m01d15.nc",
+                        sfcforc_filename="../data/asicsmed/forc_ASICS_y2013.nc",
                         lat0 =   42.04, nbhours = 720., outfreq  = 1.,
                         output_filename="scm_asicsmed.nc" , eddy_diff = True ,
                         evd = False  , mass_flux_tra          = False  ,
@@ -146,17 +146,23 @@ class SCM:
         # define the initial state
         #-----------------------------------
         # read initial conditions in initial_filename
-        self.u_n      = np.zeros(self.nz); self.v_n      = np.zeros(self.nz)
-        self.u_np1    = np.zeros(self.nz); self.v_np1    = np.zeros(self.nz)
+        self.u_n        = np.zeros(self.nz); self.v_n        = np.zeros(self.nz)
+        self.u_np1      = np.zeros(self.nz); self.v_np1      = np.zeros(self.nz)
+        self.u_np1_star = np.zeros(self.nz); self.v_np1_star = np.zeros(self.nz)
+        self.uFlx       = np.zeros(self.nz+1); self.vFlx     = np.zeros(self.nz+1)
         fh01      = Dataset(initial_filename, mode='r',format="NETCDF4")
         tini      = np.squeeze(fh01.variables['votemper'][0,:-1,0,0]);
         sini      = np.squeeze(fh01.variables['vosaline'][0,:-1,0,0]);
-        self.t_n      = np.zeros((self.nz,self.ntra), order='F')
-        self.t_np1    = np.zeros((self.nz,self.ntra), order='F')
+        self.t_n        = np.zeros((self.nz,self.ntra), order='F')
+        self.t_np1      = np.zeros((self.nz,self.ntra), order='F')
+        self.t_np1_star = np.zeros((self.nz,self.ntra), order='F')
+        self.tFlx       = np.zeros(self.nz+1)
         self.t_n  [:,self.isalt] = np.flip(sini)
         self.t_np1[:,self.isalt] = np.flip(sini)
+        self.t_np1_star[:,self.isalt] = np.flip(sini)
         self.t_n  [:,self.itemp] = np.flip(tini)
         self.t_np1[:,self.itemp] = np.flip(tini)
+        self.t_np1_star[:,self.itemp] = np.flip(tini)
         #------------------------------------
         self.alpha   = 0.; self.beta    = 0.
         ####################################
@@ -274,24 +280,24 @@ class SCM:
             #===================================================
             # Advance tracers to n+1 (vertical diffusion only)
             #===================================================
-            self.t_np1  = scm_oce.advance_tra_ed(
+            self.t_np1_star, self.tFlx = scm_oce.advance_tra_ed(
                                         self.t_n, self.stflx   , self.srflx,
                                         swr_frac, self.btflx   , self.Hz   , self.akt  ,
-                                        self.z_w, 0.*self.eps_n, self.alpha,
+                                        self.z_r, 0.*self.eps_n, self.alpha,
                                         self.dt , self.nz      , self.ntra  )
             # penalization
-            self.t_np1[:,self.itemp] = (self.t_np1[:,self.itemp]+sigma[:]*self.dt*traLS[self.itemp])/(1.+sigma[:]*self.dt)
-            self.t_np1[:,self.isalt] = (self.t_np1[:,self.isalt]+sigma[:]*self.dt*traLS[self.isalt])/(1.+sigma[:]*self.dt)
+            self.t_np1_star[:,self.itemp] = (self.t_np1_star[:,self.itemp]+sigma[:]*self.dt*traLS[self.itemp])/(1.+sigma[:]*self.dt)
+            self.t_np1_star[:,self.isalt] = (self.t_np1_star[:,self.isalt]+sigma[:]*self.dt*traLS[self.isalt])/(1.+sigma[:]*self.dt)
             #==============================================================
             # advance dynamics to n+1 (Coriolis + vertical viscosity only)
             #==============================================================
-            self.u_np1, self.v_np1 = scm_oce.advance_dyn_cor_ed(
+            self.u_np1_star, self.v_np1_star, self.uFlx, self.vFlx = scm_oce.advance_dyn_cor_ed(
                                         self.u_n, self.v_n, self.ustr_sfc, self.vstr_sfc,
                                         self.ustr_bot, self.vstr_bot,
-                                        self.Hz , self.akv, self.fcor, self.dt, self.nz  )
+                                        self.Hz , self.akv, self.z_r, self.fcor, self.dt, self.nz  )
             # penalization
-            self.u_np1[:] = np.exp(-self.dt*sigma[:])*self.u_np1[:]
-            self.v_np1[:] = np.exp(-self.dt*sigma[:])*self.v_np1[:]
+            self.u_np1_star[:] = np.exp(-self.dt*sigma[:])*self.u_np1_star[:]
+            self.v_np1_star[:] = np.exp(-self.dt*sigma[:])*self.v_np1_star[:]
             #===================
             # Compute mass flux
             #===================
@@ -302,14 +308,22 @@ class SCM:
                 else:
                   self.Fmass = -(self.ap[:]*self.wp[:])/(1.-self.ap[:])
             # apply the MF term to the tracer equation
-            if self.MF_tra: scm_oce.advance_tra_mf(
-                                      self.t_np1, self.tp, self.Fmass, self.Hz,
+            if self.MF_tra:
+                self.t_np1 = scm_oce.advance_tra_mf(
+                                      self.t_np1_star, self.tp, self.Fmass, self.tFlx, self.Hz,
                                       self.dt, self.nz, self.ntra )
+            else:
+                self.t_np1[:,self.itemp] = self.t_np1_star[:,self.itemp]
+                self.t_np1[:,self.isalt] = self.t_np1_star[:,self.isalt]
             # apply the MF term to the velocity equation + compute the transfer of KE to subgrid scales stored in shearMF
-            if self.MF_dyn: scm_oce.advance_dyn_mf(
-                                      self.u_np1, self.v_np1, self.shearMF,
+            if self.MF_dyn:
+                self.u_np1, self.v_np1 = scm_oce.advance_dyn_mf(
+                                      self.u_np1_star, self.v_np1_star, self.shearMF,
                                       self.u_n  , self.v_n  , self.up , self.vp ,
-                                      self.Fmass, self.Hz   , self.dt , self.nz  )
+                                      self.Fmass, self.uFlx, self.vFlx, self.Hz   , self.dt , self.nz  )
+            else:
+                self.u_np1[:] = self.u_np1_star[:]
+                self.v_np1[:] = self.v_np1_star[:]
             #==========================================================
             # Compute eddy-viscosity / eddy-diffusivity  (TKE scheme)
             #==========================================================
@@ -394,7 +408,7 @@ class SCM:
         # Compute Brunt-Vaisala frequency bvf for TKE production/destruction term
         #==========================================================================
         rho,self.bvf = scm_oce.rho_eos(
-                                 self.t_np1[:,self.itemp], self.t_np1[:,self.isalt],
+                                 self.t_np1_star[:,self.itemp], self.t_np1_star[:,self.isalt],
                                  self.z_r, self.z_w,self.rho0, self.nz )
         #=======================================
         # Compute boundary conditions for TKE
@@ -409,9 +423,11 @@ class SCM:
                                       0.*self.bc_ap, 0.*self.wp0, tkemin)
         #=======================================
         # Compute TKE production by shear
+        #=======================================
         self.shear = scm_tke.compute_shear(
                                   self.u_n  , self.v_n  ,
                                   self.u_np1, self.v_np1,
+                                  self.u_np1_star, self.v_np1_star,
                                   self.akv  , self.z_r  , self.nz  )
         #================================================
         # Transfer from mean PE/KE to TKE by mass flux term
@@ -420,11 +436,11 @@ class SCM:
         #================================================
         # Triple correlation term
         if self.MF_tke_trplCorr:
-          self.triple_corr, self.tke_env = scm_mfc.compute_triplecorr(
+          self.triple_corr = scm_mfc.compute_triplecorr(
                                         self.tke_n, self.tp[:,self.isalt+1], self.Fmass,
                                         self.up   , self.vp   ,self.wp  ,
                                         self.u_np1, self.v_np1, self.Hz ,
-                                        self.z_r  , self.wtke, self.nz  )
+                                        self.z_r  , 0, self.wtke, self.nz  )
         #=========================
         # Advance TKE
         self.tke_np1, self.Prdtl, self.eps_n, self.residual = scm_tke.advance_tke(
@@ -487,7 +503,7 @@ class SCM:
           self.ap,self.up,self.vp,self.wp,self.tp,self.Bp,self.ent,self.det, self.epsPlume = scm_mfc.mass_flux_r10(
                                     u_mean, v_mean, t_mean, self.tke_n, self.z_w, self.Hz,
                                     tp0   , up0   , vp0   , wp0     , self.mf_params,
-                                    self.eos_params, tkepmin, mxlpmin, self.MF_small_ap, self.lineos, self.zinv ,
+                                    self.eos_params, tkepmin, mxlpmin, self.MF_small_ap, self.lineos, 0, self.zinv ,
                                     self.nz , self.ntraMF , len(self.mf_params), len(self.eos_params)   )
         if self.mass_flux_entr=='R10corNT':
           self.ap,self.up,self.vp,self.wp,self.tp,self.Bp,self.ent,self.det, self.vortp, self.epsPlume = scm_mfc.mass_flux_r10_cor(

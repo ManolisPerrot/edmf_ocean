@@ -62,7 +62,7 @@ CONTAINS
   END SUBROUTINE compute_tke_bdy
   !=============================================================================
 
-  SUBROUTINE compute_shear(u_n, v_n, u_np1, v_np1, Akv, zr, N, shear2)
+  SUBROUTINE compute_shear(u_n, v_n, u_np1, v_np1, u_np1_star, v_np1_star, Akv, zr, N, shear2)
     !!==========================================================================<br />
     !!                  ***  ROUTINE compute_shear  ***                         <br />
     !! ** Purposes : compute shear production term for TKE equation             <br />
@@ -71,6 +71,7 @@ CONTAINS
     INTEGER, INTENT(IN   )              :: N                      !! number of vertical levels
     REAL(8), INTENT(IN   )              :: u_n  (1:N),v_n  (1:N)  !! velocity components at time n    [m/s]
     REAL(8), INTENT(IN   )              :: u_np1(1:N),v_np1(1:N)  !! velocity components at time n+1  [m/s]
+    REAL(8), INTENT(IN   )              :: u_np1_star(1:N),v_np1_star(1:N) !! velocity components at time n+1 (*)  [m/s]
     REAL(8), INTENT(IN   )              :: zr(1:N)                !! depth at cell centers [m]
     REAL(8), INTENT(IN   )              :: Akv(0:N)               !! eddy-viscosity [m2/s]
     REAL(8), INTENT(  OUT)              :: shear2(0:N)            !! shear production term [m2/s3]
@@ -80,9 +81,9 @@ CONTAINS
     shear2(0:N) = 0.
     DO k=1,N-1
       cff       = Akv(k) / ( zr(k+1)-zr(k) )**2
-      du        = cff*( u_np1(k+1)-u_np1(k) )*0.5*( u_n(k+1)+u_np1(k+1)-u_n(k)-u_np1(k) ) !! Shear production term using discretization from Burchard (2002) <br />
+      du        = cff*( u_np1_star(k+1)-u_np1_star(k) )*0.5*( u_n(k+1)+u_np1(k+1)-u_n(k)-u_np1(k) ) !! Shear production term using discretization from Burchard (2002) <br />
       !! \( {\rm Sh}_{k+1/2} = \frac{ (K_m)_{k+1/2} }{ \Delta z_{k+1/2}^2 } ( u_{k+1}^n - u_{k}^n ) ( u_{k+1}^{n+1/2} - u_{k}^{n+1/2} )  \)
-      dv        = cff*( v_np1(k+1)-v_np1(k) )*0.5*( v_n(k+1)+v_np1(k+1)-v_n(k)-v_np1(k) )
+      dv        = cff*( v_np1_star(k+1)-v_np1_star(k) )*0.5*( v_n(k+1)+v_np1(k+1)-v_n(k)-v_np1(k) )
       shear2(k) = du + dv
     ENDDO
   !---------------------------------------------------------------------------------------------------
@@ -127,7 +128,7 @@ CONTAINS
     REAL(8), INTENT(  OUT)   :: residual                     !! Diagnostics : TKE spuriously added to guarantee that tke >= tke_min [m3/s3]
     ! local variables
     INTEGER                  :: k
-    REAL(8)                  :: mxld(0:N),mxlm(0:N),ff(0:N), cff, Ric, isch
+    REAL(8)                  :: mxld(0:N),mxlm(0:N),ff(0:N), cff, Ric, isch, vint_eps
     REAL(8)                  :: sh2,buoy,Ri,cff1,cff2,cff3,rhs,rhsmin,ceps,ct,cm
     ! Initialization
     tke_np1(  N  ) = tkemin
@@ -205,6 +206,12 @@ CONTAINS
     !         Store the TKE dissipation term for diagnostics
     eps    (1:N-1)= ceps*(cff2*tke_np1(1:N-1)-cff1*tke_n(1:N-1))*(SQRT( tke_n(1:N-1) )/mxld(1:N-1))
     eps(0)=0.; eps(N)=0.
+    !
+    !vint_eps = 0.
+    !DO k=1,N-1
+    !  vint_eps = vint_eps + (zr(k+1)-zr(k))*eps(k)
+    !ENDDO
+    !print*,'vint_eps (TKE) = ',vint_eps
     !         Store the ED contribution to w'e turbulent flux
     DO k = 1,N
       wtke(k) = wtke(k) - 0.5*isch*(akv(k)+akv(k-1))*(tke_np1(k)-tke_np1(k-1))/Hz(k)
