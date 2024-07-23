@@ -1,6 +1,6 @@
 import sys  # to put the SCM into the PYTHONPATH
 
-sys.path.append('../../library_new/F2PY')
+sys.path.append('../../library/F2PY')
 
 #!/usr/bin/env python
 # coding: utf-8
@@ -35,11 +35,11 @@ saving_name = case+'72h_profile_LES_vs_EDMF.png'
 # ===========================================================================
 # Define the common parameters:
 common_params = {
-    'nz': 100,
+    'nz': 2000,
     'dt': 50.,
     'h0': 2000.,
     'thetas': 6.5,
-    'hc': 400,
+    'hc': 1.e+16,
     'nbhours': 72,
     'outfreq': 1,
     'output_filename': "scm_output.nc",

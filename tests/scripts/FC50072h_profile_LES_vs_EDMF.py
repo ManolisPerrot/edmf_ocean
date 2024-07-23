@@ -308,7 +308,7 @@ if case == 'FC500':
                 alpha=alpha[i], linewidth=linewidth[i], label=label)
 
 
-    ax.set_xlim((- 1.3e-5, 0))
+    ax.set_xlim((- 1.3e-5, 2e-6))
     ax.set_ylim((-1.3, 0))
 
     ax.set_xlabel(r'$m^3.s^{-3}$')
