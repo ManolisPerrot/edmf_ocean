@@ -117,7 +117,7 @@ common_params = {
     'up_c': 0.5,
     'vp_c': 0.5,
     'bc_ap': 0.2,    #0.3,
-    'delta_bkg': 0.0075*250,   # 0.006,
+    'delta_bkg': 0.006*250,   # 0.006,
     'wp0' : -0.5e-08,
     'output_filename': 'run',
     'write_netcdf': True
@@ -170,9 +170,19 @@ if case == 'W005_C500_NO_COR':
 
 
 
-run_label = [r'$\tilde{\alpha} = 1$ (\texttt{small_ap = True}) ', r'$\tilde{\alpha} = \frac{1}{1-a_p}$ (\texttt{small_ap = False})']
+run_label = [r'$\sigma = 1$ (\texttt{small_ap = True}) \& $\mathbf{u}_{h,p} = \overline{\mathbf{u}}$ ', r'$\sigma = 1$ (\texttt{small_ap = True}) \& $\mathbf{u}_{h,p} \neq \overline{\mathbf{u}}$ ', r'$\tilde{\alpha} = \frac{1}{1-a_p}$ (\texttt{small_ap = False}) \& $\mathbf{u}_{h,p} = \overline{\mathbf{u}}$',r'$\tilde{\alpha} = \frac{1}{1-a_p}$ (\texttt{small_ap = False}) \& $\mathbf{u}_{h,p} \neq \overline{\mathbf{u}}$']
 runs = [
     {
+        'eddy_diff': True,
+        'evd': False,
+        'mass_flux_tra': True,
+        'mass_flux_dyn': False,
+        'mass_flux_tke': True,
+        'mass_flux_tke_trplCorr': True,
+        'mass_flux_small_ap': True,
+        'output_filename': 'run2.nc'
+    },
+        {
         'eddy_diff': True,
         'evd': False,
         'mass_flux_tra': True,
@@ -183,6 +193,16 @@ runs = [
         'output_filename': 'run2.nc'
     },
         {
+        'eddy_diff': True,
+        'evd': False,
+        'mass_flux_tra': True,
+        'mass_flux_dyn': False,
+        'mass_flux_tke': True,
+        'mass_flux_tke_trplCorr': True,
+        'mass_flux_small_ap': False,
+        'output_filename': 'run3.nc'
+    },
+            {
         'eddy_diff': True,
         'evd': False,
         'mass_flux_tra': True,
@@ -231,23 +251,13 @@ instant = 71
 mld = (-z_r_les[(-WTH[instant]).argmax()]).data
 
 
-################################# PLOTTING
-styles = ['-', '-', '-']
-#colors = ['k',blue,orange]
-colors = ['k','tab:blue','tab:orange']
-alpha = [0.5,1,1]
-linewidth = [4]*(len(run_label))
-
-style_les = 'ko'
-alpha_les = 1
-linewidth_les = 4
 
 
 ################################# PLOTTING
-styles = ['-', '-', '-']
+styles = ['-', '-', '-','-']
 #colors = ['k',blue,orange]
-colors = ['k','tab:blue','tab:orange']
-alpha = [0.5,1,1]
+colors = ['k','tab:blue','tab:orange','tab:green']
+alpha = [0.5,1,1,1]
 linewidth = [4]*(len(run_label))
 
 style_les = 'ko'
@@ -527,4 +537,4 @@ plt.savefig(saving_path+saving_name, bbox_inches='tight', dpi=300)
 
 print('figure saved at'+saving_path+saving_name)
 
-#plt.show()
+plt.show()

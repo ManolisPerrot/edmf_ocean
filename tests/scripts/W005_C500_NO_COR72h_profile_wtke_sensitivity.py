@@ -170,11 +170,11 @@ if case == 'W005_C500_NO_COR':
 
 
 
-run_label = [r'ED-only',r'Witek et al. (2011)', r'Han \& Bretherton (2019) ',r'New']
+run_label = [r'ED+EVD',r'Witek et al. (2011)', r'Han \& Bretherton (2019) ',r'New']
 runs = [
     {
         'eddy_diff': True,
-        'evd': False,
+        'evd': True,
         'mass_flux_tra': True,
         'mass_flux_dyn': True,
         'mass_flux_tke': True,

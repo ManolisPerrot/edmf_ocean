@@ -1,6 +1,6 @@
 import sys  # to put the SCM into the PYTHONPATH
 
-sys.path.append('../../library/F2PY')
+sys.path.append('../../library_new/F2PY')
 
 #!/usr/bin/env python
 # coding: utf-8
@@ -168,8 +168,8 @@ ax.set_title(r'\rm{Vertically integrated total energy budget}')
 ax.set_xlabel(r'\rm{time} (hours)')
 ax.set_ylabel(r'${\rm m}^{3}\;{\rm s}^{-3}$')
 ax.plot( (out[2]['Etot'] )[1:] , color='tab:orange' , linewidth=3 , alpha=1, linestyle = '-', label='EDMF-Energy')
-ax.plot( (out[1]['Etot'] )[1:] , color='tab:blue'   , linewidth=3 , alpha=1, linestyle = '-', label='EDMF')
-
+# ax.plot( (out[1]['Etot'] )[1:] , color='tab:blue'   , linewidth=3 , alpha=1, linestyle = '-', label='EDMF')
+# ax.set_yscale('log')
 # test Etot
 for i, label in enumerate(run_label):
     print(label)

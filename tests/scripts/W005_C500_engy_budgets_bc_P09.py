@@ -87,7 +87,7 @@ if case == 'W005_C500_NO_COR':
 
 # Define parameters specific to each run (overwrite common parameters):
 
-run_label = [r'(\texttt{bc_P09 = False}) ', r'(\texttt{bc_P09 = True}) ']
+run_label = [r'(\texttt{bc_P09 = false}) ', r'(\texttt{bc_P09 = consistent})',r'(\texttt{bc_P09 = inconsistent})']
 runs = [
     {
         'eddy_diff': True,
@@ -98,7 +98,7 @@ runs = [
         'mass_flux_tke_trplCorr': True,
         'mass_flux_small_ap': True,
         'output_filename': 'run1.nc',
-        'bc_P09': False
+        'bc_P09': 'false'
     },
         {
         'eddy_diff': True,
@@ -109,7 +109,18 @@ runs = [
         'mass_flux_tke_trplCorr': True,
         'mass_flux_small_ap': True,
         'output_filename': 'run2.nc',
-        'bc_P09': True
+        'bc_P09': 'consistent'
+    },
+            {
+        'eddy_diff': True,
+        'evd': False,
+        'mass_flux_tra': True,
+        'mass_flux_dyn': True,
+        'mass_flux_tke': True,
+        'mass_flux_tke_trplCorr': True,
+        'mass_flux_small_ap': True,
+        'output_filename': 'run2.nc',
+        'bc_P09': 'inconsistent'
     }
         ]
 
@@ -163,8 +174,8 @@ ax.set_title(r'\rm{Vertically integrated total energy budget}')
 ax.set_xlabel(r'\rm{time} (hours)')
 ax.set_ylabel(r'${\rm m}^{3}\;{\rm s}^{-3}$')
 for i, label in enumerate(run_label):
-    ax.plot( (out[i]['Etot'] )[1:] , color=colors[i] , linewidth=3 , alpha=1, linestyle = '-', label=label)
-
+    ax.plot( (out[i]['Etot'] )[1:]  , linewidth=3 , alpha=1, linestyle = '-', label=label)
+ax.set_yscale('log')
 # test Etot
 for i, label in enumerate(run_label):
     print(label)
