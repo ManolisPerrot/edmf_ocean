@@ -320,7 +320,7 @@ CONTAINS
     !
     DO k=1,N-1
       IF( bvf(k) <= -1.e-12 ) THEN
-        Akv  (k  )  = AkEvd
+        ! Akv  (k  )  = AkEvd
         Akt  (k  )  = AkEvd
       ENDIF
     ENDDO
