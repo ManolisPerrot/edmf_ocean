@@ -493,9 +493,12 @@ class SCM:
                                                       - self.t_np1_star[0:self.nz-1,self.itemp] ) / self.Hz[0:self.nz-1]
         self.wued[  self.nz] = self.ustr_sfc                                     ## (w'theta')_ED
         self.wved[  self.nz] = self.vstr_sfc
-#        self.wued[1:self.nz] = self.akv[1:self.nz] * (  self.u_np1[1:self.nz]
-#                                                      - self.u_np1[0:self.nz-1] ) / self.Hz[0:self.nz-1]
-        self.wued[1:self.nz] =  (  self.u_np1_star[1:self.nz] - self.u_np1_star[0:self.nz-1] ) / self.Hz[0:self.nz-1]
+
+        # self.wued[1:self.nz] = self.akv[1:self.nz] * (  self.u_np1[1:self.nz]
+        #                                              - self.u_np1[0:self.nz-1] ) / self.Hz[0:self.nz-1]
+        # self.wved[1:self.nz] = self.akv[1:self.nz] * (  self.v_np1[1:self.nz]
+        #                                              - self.v_np1[0:self.nz-1] ) / self.Hz[0:self.nz-1]
+        self.wued[1:self.nz] = self.akv[1:self.nz] * (  self.u_np1_star[1:self.nz] - self.u_np1_star[0:self.nz-1] ) / self.Hz[0:self.nz-1]
         self.wved[1:self.nz] = self.akv[1:self.nz] * (  self.v_np1_star[1:self.nz]
                                                       - self.v_np1_star[0:self.nz-1] ) / self.Hz[0:self.nz-1]
         if self.MF_tra:                                                         ## (w'theta')_MF
