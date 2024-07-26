@@ -24,6 +24,7 @@ plt.rcParams.update({'font.size': 18})
 plt.rcParams.update({'figure.facecolor': 'white'})
 plt.rcParams.update({'savefig.facecolor': 'white'})
 ###########################################
+blue, orange, magenta, grey, green = '#0db4c3', '#eea021', '#ff0364', '#606172', '#3fb532'
 
 # ===========================================================================
 #case = 'FC500'
@@ -67,13 +68,13 @@ common_params = {
     'entr_scheme': 'R10',
     'Cent': 0.99,
     'Cdet': 1.99,       # 'Cdet': 2.5,
-    'wp_a': 1.,
-    'wp_b': 1.,      # 'wp_b': 1.
+    'wp_a': 1.3,
+    'wp_b': 1.3,      # 'wp_b': 1.
     'wp_bp': 0.003*250,     #      0.002,
     'up_c': 0.5,
     'vp_c': 0.5,
     'bc_ap': 0.2,    #0.3,
-    'delta_bkg': 0.005*250,   # 0.006,
+    'delta_bkg': 0.009*250,   # 0.006,
     'wp0' : -0.5e-08,
     'output_filename': 'run',
     'write_netcdf': True
@@ -87,13 +88,13 @@ if case == 'W005_C500_NO_COR':
 
 # Define parameters specific to each run (overwrite common parameters):
 
-run_label = ['ED', 'EDMF', 'EDMF-Energy']
+run_label = [r'EDMF-inconsistent', r'EDMF-Energy (\texttt{bc\_P09=inconsistent})', r'EDMF-Energy (\texttt{bc\_P09=false})', r'EDMF-Energy (\texttt{bc\_P09=consistent})']
 runs = [
     {
         'eddy_diff': True,
         'evd': False,
-        'mass_flux_tra': False,
-        'mass_flux_dyn': False,
+        'mass_flux_tra': True,
+        'mass_flux_dyn': True,
         'mass_flux_tke': False,
         'mass_flux_tke_trplCorr': False,
         'output_filename': 'run1.nc'
@@ -104,19 +105,31 @@ runs = [
         'evd': False,
         'mass_flux_tra': True,
         'mass_flux_dyn': True,
-        'mass_flux_tke': False,
-        'mass_flux_tke_trplCorr': False,
+        'mass_flux_tke': True,
+        'mass_flux_tke_trplCorr': True,
+        'bc_P09': 'inconsistent',
         'output_filename': 'run2.nc'
     },
-        {
+    {
         'eddy_diff': True,
         'evd': False,
         'mass_flux_tra': True,
         'mass_flux_dyn': True,
         'mass_flux_tke': True,
         'mass_flux_tke_trplCorr': True,
+        'bc_P09': 'false',
         'output_filename': 'run3.nc'
-    }
+    },
+    {
+        'eddy_diff': True,
+        'evd': False,
+        'mass_flux_tra': True,
+        'mass_flux_dyn': True,
+        'mass_flux_tke': True,
+        'mass_flux_tke_trplCorr': True,
+        'bc_P09': 'consistent',
+        'output_filename': 'run4.nc'
+    },
         ]
 
 
@@ -159,51 +172,51 @@ style_les = 'ko'
 alpha_les = 0.5
 linewidth_les = 4
 
+
+#================================================================
+#================================================================
 fig, axes = plt.subplots(nrows=1, ncols=1, sharex=True,
-                         sharey=True, figsize=(6, 4) )
+                         sharey=True , figsize=(9,6))
 # ===============================================================
 ax = axes
-
 ax.set_title(r'\rm{Vertically integrated total energy budget}')
 ax.set_xlabel(r'\rm{time} (hours)')
 ax.set_ylabel(r'${\rm m}^{3}\;{\rm s}^{-3}$')
-ax.plot( (out[2]['Etot'] )[1:] , color='tab:orange' , linewidth=3 , alpha=1, linestyle = '-', label='EDMF-Energy')
-# ax.plot( (out[1]['Etot'] )[1:] , color='tab:blue'   , linewidth=3 , alpha=1, linestyle = '-', label='EDMF')
-# ax.set_yscale('log')
-# test Etot
-for i, label in enumerate(run_label):
-    print(label)
-    is_in_range(value=max(np.abs(out[i]['Etot'].data)),value_name='max(abs(Etot vert int))',reference=0.,tolerance=5e-8)
+ax.plot( (out[0]['Etot'] )[1:]  ,color='tab:red'  , linewidth=3 , alpha=1, linestyle = '-', label=run_label[0])
+ax.plot(0.5*2.456e-7*out[0]['zinv'], color='k', label=r'$B_0 h/2$')
+ax.plot( (out[2]['Etot'] )[1:]  ,color='tab:green', linewidth=3 , alpha=0.75, linestyle = '-', label=run_label[2])
+ax.plot( (out[3]['Etot'] )[1:]  ,color='tab:green', linewidth=3 , alpha=1, linestyle = '--', label=run_label[3])
+ax.plot( (out[1]['Etot'] )[1:]  ,color='tab:green', linewidth=3 , alpha=1, linestyle = ':', label=run_label[1])
 
-# ===============================================================
-
-ax.legend()
+ax.set_yscale('symlog',linthresh=1e-13)
+ax.legend(fontsize=12)
+# plt.plot()
+fig.tight_layout()
 plt.savefig(saving_path+'W005_C500_engy_budgets', bbox_inches = 'tight', dpi=300)
 print('fig saved at'+saving_path+'W005_C500_engy_budgets')
-
-
+plt.show()
 #================================================================
 #================================================================
 
-fig, axes = plt.subplots(nrows=1, ncols=1, sharex=True,
-                         sharey=True, figsize=(6, 4) )
-# ===============================================================
-ax = axes
+# fig, axes = plt.subplots(nrows=1, ncols=1, sharex=True,
+#                          sharey=True, figsize=(6, 4) )
+# # ===============================================================
+# ax = axes
 
-ax.set_title(r'\rm{Vertically integrated total energy budget}')
-ax.set_xlabel(r'\rm{time} (hours)')
-ax.set_ylabel(r'${\rm m}^{3}\;{\rm s}^{-3}$')
-ax.plot( (out[2]['Etke'] )[1:]  , linewidth=3 , alpha=1, linestyle = '-', label='Etke')
-ax.plot( (out[2]['Ekin'] )[1:]  , linewidth=3 , alpha=1, linestyle = '-', label='Ekin')
-ax.plot( (out[2]['Epot'] )[1:]  , linewidth=3 , alpha=1, linestyle = '-', label='Epot')
-ax.plot( (out[2]['Etot'] )[1:]  , linewidth=3 , alpha=1, linestyle = '-', label='Etot')
+# ax.set_title(r'\rm{Vertically integrated total energy budget}')
+# ax.set_xlabel(r'\rm{time} (hours)')
+# ax.set_ylabel(r'${\rm m}^{3}\;{\rm s}^{-3}$')
+# ax.plot( (out[2]['Etke'] )[1:]  , linewidth=3 , alpha=1, linestyle = '-', label='Etke')
+# ax.plot( (out[2]['Ekin'] )[1:]  , linewidth=3 , alpha=1, linestyle = '-', label='Ekin')
+# ax.plot( (out[2]['Epot'] )[1:]  , linewidth=3 , alpha=1, linestyle = '-', label='Epot')
+# ax.plot( (out[2]['Etot'] )[1:]  , linewidth=3 , alpha=1, linestyle = '-', label='Etot')
 
-# ===============================================================
+# # ===============================================================
 
-ax.legend()
-saving_name=case+'_energy_diag'
-plt.savefig(saving_path+saving_name, bbox_inches = 'tight', dpi=300)
-print('fig saved at'+saving_path+saving_name)
+# ax.legend()
+# saving_name=case+'_energy_diag'
+# plt.savefig(saving_path+saving_name, bbox_inches = 'tight', dpi=300)
+# print('fig saved at'+saving_path+saving_name)
 
 
 plt.show()
