@@ -21,6 +21,8 @@ from netCDF4 import Dataset
 import matplotlib.pyplot as plt
 import numpy as np
 from unit_tests import is_in_range
+from cases_exhaustive_settings import case_settings
+
 
 ###################################################
 plt.rcParams['text.usetex'] = True
@@ -77,8 +79,10 @@ mld = (-z_r_les[(-WTH[instant]).argmax()])
 
 # ===========================================================================
 
-# Define the common parameters:
-common_params = {
+#load physical parameters of the case
+physical_params = case_settings[case].copy()
+# Define SCM and mass-flux default parameters:
+scm_params = {
     'nz': 100,
     'dt': 50.,
     'h0': 2000.,
@@ -86,17 +90,6 @@ common_params = {
     'hc': 400,
     'nbhours': 72,
     'outfreq': 1,
-    'output_filename': "scm_output.nc",
-    'T0': 2.,
-    'N0': 1.9620001275490499e-6,
-    'Tcoef': 0.2048,
-    'SaltCst': 35.,
-    'lat0': 0.,
-    'sustr': 0.,
-    'svstr': 0.,
-    'stflx': -500.,
-    'srflx': 0.,
-    'ssflx': 0.,
     'eddy_diff': True,
     'evd': False,
     'mass_flux_tra': True,
@@ -109,7 +102,7 @@ common_params = {
     'tke_sfc_dirichlet': False,
     'eddy_diff_tke_const': 'NEMO',
     'entr_scheme': 'R10',
-    'Cent': 0.999,
+    'Cent': 0.99,
     'Cdet': 1.99,       # 'Cdet': 2.5,
     'wp_a': 1.3,
     'wp_b': 1.3,      # 'wp_b': 1.
@@ -117,7 +110,7 @@ common_params = {
     'up_c': 0.5,
     'vp_c': 0.5,
     'bc_ap': 0.2,    #0.3,
-    'delta_bkg': 0.006*250,   # 0.006,
+    'delta_bkg': 0.009*250,   # 0.006,
     'wp0' : -0.5e-08,
     'output_filename': 'run',
     'write_netcdf': True
@@ -126,51 +119,7 @@ common_params = {
 
 
 
-
-if case == 'W05_C500':
-    common_params['sustr'] = 0.5/1027
-
-if case == 'W005_C500_NO_COR':
-    common_params['sustr'] = 0.05/1027
-
-# Define parameters specific to each run (overwrite common parameters):
-
-# run_label = ['ED', 'EDMF', 'EDMF-Energy']
-# runs = [
-#     {
-#         'eddy_diff': True,
-#         'evd': False,
-#         'mass_flux_tra': False,
-#         'mass_flux_dyn': False,
-#         'mass_flux_tke': False,
-#         'mass_flux_tke_trplCorr': False,
-#         'output_filename': 'run1.nc'
-
-#     },
-#     {
-#         'eddy_diff': True,
-#         'evd': False,
-#         'mass_flux_tra': True,
-#         'mass_flux_dyn': True,
-#         'mass_flux_tke': False,
-#         'mass_flux_tke_trplCorr': False,
-#         'output_filename': 'run2.nc'
-#     },
-#         {
-#         'eddy_diff': True,
-#         'evd': False,
-#         'mass_flux_tra': True,
-#         'mass_flux_dyn': True,
-#         'mass_flux_tke': True,
-#         'mass_flux_tke_trplCorr': True,
-#         'output_filename': 'run3.nc'
-#     }
-#         ]
-
-
-
-
-run_label = [r'$\sigma = 1$ (\texttt{small_ap = True}) \& $\overline{w^\prime u^\prime}^{MF}=0$ ', r'$\sigma = 1$ (\texttt{small_ap = True}) \& $\overline{w^\prime u^\prime}^{MF}\neq 0$ ', r'$\tilde{\alpha} = \frac{1}{1-a_p}$ (\texttt{small_ap = False}) \& $\overline{w^\prime u^\prime}^{MF}=0$',r'$\tilde{\alpha} = \frac{1}{1-a_p}$ (\texttt{small_ap = False}) \& $\overline{w^\prime u^\prime}^{MF}\neq 0$']
+run_label = [r'$\sigma = 1$ (\texttt{small_ap = True}) \& $\overline{w^\prime u^\prime}^{MF}=0$ ', r'$\sigma = 1$ (\texttt{small_ap = True}) \& $\overline{w^\prime u^\prime}^{MF}\neq 0$ ', r'$\sigma = \frac{1}{1-a_p}$ (\texttt{small_ap = False}) \& $\overline{w^\prime u^\prime}^{MF}=0$',r'$\sigma = \frac{1}{1-a_p}$ (\texttt{small_ap = False}) \& $\overline{w^\prime u^\prime}^{MF}\neq 0$']
 runs = [
     {
         'eddy_diff': True,
@@ -219,11 +168,11 @@ scm = [0]*len(runs)
 
 # Run the SCM
 for i, run_params in enumerate(runs):
-    params = common_params.copy()  # Create a copy of common_params
+    params = physical_params.copy()  # Create a copy of common_params
+    params.update(scm_params)  # Update with run_params
     params.update(run_params)  # Update with run_params
     scm[i] = SCM(**params)
     scm[i].run_direct()
-
     # test zinv
     if scm[i].MF_tra or scm[i].MF_dyn: 
         print(run_label[i])

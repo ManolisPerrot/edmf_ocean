@@ -85,7 +85,7 @@ runs = [
     },
         ]
 #
-colors    = ['0.5','k']
+colors    = ['tab:gray','tab:green']
 linewidth = [3]*(len(run_label))
 linestyle = ['solid','solid']
 #
@@ -144,12 +144,12 @@ for x in range(nd):
     for i in range(len(runs)):
       ax.plot(out[i].variables['temp'][ntime,:], out[i].variables['z_r'][:],
                 color = colors[i],linewidth=linewidth[i],linestyle=linestyle[i],label=run_label[i])
-    ax.plot(new_temp, new_depthT,marker='o',label='mooring data',linewidth=1.5,linestyle="dashed",color='r')
+    ax.plot(new_temp, new_depthT,marker='o',label='mooring data',linewidth=1.5,linestyle="dashed",color='k')
   else:
     for i in range(len(runs)):
       ax.plot(out[i].variables['temp'][ntime,:], out[i].variables['z_r'][:],
                 color = colors[i],linewidth=linewidth[i],linestyle=linestyle[i])
-    ax.plot(new_temp, new_depthT,marker='o',linewidth=1.5,linestyle="dashed",color='r')
+    ax.plot(new_temp, new_depthT,marker='o',linewidth=1.5,linestyle="dashed",color='k')
   #
   for tick in ax.xaxis.get_major_ticks():
                 tick.label1.set_fontsize(12)
@@ -165,7 +165,7 @@ for x in range(nd):
   for i in range(len(runs)):
     ax.plot(out[i].variables['salt'][ntime,:], out[i].variables['z_r'][:],
                 color = colors[i],linewidth=linewidth[i],linestyle=linestyle[i])
-  ax.plot(new_salt, new_depthS,marker='o',linewidth=1.5,linestyle="dashed",color='r')
+  ax.plot(new_salt, new_depthS,marker='o',linewidth=1.5,linestyle="dashed",color='k')
   #
   for tick in ax.xaxis.get_major_ticks():
                 tick.label1.set_fontsize(12)
@@ -185,7 +185,7 @@ for i in range(len(runs)):
 #==============
 plt.tight_layout()
 plt.savefig('../figures/asicsmed_tra.pdf', bbox_inches='tight')
-#plt.show()
+plt.show()
 #===============================
 #### create figure 2
 #======================================================
@@ -267,7 +267,7 @@ for i in range(len(tscm)):
 #
 ax = axes[2]
 ax.set_title(r"$h_{\rm mxl} \; [{\rm m}]$",fontsize=12)
-ax.plot(time_dta, gaussian_filter(hmxl_dta,sigma=3),color='r',linewidth=1.5,label='mooring data')
+ax.plot(time_dta, gaussian_filter(hmxl_dta,sigma=3),color='k',linewidth=1.5,label='mooring data')
 #
 for i in range(len(runs)):
   out[i] = Dataset(scm[i].output, mode='r')
@@ -283,4 +283,4 @@ ax.legend(loc=3,fontsize='6')
 ax.set_ylim(-2300.,0.)
 plt.tight_layout()
 plt.savefig('../figures/asicsmed_hmxl.pdf', bbox_inches='tight')
-#plt.show()
+plt.show()

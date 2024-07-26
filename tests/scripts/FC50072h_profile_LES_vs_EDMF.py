@@ -21,6 +21,7 @@ from netCDF4 import Dataset
 import matplotlib.pyplot as plt
 import numpy as np
 from unit_tests import is_in_range
+from cases_exhaustive_settings import  case_settings
 
 ###################################################
 plt.rcParams['text.usetex'] = True
@@ -81,8 +82,10 @@ mld = (-z_r_les[(-WTH[instant]).argmax()])
 
 # ===========================================================================
 
-# Define the common parameters:
-common_params = {
+#load physical parameters of the case
+physical_params = case_settings[case].copy()
+# Define SCM and mass-flux default parameters:
+scm_params = {
     'nz': 100,
     'dt': 50.,
     'h0': 2000.,
@@ -90,17 +93,6 @@ common_params = {
     'hc': 400,
     'nbhours': 72,
     'outfreq': 1,
-    'output_filename': "scm_output.nc",
-    'T0': 2.,
-    'N0': 1.9620001275490499e-6,
-    'Tcoef': 0.2048,
-    'SaltCst': 35.,
-    'lat0': 0.,
-    'sustr': 0.,
-    'svstr': 0.,
-    'stflx': -500.,
-    'srflx': 0.,
-    'ssflx': 0.,
     'eddy_diff': True,
     'evd': False,
     'mass_flux_tra': True,
@@ -121,7 +113,7 @@ common_params = {
     'up_c': 0.5,
     'vp_c': 0.5,
     'bc_ap': 0.2,    #0.3,
-    'delta_bkg': 0.006*250,   # 0.006,
+    'delta_bkg': 0.009*250,   # 0.006,
     'wp0' : -0.5e-08,
     'output_filename': 'run',
     'write_netcdf': True
@@ -131,16 +123,16 @@ common_params = {
 
 # Define parameters specific to each run (overwrite common parameters):
 
-run_label = ['ED+EVD', 'EDMF', 'EDMF-Energy']
+run_label = [r'ED+EVD',r'EDMF-inconsistent',  r'EDMF-Energy (\texttt{bc\_P09=false})', r'EDMF-Energy (\texttt{bc\_P09=consistent})',r'EDMF-Energy (\texttt{bc\_P09=inconsistent})']
 runs = [
-    {
+        {
         'eddy_diff': True,
         'evd': True,
         'mass_flux_tra': False,
         'mass_flux_dyn': False,
         'mass_flux_tke': False,
         'mass_flux_tke_trplCorr': False,
-        'output_filename': 'run1.nc'
+        'output_filename': 'run0.nc'
 
     },
     {
@@ -150,7 +142,8 @@ runs = [
         'mass_flux_dyn': True,
         'mass_flux_tke': False,
         'mass_flux_tke_trplCorr': False,
-        'output_filename': 'run2.nc'
+        'output_filename': 'run1.nc'
+
     },
         {
         'eddy_diff': True,
@@ -159,7 +152,28 @@ runs = [
         'mass_flux_dyn': True,
         'mass_flux_tke': True,
         'mass_flux_tke_trplCorr': True,
-        'output_filename': 'FC500_edmf_ocean.nc'
+        'bc_P09': 'false',
+        'output_filename': 'run3.nc'
+    },
+    {
+        'eddy_diff': True,
+        'evd': False,
+        'mass_flux_tra': True,
+        'mass_flux_dyn': True,
+        'mass_flux_tke': True,
+        'mass_flux_tke_trplCorr': True,
+        'bc_P09': 'consistent',
+        'output_filename': 'run4.nc'
+    },
+    {
+        'eddy_diff': True,
+        'evd': False,
+        'mass_flux_tra': True,
+        'mass_flux_dyn': True,
+        'mass_flux_tke': True,
+        'mass_flux_tke_trplCorr': True,
+        'bc_P09': 'inconsistent',
+        'output_filename': 'run2.nc'
     }
         ]
 
@@ -170,10 +184,12 @@ scm = [0]*len(runs)
 
 # Run the SCM
 for i, run_params in enumerate(runs):
-    params = common_params.copy()  # Create a copy of common_params
+    params = physical_params.copy()  # Create a copy of common_params
+    params.update(scm_params)  # Update with run_params
     params.update(run_params)  # Update with run_params
     scm[i] = SCM(**params)
     scm[i].run_direct()
+
 
     # test zinv
     if scm[i].MF_tra or scm[i].MF_dyn: 
@@ -197,16 +213,14 @@ for i, run_params in enumerate(runs):
 #     V_scm  = scm[i].v_history
 
 instant = 71
-
-
 mld = (-z_r_les[(-WTH[instant]).argmax()]).data
 
 
 ################################# PLOTTING
-styles = ['-', '-', '-']
+styles = ['-', '-', '-','--',':']
 #colors = ['k',blue,orange]
-colors = ['k','tab:blue','tab:orange']
-alpha = [0.5,1,1]
+colors = ['tab:gray','tab:red','tab:green','tab:green','tab:green']
+alpha = [1,1,0.75,1,1]
 linewidth = [4]*(len(run_label))
 
 style_les = 'ko'
@@ -259,8 +273,8 @@ if case == 'FC500':
             ax.plot(-(scm[i].wted + scm[i].wtmf), scm[i].z_w/mld, linestyle=styles[i], color = colors[i],
                     alpha=alpha[i], linewidth=linewidth[i], label=label)
             
-    ax.plot( -scm[1].wted, scm[1].z_w/mld, color ='tab:blue'  , linestyle ='--', alpha=1.0 , linewidth=3 )
-    ax.plot( -scm[2].wted, scm[2].z_w/mld, color ='tab:orange', linestyle ='--', alpha=1.0 , linewidth=3 )
+    ax.plot( -scm[1].wted, scm[1].z_w/mld, color ='tab:red'  , linestyle ='-.', alpha=1.0 , linewidth=2 )
+    ax.plot( -scm[2].wted, scm[2].z_w/mld, color ='tab:green', linestyle ='-.', alpha=1.0 , linewidth=2 )
 
     ax.ticklabel_format(style='sci', axis='x', scilimits=(0, 0))
 
@@ -336,4 +350,4 @@ plt.savefig(saving_path+saving_name, bbox_inches='tight', dpi=300)
 
 print('figure saved at'+saving_path+saving_name)
 
-#plt.show()
+plt.show()

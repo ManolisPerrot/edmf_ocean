@@ -21,6 +21,7 @@ from netCDF4 import Dataset
 import matplotlib.pyplot as plt
 import numpy as np
 from unit_tests import is_in_range
+from cases_exhaustive_settings import case_settings
 
 ###################################################
 plt.rcParams['text.usetex'] = True
@@ -77,8 +78,10 @@ mld = (-z_r_les[(-WTH[instant]).argmax()])
 
 # ===========================================================================
 
-# Define the common parameters:
-common_params = {
+#load physical parameters of the case
+physical_params = case_settings[case].copy()
+# Define SCM and mass-flux default parameters:
+scm_params = {
     'nz': 100,
     'dt': 50.,
     'h0': 2000.,
@@ -86,17 +89,6 @@ common_params = {
     'hc': 400,
     'nbhours': 72,
     'outfreq': 1,
-    'output_filename': "scm_output.nc",
-    'T0': 2.,
-    'N0': 1.9620001275490499e-6,
-    'Tcoef': 0.2048,
-    'SaltCst': 35.,
-    'lat0': 0.,
-    'sustr': 0.,
-    'svstr': 0.,
-    'stflx': -500.,
-    'srflx': 0.,
-    'ssflx': 0.,
     'eddy_diff': True,
     'evd': False,
     'mass_flux_tra': True,
@@ -123,28 +115,17 @@ common_params = {
     'write_netcdf': True
 }
 
-
-
-
-
-if case == 'W05_C500':
-    common_params['sustr'] = 0.5/1027
-
-if case == 'W005_C500_NO_COR':
-    common_params['sustr'] = 0.05/1027
-
-# Define parameters specific to each run (overwrite common parameters):
-
-run_label = ['ED+EVD', 'EDMF', 'EDMF-Energy']
+# Define parameters specific to each run (overwrite previous parameters):
+run_label = [r'ED+EVD',r'EDMF-inconsistent',  r'EDMF-Energy (\texttt{bc\_P09=false})', r'EDMF-Energy (\texttt{bc\_P09=consistent})',r'EDMF-Energy (\texttt{bc\_P09=inconsistent})']
 runs = [
-    {
+        {
         'eddy_diff': True,
         'evd': True,
         'mass_flux_tra': False,
         'mass_flux_dyn': False,
         'mass_flux_tke': False,
         'mass_flux_tke_trplCorr': False,
-        'output_filename': 'run1.nc'
+        'output_filename': 'run0.nc'
 
     },
     {
@@ -154,7 +135,8 @@ runs = [
         'mass_flux_dyn': True,
         'mass_flux_tke': False,
         'mass_flux_tke_trplCorr': False,
-        'output_filename': 'run2.nc'
+        'output_filename': 'run1.nc'
+
     },
         {
         'eddy_diff': True,
@@ -163,18 +145,37 @@ runs = [
         'mass_flux_dyn': True,
         'mass_flux_tke': True,
         'mass_flux_tke_trplCorr': True,
+        'bc_P09': 'false',
         'output_filename': 'run3.nc'
+    },
+    {
+        'eddy_diff': True,
+        'evd': False,
+        'mass_flux_tra': True,
+        'mass_flux_dyn': True,
+        'mass_flux_tke': True,
+        'mass_flux_tke_trplCorr': True,
+        'bc_P09': 'consistent',
+        'output_filename': 'run4.nc'
+    },
+    {
+        'eddy_diff': True,
+        'evd': False,
+        'mass_flux_tra': True,
+        'mass_flux_dyn': True,
+        'mass_flux_tke': True,
+        'mass_flux_tke_trplCorr': True,
+        'bc_P09': 'inconsistent',
+        'output_filename': 'run2.nc'
     }
         ]
-
-
-
 
 scm = [0]*len(runs)
 
 # Run the SCM
 for i, run_params in enumerate(runs):
-    params = common_params.copy()  # Create a copy of common_params
+    params = physical_params.copy()  # Create a copy of common_params
+    params.update(scm_params)  # Update with run_params
     params.update(run_params)  # Update with run_params
     scm[i] = SCM(**params)
     scm[i].run_direct()
@@ -201,16 +202,14 @@ for i, run_params in enumerate(runs):
 #     V_scm  = scm[i].v_history
 
 instant = 71
-
-
 mld = (-z_r_les[(-WTH[instant]).argmax()]).data
 
 
 ################################# PLOTTING
-styles = ['-', '-', '-']
+styles = ['-', '-', '-','--',':']
 #colors = ['k',blue,orange]
-colors = ['k','tab:blue','tab:orange']
-alpha = [0.5,1,1]
+colors = ['tab:gray','tab:red','tab:green','tab:green','tab:green']
+alpha = [1,1,0.75,1,1]
 linewidth = [4]*(len(run_label))
 
 style_les = 'ko'
@@ -238,7 +237,7 @@ if case == 'W005_C500_NO_COR':
                 alpha=alpha[i], linewidth=linewidth[i], label=label)
 
     ax.set_xlim((1.65, 1.77))
-    ax.set_ylim((-1.3, 0))
+    # ax.set_ylim((-1.3, 0))
 
 
     # ===============================================================
@@ -282,8 +281,8 @@ if case == 'W005_C500_NO_COR':
     #                alpha=alpha[i], linewidth=linewidth[i], label=label)
     # ax.ticklabel_format(style='sci', axis='x', scilimits=(0, 0))
 
-    ax.plot( -scm[1].wted, scm[1].z_w/mld, color ='tab:blue'  , linestyle ='--', alpha=1.0 , linewidth=3 )
-    ax.plot( -scm[2].wted, scm[2].z_w/mld, color ='tab:orange', linestyle ='--', alpha=1.0 , linewidth=3 )
+    ax.plot( -scm[1].wted, scm[1].z_w/mld, color ='tab:red'  , linestyle ='-.', alpha=1.0 , linewidth=2 )
+    ax.plot( -scm[2].wted, scm[2].z_w/mld, color ='tab:green', linestyle ='-.', alpha=1.0 , linewidth=2 )
     # ax.plot( -out[1]['WT_ED'][-1,:], out[1].z_w/mld, color ='tab:blue'  , linestyle ='--', alpha=1.0 , linewidth=3 )
     # ax.plot( -out[2]['WT_ED'][-1,:], out[2].z_w/mld, color ='tab:orange', linestyle ='--', alpha=1.0 , linewidth=3 )
 
@@ -348,8 +347,8 @@ if case == 'W005_C500_NO_COR':
 
     ax.ticklabel_format(style='sci', axis='x', scilimits=(0, 0))
 
-    ax.plot( scm[1].wued, scm[1].z_w/mld, color ='tab:blue'  , linestyle ='--', alpha=1.0 , linewidth=3 )
-    ax.plot( scm[2].wued, scm[2].z_w/mld, color ='tab:orange', linestyle ='--', alpha=1.0 , linewidth=3 )
+    ax.plot( scm[1].wued, scm[1].z_w/mld,  color ='tab:red'  , linestyle ='-.', alpha=1.0 , linewidth=2 ) 
+    ax.plot( scm[2].wued, scm[2].z_w/mld,  color ='tab:green', linestyle ='-.', alpha=1.0 , linewidth=2 )
 
     ax.set_ylim((-1.3, 0))
 
@@ -378,117 +377,6 @@ if case == 'W005_C500_NO_COR':
 
     fig.tight_layout()
 
-
-
-###########################################################################################
-#============================================ FC ==========================================
-###########################################################################################
-
-if case == 'FC500':
-    fig, axes = plt.subplots(nrows=1, ncols=4, sharex=False,
-                         sharey=True, figsize=(15, 5))
-
-    # ===============================================================
-    ax = axes.flat[0]
-    ax.set_xlabel(r'$ C$')
-    ax.set_ylabel(r'$z / h $')
-    ax.set_title(r'$\overline{\theta}$')
-
-
-    ax.plot(TH_les[instant], z_r_les/mld, style_les,
-            alpha=alpha_les, linewidth=linewidth_les,  label='LES')
-
-    for i, label in enumerate(run_label):
-        ax.plot(scm[i].t_np1[:, 0], scm[i].z_r/mld, linestyle=styles[i], color = colors[i],
-                alpha=alpha[i], linewidth=linewidth[i], label=label)
-
-    ax.set_xlim((1.65, 1.78))
-    ax.set_ylim((-1.3, 0))
-
-    # ===============================================================
-
-
-    ax = axes.flat[1]
-    ax.set_title(r'$\overline{w^\prime \theta^\prime}$')
-
-    ax.plot(WTH[instant], z_r_les/mld, style_les,
-            alpha=alpha_les, linewidth=linewidth_les, label='LES')
-
-    for i, label in enumerate(run_label):
-        if run_label == 'ED':
-            ax.plot(-(scm[i].wted), scm[i].z_w/mld, linestyle=styles[i], color = colors[i],
-                    alpha=alpha[i], linewidth=linewidth[i], label=label)
-        else:
-            ax.plot(-(scm[i].wted + scm[i].wtmf), scm[i].z_w/mld, linestyle=styles[i], color = colors[i],
-                    alpha=alpha[i], linewidth=linewidth[i], label=label)
-    ax.ticklabel_format(style='sci', axis='x', scilimits=(0, 0))
-
-    #ax.plot( -out[1]['WT_ED'][-1,:], out[1].z_w/mld, color ='tab:blue'  , linestyle ='--', alpha=1.0 , linewidth=3 )
-    #ax.plot( -out[2]['WT_ED'][-1,:], out[2].z_w/mld, color ='tab:orange', linestyle ='--', alpha=1.0 , linewidth=3 )
-
-    ax.set_ylim((-1.3, 0))
-
-    ax.set_xlabel(r'$K.m.s^{-1}$')
-
-
-    # ===============================================================
-    # ===============================================================
-    ax = axes.flat[2]
-    ax.set_title(r'$k$')
-
-    ax.plot(TKE[instant], z_r_les/mld, style_les,
-            alpha=alpha_les, linewidth=linewidth_les, label='LES')
-
-    for i, label in enumerate(run_label):
-        ax.plot(scm[i].tke_np1, scm[i].z_w/mld, linestyle=styles[i], color = colors[i],
-                alpha=alpha[i], linewidth=linewidth[i], label=label)
-    ax.ticklabel_format(style='sci', axis='x', scilimits=(0, 0))
-
-    ax.set_xlim((-0.0001, 0.0009))
-    ax.set_ylim((-1.3, 0))
-
-    ax.set_xlabel(r'$m^2.s^{-2}$')
-
-
-
-    # ===============================================================
-    ax = axes.flat[3]
-    ax.set_title(r'$\overline{w^\prime \frac{u^{\prime 2}}{2}  }$')
-
-    ax.plot(WTKE[instant], z_r_les/mld, style_les,
-            alpha=alpha_les, linewidth=linewidth_les, label='LES')
-
-    for i, label in enumerate(run_label):
-        ax.plot((scm[i].wtke), scm[i].z_r/mld, linestyle=styles[i], color = colors[i],
-                alpha=alpha[i], linewidth=linewidth[i], label=label)
-
-
-    ax.set_xlim((- 1.1e-5, 0))
-    ax.set_ylim((-1.3, 0))
-
-    ax.set_xlabel(r'$m^3.s^{-3}$')
-
-    handles, labels = ax.get_legend_handles_labels()
-    fig.legend(handles, labels, loc='upper center', bbox_to_anchor=(
-        0.5, -0.05), fancybox=False, shadow=False, ncol=4)
-
-    for ax in axes.flat:
-        ax.set_box_aspect(1)
-
-
-
-    fig.tight_layout()
-
-    # ===============================================================
-
-
-
-
-
-
 plt.savefig(saving_path+saving_name, bbox_inches='tight', dpi=300)
-
-
 print('figure saved at'+saving_path+saving_name)
-
-plt.show()
+# plt.show()
