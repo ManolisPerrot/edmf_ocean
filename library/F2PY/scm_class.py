@@ -348,7 +348,8 @@ class SCM:
         swr_frac = scm_oce.lmd_swfrac(self.Hz,self.nz)   ## Compute fraction of solar shortwave flux penetrating to specified depth
         if self.ED_scheme=='TKE': self.do_TKE( )                        ## Initialize eddy-diffusion scheme to compute eddy diffusivity/eddy viscosity for the first time-step
         if self.ED_scheme=='Keps': self.do_KEPS( )
-        if self.bc_P09 == 'consistent': MF_sfc_flux = 0.
+        # if self.bc_P09 == 'consistent': 
+        MF_sfc_flux = 0.    #initialize ED sfc flux correction (since Fmass is not rigouroulsy zero at sfc)
         stflx0 = np.zeros(2)
         stflx0[self.isalt] = self.stflx[self.isalt]
         ####################################
@@ -363,19 +364,9 @@ class SCM:
             #===================================================
             # Advance tracers to n+1 (vertical diffusion only)
             #===================================================
-            #
-            stflx0[self.itemp] = self.stflx[self.itemp]
-            if self.bc_P09 =='consistent':
-                #print("=================")
-                #print(self.stflx[self.itemp])
-                stflx0[self.itemp] = stflx0[self.itemp] - MF_sfc_flux
-                #print(stflx0[self.itemp])
-            #    SqrTKE   =  np.sqrt(self.tke_n[-1]) # surface value of TKE
-            #    self.wp0 = -np.sqrt(0.66666667)*SqrTKE
-            ### Pergaud consistent flux correction
-            #if self.bc_P09 == 'consistent':
-            #    stflx0[:] = (1.- self.ap[-1]*self.wp0*self.beta_bc_P09 / SqrTKE)*self.stflx[:]
-            ###
+              # Correct ED sfc flux from the MF contribution
+            stflx0[self.itemp] = self.stflx[self.itemp]- MF_sfc_flux
+
             self.t_np1_star, self.tFlx = scm_oce.advance_tra_ed(
                                         self.t_n, stflx0, self.srflx,
                                         swr_frac, self.btflx, self.Hz   , self.akt  ,
@@ -397,13 +388,19 @@ class SCM:
                   self.Fmass = -(self.ap[:]*self.wp[:])
                 else:
                   self.Fmass = -(self.ap[:]*self.wp[:])/(1.-self.ap[:])
-                if self.bc_P09 == 'false': self.Fmass[-1] = 0. # zero mass flux through the surface if not Pergaud boundary conditions
             # apply the MF term to the tracer equation
             if self.MF_tra:
                 self.t_np1 = scm_oce.advance_tra_mf(
                                       self.t_np1_star, self.tp, self.Fmass, self.tFlx, self.Hz,
                                       self.dt, self.nz, self.ntra )
-                if self.bc_P09 == 'consistent': MF_sfc_flux = self.Fmass[-1]*(self.tp[-1,self.itemp]-self.t_np1_star[-1,self.itemp])
+                if self.bc_P09 == 'inconsistent':
+                    # do not correct ED flux
+                    MF_sfc_flux=0
+                else:
+                  # recompute MF at sfc
+                  # note that we don't use temp at N+1/2 but at N since it is 
+                  # how the flux is computed in the fortran routine
+                  MF_sfc_flux = self.Fmass[-1]*(self.tp[-1,self.itemp]-self.t_np1_star[-1,self.itemp])                 
             else:
                 self.t_np1[:,self.itemp] = self.t_np1_star[:,self.itemp]
                 self.t_np1[:,self.isalt] = self.t_np1_star[:,self.isalt]
@@ -554,10 +551,8 @@ class SCM:
           vint_eps_Epot = vint_eps_Epot + 0.5*self.Hz[k]*(self.eps_n[k+1]+self.eps_n[k])
         sfc_KE   = 0.5*( (self.u_np1[-1]+self.u_n[-1])*self.uFlx[-1]
                        + (self.v_np1[-1]+self.v_n[-1])*self.vFlx[-1] )
-        if self.bc_P09 == 'consistent':
-            sfc_Epot = -(1.+0.5*(self.alpha*self.g/self.cp)*self.Hz[-1])*self.tFlx[-1]
-        else:
-            sfc_Epot =  (1.+0.5*(self.alpha*self.g/self.cp)*self.Hz[-1])*self.stflx[self.itemp]
+#
+        sfc_Epot = (1.+0.5*(self.alpha*self.g/self.cp)*self.Hz[-1])*self.stflx[self.itemp]
         #
         self.vint_Epot = self.cp*( self.vint_Epot - sfc_Epot ) - vint_eps_Epot
         self.vint_Ekin = self.vint_Ekin - sfc_KE
@@ -684,13 +679,13 @@ class SCM:
         # Pergaud 2009 boundary conditions
         if self.bc_P09 != 'false':
             SqrTKE = np.sqrt(self.tke_n[-1]) # surface value of TKE
-            Tmean  = tp0[self.itemp]
-            Smean  = tp0[self.isalt]
+            self.Tmean_sfc  = tp0[self.itemp]
+            self.Smean_sfc  = tp0[self.isalt]
             wp0    = -np.sqrt(0.66666667)*SqrTKE
             self.wp0 = wp0
             # wp0    = -SqrTKE
-            tp0[self.itemp]    = Tmean + self.beta_bc_P09*self.stflx[self.itemp]/SqrTKE
-            tp0[self.isalt]    = Smean + self.beta_bc_P09*self.stflx[self.isalt]/SqrTKE
+            tp0[self.itemp]    = self.Tmean_sfc + self.beta_bc_P09*self.stflx[self.itemp]/SqrTKE
+            tp0[self.isalt]    = self.Smean_sfc + self.beta_bc_P09*self.stflx[self.isalt]/SqrTKE
         #=================================================================
         # Compute the mean quantities used to constrain the mass flux eqns
         u_mean,v_mean,t_mean,dtke_m = scm_mfc.compute_mf_forcing(
@@ -715,6 +710,11 @@ class SCM:
                                     self.nz , self.ntraMF , len(self.mf_params), len(self.eos_params)   )
         self.zinv = min(self.zinvMin,self.zinv)
     #
+        if self.bc_P09 != 'false':
+          self.tp[-1,self.itemp] = self.t_np1_star[-1,self.itemp] + self.beta_bc_P09*self.stflx[self.itemp]/SqrTKE
+        else:
+          self.tp[-1,self.itemp] = self.t_np1_star[-1,self.itemp]
+
 
 
 
