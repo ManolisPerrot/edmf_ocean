@@ -138,7 +138,7 @@ if case == 'W005_C500_NO_COR':
 # Define parameters specific to each run (overwrite common parameters):
 
 # run_label = [r'$\textit{\textbf{u}}_{h,p} = \overline{\textbf{\textit{u}}}$', r'$\textbf{\textit{u}}_{h,p} \neq \overline{\textbf{\textit{u}}}$']
-run_label = [r'nz=50', r'nz=100',r'nz=1000',r'dt=50s',r'dt=1800s']
+run_label = [r'dz=40m', r'dz=20m',r'dz=2m',r'dt=50s',r'dt=1800s']
 runs = [
     {
         'nz': 50,

@@ -10,6 +10,7 @@ sys.path.insert(0,"../../library/F2PY/")
 #import add
 import numpy as np
 import matplotlib
+matplotlib.rcParams.update(matplotlib.rcParamsDefault)
 #matplotlib.use('TkAgg')
 #matplotlib.use('pdf')
 import matplotlib.pyplot as plt
@@ -108,7 +109,7 @@ tmin  = np.zeros(nd); tmin[:]=12.875
 tmax  = np.zeros(nd); tmax[:]=13.25
 Dmax  = np.array([1000,2000,2300])
 # Create figure 1
-fig, axes = plt.subplots(nrows = 3, ncols = 2, sharex=False, sharey=False)
+fig, axes = plt.subplots(nrows = 3, ncols = 2, sharex=False, sharey=True)
 fig.set_figheight(9)
 fig.set_figwidth(6)
 #===============================
@@ -120,7 +121,7 @@ for i in range(len(runs)):
 for x in range(nd):
   ntime     = tscm[x]
   ntime_dta = tdtm[x]
-  hmax      = Dmax[x]
+  hmax      = 2500. #Dmax[x]
   #===
   nc_dta    = Dataset(data_file, mode='r')
   print(nc_dta.variables['ocean_time'][ntime_dta]/(3600*24))

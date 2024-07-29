@@ -103,17 +103,19 @@ scm_params = {
     'entr_scheme': 'R10',
     'Cent': 0.99,
     'Cdet': 1.99,       # 'Cdet': 2.5,
-    'wp_a': 1.3,
-    'wp_b': 1.3,      # 'wp_b': 1.
-    'wp_bp': 0.003*250,     #      0.002,
-    'up_c': 0.5,
+    'wp_a': 1.3,   #1
+    'wp_b': 1.3,     #1.
+    'wp_bp': 0.003*250,    
+    'up_c': 0.5, 
     'vp_c': 0.5,
     'bc_ap': 0.2,    #0.3,
-    'delta_bkg': 0.009*250,   # 0.006,
+    'delta_bkg': 0.009*250,   # 0.005,
     'wp0' : -0.5e-08,
     'output_filename': 'run',
+    'beta_bc_P09': 0.3,
     'write_netcdf': True
 }
+
 
 # Define parameters specific to each run (overwrite previous parameters):
 run_label = [r'ED+EVD',r'EDMF-inconsistent',  r'EDMF-Energy (\texttt{bc\_P09=false})', r'EDMF-Energy (\texttt{bc\_P09=consistent})',r'EDMF-Energy (\texttt{bc\_P09=inconsistent})']
@@ -373,7 +375,7 @@ if case == 'W005_C500_NO_COR':
 
     handles, labels = ax.get_legend_handles_labels()
     fig.legend(handles, labels, loc='upper center', bbox_to_anchor=(
-        0.5, -0.008), fancybox=False, shadow=False, ncol=4)
+        0.5, -0.008), fancybox=False, shadow=False, ncol=3)
 
     fig.tight_layout()
 

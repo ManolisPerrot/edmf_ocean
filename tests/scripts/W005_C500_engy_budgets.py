@@ -60,7 +60,7 @@ common_params = {
     'mass_flux_dyn': True,
     'mass_flux_tke': True,
     'mass_flux_tke_trplCorr': True,
-    'mass_flux_small_ap': False,
+    'mass_flux_small_ap': True,
     'lin_eos': True,
     'extrap_ak_surf': True,
     'tke_sfc_dirichlet': False,
@@ -77,6 +77,7 @@ common_params = {
     'delta_bkg': 0.009*250,   # 0.006,
     'wp0' : -0.5e-08,
     'output_filename': 'run',
+    'beta_bc_P09': 0.3,
     'write_netcdf': True
 }
 
@@ -183,7 +184,7 @@ ax.set_title(r'\rm{Vertically integrated total energy budget}')
 ax.set_xlabel(r'\rm{time} (hours)')
 ax.set_ylabel(r'${\rm m}^{3}\;{\rm s}^{-3}$')
 ax.plot( (out[0]['Etot'] )[1:]  ,color='tab:red'  , linewidth=3 , alpha=1, linestyle = '-', label=run_label[0])
-ax.plot(0.5*2.456e-7*out[0]['zinv'], color='k', label=r'$B_0 h/2$')
+ax.plot(0.5*2.456e-7*out[0]['zinv'], color='tab:gray', linestyle='--', label=r'$B_0 h/2$')
 ax.plot( (out[2]['Etot'] )[1:]  ,color='tab:green', linewidth=3 , alpha=0.75, linestyle = '-', label=run_label[2])
 ax.plot( (out[3]['Etot'] )[1:]  ,color='tab:green', linewidth=3 , alpha=1, linestyle = '--', label=run_label[3])
 ax.plot( (out[1]['Etot'] )[1:]  ,color='tab:green', linewidth=3 , alpha=1, linestyle = ':', label=run_label[1])

@@ -91,6 +91,7 @@ scm_params = {
     'h0': 2000.,
     'thetas': 6.5,
     'hc': 400,
+    'cpoce':3800,
     'nbhours': 72,
     'outfreq': 1,
     'eddy_diff': True,
@@ -213,6 +214,7 @@ for i, run_params in enumerate(runs):
 #     V_scm  = scm[i].v_history
 
 instant = 71
+instant_les=71
 mld = (-z_r_les[(-WTH[instant]).argmax()]).data
 
 
@@ -246,14 +248,14 @@ if case == 'FC500':
     ax.set_title(r'$\overline{\theta}$')
 
 
-    ax.plot(TH_les[instant], z_r_les/mld, style_les,
+    ax.plot(TH_les[instant_les], z_r_les/mld, style_les,
             alpha=alpha_les, linewidth=linewidth_les,  label='LES')
 
     for i, label in enumerate(run_label):
         ax.plot(scm[i].t_np1[:, 0], scm[i].z_r/mld, linestyle=styles[i], color = colors[i],
                 alpha=alpha[i], linewidth=linewidth[i], label=label)
 
-    ax.set_xlim((1.65, 1.78))
+    ax.set_xlim((1.65, 1.76))
     ax.set_ylim((-1.3, 0))
 
     # ===============================================================
@@ -329,7 +331,7 @@ if case == 'FC500':
 
     handles, labels = ax.get_legend_handles_labels()
     fig.legend(handles, labels, loc='upper center', bbox_to_anchor=(
-        0.5, -0.05), fancybox=False, shadow=False, ncol=4)
+        0.5, -0.05), fancybox=False, shadow=False, ncol=3)
 
     for ax in axes.flat:
         ax.set_box_aspect(1)
