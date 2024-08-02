@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+      <meta name="description" content="Documentation for SCM-EDMF ocean">
+    <meta name="author" content="M. Perrot / F. Lemarié" >
+    <link rel="icon" href="../favicon.png">
+
+    <title>All Procedures &ndash; SCM-EDMF ocean
+</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+    <link href="../css/pygments.css" rel="stylesheet">
+    <link href="../css/font-awesome.min.css" rel="stylesheet">
+    <link href="../css/local.css" rel="stylesheet">
+      <link  href="../tipuesearch/tipuesearch.css" rel="stylesheet">
+
+    <script src="https://code.jquery.com/jquery-3.7.0.slim.min.js" integrity="sha256-tG5mcZUtJsZvyKAxYLVXrmjKBVLd6VpVccqz/r4ypFE=" crossorigin="anonymous"></script>
+  </head>
+
+  <body>
+
+    <!-- Fixed navbar -->
+    <div class="container-fluid mb-sm-4 mb-xl-2">
+      <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+        <div class="container">
+          <a class="navbar-brand" href="../index.html">SCM-EDMF ocean </a>
+          <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbar"
+                  aria-expanded="false" aria-controls="navbar" aria-label="Toggle navigation">
+                  <span class="navbar-toggler-icon">
+          </button>
+
+          <div id="navbar" class="navbar-collapse collapse">
+            <ul class="navbar-nav">
+                  <li class="nav-item">
+                    <a class="nav-link" href="../lists/files.html">Source Files</a>
+                  </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="../lists/modules.html">Modules</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="../lists/procedures.html">Procedures</a>
+                </li>
+            </ul>
+              <div class="d-flex align-items-end flex-grow-1">
+                <form action="../search.html" role="search" class="ms-auto">
+                  <input type="text" class="form-control" aria-label="Search" placeholder="Search" name="q" id="tipue_search_input" autocomplete="off" required>
+                </form>
+              </div>
+          </div><!--/.nav-collapse -->
+        </div>
+      </nav>
+    </div>
+
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-12" id='text'>
+			 <h1>Procedures</h1>
+			 <table class="table table-striped">
+			 <thead><tr><th>Procedure</th><th>Location</th><th>Procedure Type</th><th>Description</th></tr></thead>
+			 <tbody>
+			   <tr><td><a href='../proc/advance_dyn_cor_ed.html'>advance_dyn_Cor_ED</a></td><td><a href='../module/scm_oce.html'>scm_oce</a></td><td>Subroutine</td><td><p>============================================================================<br />
+                  ***  ROUTINE advance_dyn_Cor_ED  ***                      <br />
+ ** Purposes : integrate vertical viscosity and Coriolis terms for dynamics <br />
+============================================================================<br />
+ 1- Compute Coriolis term <br />
+ if n is even
+ <script type="math/tex; mode=display">\begin{align*}
+ u^{n+1,\star} &= u^n + \Delta t f v^n \\
+ v^{n+1,\star} &= v^n - \Delta t f u^{n+1,\star}
+ \end{align*}</script>
+ if n is odd
+ <script type="math/tex; mode=display">\begin{align*}
+ v^{n+1,\star} &= v^n - \Delta t f u^n \\
+ u^{n+1,\star} &= u^n + \Delta t f v^{n+1,\star}
+ \end{align*}</script>
+ 2 - Apply surface forcing <br />
+ 3 - Implicit integration for vertical viscosity <br />
+ <script type="math/tex; mode=display">\begin{align*}
+ \mathbf{u}^{n+1,\star \star} &= \mathbf{u}^{n+1,\star} + \Delta t \partial_z \left(  K_m \partial_z  \mathbf{u}^{n+1,\star \star} \right)  \\
+ \end{align*}</script>
+</p></td></tr>
+			   <tr><td><a href='../proc/advance_dyn_mf.html'>advance_dyn_MF</a></td><td><a href='../module/scm_oce.html'>scm_oce</a></td><td>Subroutine</td><td><p>==========================================================================<br />
+                  ***  ROUTINE advance_dyn_MF  ***                        <br />
+ ** Purposes : integrate mass flux term for dynamics and compute transfer
+                         of KE to TKE related to the mass flux            <br />
+==========================================================================<br />
+ <script type="math/tex; mode=display"> \mathbf{u}^{n+1} = \mathbf{u}^{n+1,\star \star} - \Delta t \partial_z\left( a^{\rm p} w^{\rm p} \left( \mathbf{u}^{\rm p} - \mathbf{u}^{n+1,\star \star}  \right)   \right) </script>
+ Compute the shear term associated with mass flux
+ <script type="math/tex; mode=display"> {\rm Sh}^{\rm p} = - a^{\rm p} w^{\rm p} \left( \mathbf{u}^{\rm p} - \mathbf{u}^{n+1,\star \star}  \right) \cdot \frac{1}{2} \left( \partial_z \mathbf{u}^n + \partial_z \mathbf{u}^{n+1}  \right) </script>
+</p></td></tr>
+			   <tr><td><a href='../proc/advance_tke.html'>advance_tke</a></td><td><a href='../module/scm_tke.html'>scm_tke</a></td><td>Subroutine</td><td><p>==========================================================================<br />
+                  ***  ROUTINE advance_tke  ***                           <br />
+ ** Purposes : tke time stepping, advance tke from time step n to n+1     <br />
+==========================================================================<br />
+ Dissipative mixing length : <script type="math/tex"> (l_\epsilon)_{k+1/2} = \sqrt{ l_{\rm up} l_{\rm dwn} }   </script>  <br />
+ Inverse Prandtl number function of Richardson number <br /></p><a href="../proc/advance_tke.html" class="pull-right"><emph>Read more&hellip;</emph></a></td></tr>
+			   <tr><td><a href='../proc/advance_tra_ed.html'>advance_tra_ED</a></td><td><a href='../module/scm_oce.html'>scm_oce</a></td><td>Subroutine</td><td><p>============================================================================<br />
+                  ***  ROUTINE advance_tra_ED  ***                          <br />
+ ** Purposes : integrate vertical diffusion term for tracers                <br />
+============================================================================<br />
+ <script type="math/tex; mode=display"> \overline{\phi}^{n+1,*} = \overline{\phi}^n + \Delta t \partial_z \left(  K_m \partial_z  \overline{\phi}^{n+1,*} \right) </script>
+ 1 - Compute fluxes associated to solar penetration and surface bdy condition <br /></p><a href="../proc/advance_tra_ed.html" class="pull-right"><emph>Read more&hellip;</emph></a></td></tr>
+			   <tr><td><a href='../proc/advance_tra_mf.html'>advance_tra_MF</a></td><td><a href='../module/scm_oce.html'>scm_oce</a></td><td>Subroutine</td><td><p>============================================================================<br />
+                  ***  ROUTINE advance_tra_MF  ***                          <br />
+ ** Purposes : integrate mass flux term for tracers                         <br />
+============================================================================<br />
+ Compute fluxes associated to mass flux <script type="math/tex"> F_{k+1/2}^{\rm MF} = (a^{\rm p}w^{\rm p})_{k+1/2}\left( \phi^{\rm p}_{k+1/2} - \overline{\phi}_k^{n+1,\star} \right)  </script> <br />
+ <script type="math/tex">   \overline{\phi}_k^{n+1} = \overline{\phi}_k^{n+1,\star} + \frac{\Delta t}{\Delta z_k} ( F_{k+1/2}^{\rm MF}-F_{k-1/2}^{\rm MF} )   </script>
+</p></td></tr>
+			   <tr><td><a href='../proc/compute_ed.html'>compute_ED</a></td><td><a href='../module/scm_tke.html'>scm_tke</a></td><td>Subroutine</td><td><p>============================================================================<br />
+                  ***  ROUTINE compute_ED  ***                              <br />
+ ** Purposes : compute the vertical eddy viscosity and diffusivity          <br />
+============================================================================<br />
+ Compute "master" mixing length <script type="math/tex"> (l_m)_{k+1/2} = \min( (l_{\rm up})_{k+1/2}, (l_{\rm dwn})_{k+1/2} ) </script><br />
+ Compute eddy-viscosity <script type="math/tex"> (K_m)_{k+1/2} = C_m l_m \sqrt{k_{k+1/2}^{n+1}}  </script><br />
+ Compute eddy-diffusivity <script type="math/tex"> (K_s)_{k+1/2} = ({\rm Pr}_t)^{-1}_{k+1/2}   (K_m)_{k+1/2} </script><br />
+ if <script type="math/tex"> {\rm extrap\_sfc = True} \qquad \rightarrow \qquad (K_m)_{N+1/2} = \frac{3}{2} (K_m)_{N-1/2} - \frac{1}{2} (K_m)_{N-3/2} </script>
+</p></td></tr>
+			   <tr><td><a href='../proc/compute_evd.html'>compute_evd</a></td><td><a href='../module/scm_oce.html'>scm_oce</a></td><td>Subroutine</td><td><p>==========================================================================<br />
+                  ***  ROUTINE compute_evd  ***                           <br />
+ ** Purposes : compute enhanced vertical diffusion/viscosity
+                                   where the density profile is unstable  <br />
+==========================================================================<br /></p></td></tr>
+			   <tr><td><a href='../proc/compute_mf_bdy.html'>compute_MF_bdy</a></td><td><a href='../module/scm_mfc.html'>scm_mfc</a></td><td>Subroutine</td><td><p>==========================================================================<br />
+                  ***  ROUTINE compute_MF_bdy  ***                        <br />
+ ** Purposes : compute top initial condition for mass flux equation       <br />
+==========================================================================<br />
+ <script type="math/tex"> w^{\rm p}_{\rm sfc} = - w^{\rm p}_{\min} </script><br /></p><a href="../proc/compute_mf_bdy.html" class="pull-right"><emph>Read more&hellip;</emph></a></td></tr>
+			   <tr><td><a href='../proc/compute_mf_forcing.html'>compute_MF_forcing</a></td><td><a href='../module/scm_mfc.html'>scm_mfc</a></td><td>Subroutine</td><td><p>==========================================================================<br />
+                  ***  ROUTINE compute_MF_forcing  ***                    <br />
+ ** Purposes : compute mean quantities used to force the MF equations     <br />
+==========================================================================<br />
+ <script type="math/tex"> \overline{\phi}_{k} = \phi^{\rm scm}_k </script>  <br />
+ <script type="math/tex"> k_{k+1/2} = \frac{1}{2} (k^{\rm scm}_{k+1/2}+k^{\rm scm}_{k-1/2}) </script>  <br />
+ <script type="math/tex"> \overline{u}_{k} = u^{\rm scm}_k </script>  <br />
+ <script type="math/tex"> \overline{v}_{k} = v^{\rm scm}_k </script>  <br /></p></td></tr>
+			   <tr><td><a href='../proc/compute_mxl.html'>compute_mxl</a></td><td><a href='../module/scm_oce.html'>scm_oce</a></td><td>Subroutine</td><td></td></tr>
+			   <tr><td><a href='../proc/compute_mxl~2.html'>compute_mxl</a></td><td><a href='../module/scm_tke.html'>scm_tke</a></td><td>Subroutine</td><td><p>============================================================================<br />
+                  ***  ROUTINE compute_mxl  ***                             <br />
+ ** Purposes : compute mixing length scales                                 <br />
+============================================================================<br />
+ <script type="math/tex"> u_{\star}^2 = \sqrt{\tau_x^2 + \tau_y^2} </script><br /></p><a href="../proc/compute_mxl~2.html" class="pull-right"><emph>Read more&hellip;</emph></a></td></tr>
+			   <tr><td><a href='../proc/compute_mxl2.html'>compute_mxl2</a></td><td><a href='../module/scm_oce.html'>scm_oce</a></td><td>Subroutine</td><td></td></tr>
+			   <tr><td><a href='../proc/compute_shear.html'>compute_shear</a></td><td><a href='../module/scm_tke.html'>scm_tke</a></td><td>Subroutine</td><td><p>==========================================================================<br />
+                  ***  ROUTINE compute_shear  ***                         <br />
+ ** Purposes : compute shear production term for TKE equation             <br />
+==========================================================================<br />
+ Shear production term using discretization from Burchard (2002) <br />
+ <script type="math/tex"> {\rm Sh}_{k+1/2} = \frac{ (K_m)_{k+1/2} }{ \Delta z_{k+1/2}^2 } ( u_{k+1}^n - u_{k}^n ) ( u_{k+1}^{n+1/2} - u_{k}^{n+1/2} )  </script>
+</p></td></tr>
+			   <tr><td><a href='../proc/compute_tke_bdy.html'>compute_tke_bdy</a></td><td><a href='../module/scm_tke.html'>scm_tke</a></td><td>Subroutine</td><td><p>==========================================================================<br />
+                  ***  ROUTINE compute_tke_bdy  ***                       <br />
+ ** Purposes : compute top and bottom boundary conditions for TKE equation<br />
+==========================================================================<br />
+ free convection case ( <script type="math/tex"> {\rm tke\_sfc\_dirichlet = True}  </script> ) :
+ <script type="math/tex"> k_{\rm sfc} = 1.5 \times 10^{-3}\;{\rm m}^2\;{\rm s}^{-2} </script><br />
+ wind_cooling case ( <script type="math/tex"> {\rm tke\_sfc\_dirichlet = False}  </script> ) : <script type="math/tex">  F_{\rm sfc}^k = \left.  K_e \partial_z k \right|_{\rm sfc} = 0\;{\rm m}^3\;{\rm s}^{-3}    </script> <br />
+ bottom boundary condition : <script type="math/tex"> k_{\rm bot} = k_{\rm min}  </script>
+</p></td></tr>
+			   <tr><td><a href='../proc/compute_triplecorr.html'>compute_tripleCorr</a></td><td><a href='../module/scm_mfc.html'>scm_mfc</a></td><td>Subroutine</td><td><p>==========================================================================<br />
+                  ***  ROUTINE compute_tripleCorr  ***                    <br />
+ ** Purposes : compute contribution of MF terms to turbulent flux w'e     <br />
+   <script type="math/tex; mode=display"> \overline{w'e}_{\rm MF} = a^{\rm p} w^{\rm p} \underbrace{\left[ \frac{1}{1-a^{\rm p}} \right]}_{\rm small\_ap = False} \left\{ \left(  k^{\rm p} - k^n \right)
+    + \frac{1}{2} \| \mathbf{v}^p - \mathbf{v}^{n+1} \|^2 \right\}  </script>     <br />
+==========================================================================<br />
+ <script type="math/tex"> F_{k} = (a^{\rm p} w^{\rm p})_{k+1/2} ( k^{\rm p}_{k+1/2} - k_{k-1/2}^n ) </script><br />
+ <script type="math/tex"> F_{k} = F_{k} + \frac{(a^{\rm p} w^{\rm p})_{k+1/2}}{2}\left(  \mathbf{v}^{\rm p}_{k+1/2} - \mathbf{v}^{n+1}_{k} \right)^2  </script> <br />
+ <script type="math/tex"> {\rm TOM}_{k+1/2} = \frac{ F_{k+1}-F_{k} }{ \Delta z_{k+1/2} }   </script> <br /></p><a href="../proc/compute_triplecorr.html" class="pull-right"><emph>Read more&hellip;</emph></a></td></tr>
+			   <tr><td><a href='../proc/det_p09.html'>Det_P09</a></td><td><a href='../module/scm_mfc.html'>scm_mfc</a></td><td>Function</td><td><p>Detrainment <script type="math/tex"> {\rm Det\_P09} = -\frac{D_k w^{\rm p}}{a^{\rm p}} = (- C_\delta)\min\left( B^{\rm p}, 0 \right) + \delta_0 (w^{\rm p})^2 </script>
+</p></td></tr>
+			   <tr><td><a href='../proc/det_r10.html'>Det_R10</a></td><td><a href='../module/scm_mfc.html'>scm_mfc</a></td><td>Function</td><td><p>Detrainment <script type="math/tex"> {\rm Det\_R10} = -\frac{D_k h_k}{a^p} = \min\left( \beta_2(w_{k+1/2}^p-w_{k-1/2}^p), 0 \right) + \min\left(-2 w^{\rm p}_{\min}, h_k \delta_0 \frac{w_{k+1/2}^p+w_{k-1/2}^p}{2} \right) </script>  <br />
+The minimum detrainment <script type="math/tex"> -2 w^{\rm p}_{\min} </script> ensures that <script type="math/tex"> a^{\rm p}_{k-1/2} = 0 </script> as soon as <script type="math/tex"> w^{\rm p}_{k+1/2} = w^{\rm p}_{k-1/2} = -w^{\rm p}_{\min} </script>
+</p></td></tr>
+			   <tr><td><a href='../proc/ent_p09.html'>Ent_P09</a></td><td><a href='../module/scm_mfc.html'>scm_mfc</a></td><td>Function</td><td><p>Entrainment <script type="math/tex"> {\rm Ent\_P09} = \frac{E_k w^{\rm p}}{a^{\rm p}} = C_\epsilon \max\left( B^{\rm p}, 0 \right)  </script>
+</p></td></tr>
+			   <tr><td><a href='../proc/ent_r10.html'>Ent_R10</a></td><td><a href='../module/scm_mfc.html'>scm_mfc</a></td><td>Function</td><td><p>Entrainment <script type="math/tex"> {\rm Ent\_R10} = \frac{E_k h_k}{a^p} = \max\left( \beta_1(w_{k+1/2}^p-w_{k-1/2}^p), 0 \right)  </script>
+</p></td></tr>
+			   <tr><td><a href='../proc/eos_val.html'>eos_val</a></td><td><a href='../module/scm_mfc.html'>scm_mfc</a></td><td>Subroutine</td><td><p>==========================================================================<br />
+                  ***  ROUTINE rho_eos  ***                           <br />
+ ** Purposes : Compute density anomaly and Brunt Vaisala frequency via nonlinear
+                                                  Equation Of State (EOS) <br />
+==========================================================================<br /></p></td></tr>
+			   <tr><td><a href='../proc/eos_val_lin.html'>eos_val_lin</a></td><td><a href='../module/scm_mfc.html'>scm_mfc</a></td><td>Subroutine</td><td><p>==========================================================================<br />
+                  ***  ROUTINE eos_val_lin  ***                           <br />
+ ** Purposes : compute density anomaly from linear equation of state      <br />
+==========================================================================<br />
+ <script type="math/tex">   \rho_{k} = \rho_0 \left( 1 - \alpha (\theta - 2) + \beta (S - 35)   \right)  </script>  <br /></p><a href="../proc/eos_val_lin.html" class="pull-right"><emph>Read more&hellip;</emph></a></td></tr>
+			   <tr><td><a href='../proc/get_a_p_p09.html'>get_a_p_P09</a></td><td><a href='../module/scm_mfc.html'>scm_mfc</a></td><td>Subroutine</td><td><p>==========================================================================<br />
+                  ***  ROUTINE get_w_p_P09  ***                           <br />
+ ** Purposes : compute plume vertical velocity for Pergaud et al. (2009)
+                        entrainment/detrainement closure                  <br />
+==========================================================================<br /></p></td></tr>
+			   <tr><td><a href='../proc/get_a_p_r10.html'>get_a_p_R10</a></td><td><a href='../module/scm_mfc.html'>scm_mfc</a></td><td>Subroutine</td><td><p>==========================================================================<br />
+                  ***  ROUTINE get_a_p_R10  ***                           <br />
+ ** Purposes : compute plume fractional area for Rio et al. (2010)
+                        entrainment/detrainement closure                  <br />
+==========================================================================<br />
+ <script type="math/tex">   {\rm EmD}_k = \frac{h_k}{a^{\rm p}} \left( E_k - D_k \right) = {\rm Ent\_R10} + {\rm Det\_R10}  </script>  <br />
+ <script type="math/tex">  a^{\rm p}_{k-1/2} = a^{\rm p}_{k+1/2} \left(  \frac{2 w^{\rm p}_{k+1/2} - {\rm EmD}_k}{2 w^{\rm p}_{k-1/2} + {\rm EmD}_k}   \right)   </script> <br /></p></td></tr>
+			   <tr><td><a href='../proc/get_dtke_p_r10.html'>get_dtke_p_R10</a></td><td><a href='../module/scm_mfc.html'>scm_mfc</a></td><td>Subroutine</td><td><p>==========================================================================<br />
+                  ***  ROUTINE get_dtke_p_R10  ***                           <br />
+ ** Purposes : compute plume TKE for Rio et al. (2010)
+                        entrainment/detrainement closure                  <br />
+==========================================================================<br />
+ <script type="math/tex">  (\delta w^{\rm p})_{k}^{+} = \max( w^{\rm p}_{k+1/2}-w^{\rm p}_{k-1/2}  ,0) </script>  <br />
+ <script type="math/tex">  \chi_k = \frac{\beta_1}{w^{\rm p}_{k+1/2}+w^{\rm p}_{k-1/2}} (\delta w^{\rm p})_{k}^{+} \equiv \frac{E_k h_k}{2 a^{\rm p} w^{\rm p}}     </script> <br />
+ <script type="math/tex"> (e^{\rm p}-e)_{k-1/2} = \frac{(1+\chi_k)(e^{\rm p}-e)_{k+1/2} - \chi_k \| \mathbf{u}^{\rm p} - \mathbf{u} \|_k^2 + (e_{k+1/2}-e_{k-1/2}) + \frac{2 h_k}{w^{\rm p}_{k+1/2}+w^{\rm p}_{k-1/2}} \epsilon_{k+1/2}^{\rm p}   }{1-\chi_k}    </script>
+</p></td></tr>
+			   <tr><td><a href='../proc/get_t_p_p09.html'>get_t_p_P09</a></td><td><a href='../module/scm_mfc.html'>scm_mfc</a></td><td>Subroutine</td><td><p>==========================================================================<br />
+                  ***  ROUTINE get_t_p_P09  ***                           <br />
+ ** Purposes : compute plume tracer properties for Pergaud et al. (2009)
+                        entrainment/detrainement closure                  <br />
+==========================================================================<br /></p></td></tr>
+			   <tr><td><a href='../proc/get_t_p_r10.html'>get_t_p_R10</a></td><td><a href='../module/scm_mfc.html'>scm_mfc</a></td><td>Subroutine</td><td><p>==========================================================================<br />
+                  ***  ROUTINE get_t_p_R10  ***                           <br />
+ ** Purposes : compute plume tracer properties for Rio et al. (2010)
+                        entrainment/detrainement closure                  <br />
+==========================================================================<br />
+ <script type="math/tex">  \Phi^{\rm p}_{k+1/2} = a^{\rm p}_{k+1/2} w^{\rm p}_{k+1/2} \phi^{\rm p}_{k+1/2}  </script>  <br />
+ <script type="math/tex">  a^{\rm p}_{k} = \frac{a^{\rm p}_{k+1/2}+a^{\rm p}_{k-1/2}}{2}  </script>  <br />
+ <script type="math/tex"> \Phi^{\rm p}_{k-1/2} = \Phi^{\rm p}_{k+1/2} - a^{\rm p}_{k} \left( \underbrace{\frac{E_k h_k}{a^p}}_{\rm Ent\_R10} \phi_{k}^{\rm e} \underbrace{- \frac{D_k h_k}{a^p}}_{\rm Det\_R10} \phi_{k+1/2}^{\rm p}     \right)    </script> <br />
+ <script type="math/tex"> \phi^{\rm p}_{k-1/2} = \frac{\Phi^{\rm p}_{k-1/2}}{( a^{\rm p} w^{\rm p} )_{k-1/2}} </script>  <br /></p></td></tr>
+			   <tr><td><a href='../proc/get_w_p_p09.html'>get_w_p_P09</a></td><td><a href='../module/scm_mfc.html'>scm_mfc</a></td><td>Subroutine</td><td><p>==========================================================================<br />
+                  ***  ROUTINE get_w_p_P09  ***                           <br />
+ ** Purposes : compute plume vertical velocity for Pergaud et al. (2009)
+                        entrainment/detrainement closure                  <br />
+==========================================================================<br /></p></td></tr>
+			   <tr><td><a href='../proc/get_w_p_r10.html'>get_w_p_R10</a></td><td><a href='../module/scm_mfc.html'>scm_mfc</a></td><td>Subroutine</td><td><p>==========================================================================<br />
+                  ***  ROUTINE get_w_p_R10  ***                           <br />
+ ** Purposes : compute plume vertical velocity for Rio et al. (2010)
+                        entrainment/detrainement closure                  <br />
+==========================================================================<br />
+ <script type="math/tex">   {\rm rhs}_{k}^{\star} = 2 b'( w^{\rm p}_{k+1/2} )^2 + 2 a B_{k}^{\rm p}  </script>  <br />
+ if <script type="math/tex"> {\rm rhs}_{k}^{\star} < 0 \Rightarrow \alpha_w = 1 + b \beta_1 </script>, <script type="math/tex"> \alpha_w = 1 </script> otherwise <br />
+ <script type="math/tex">  ( w^{\rm p}_{k-1/2} )^2 = \frac{ (\alpha_w - h_k b') ( w^{\rm p}_{k+1/2} )^2 - 2 a h_k B_{k}^{\rm p} }{\alpha_w + h_k b'}</script> <br /></p><a href="../proc/get_w_p_r10.html" class="pull-right"><emph>Read more&hellip;</emph></a></td></tr>
+			   <tr><td><a href='../proc/lmd_swfrac.html'>lmd_swfrac</a></td><td><a href='../module/scm_oce.html'>scm_oce</a></td><td>Subroutine</td><td><p>==========================================================================<br />
+                  ***  ROUTINE lmd_swfrac  ***                            <br />
+ ** Purposes : Compute fraction of solar shortwave flux penetrating to specified
+                depth due to exponential decay in Jerlov water type.      <br />
+==========================================================================<br /></p></td></tr>
+			   <tr><td><a href='../proc/mass_flux_p09.html'>mass_flux_P09</a></td><td><a href='../module/scm_mfc.html'>scm_mfc</a></td><td>Subroutine</td><td><p>==========================================================================<br />
+                  ***  ROUTINE mass_flux_P09  ***                           <br />
+ ** Purposes : solve mass-flux equations for Pergaud et al. (2009)
+                        entrainment/detrainement closure                  <br />
+ <script type="math/tex; mode=display">\begin{align*} E &= \frac{C_\epsilon a^{\rm p}}{w^{\rm p}}  \min(0, B^{\rm p}) \\
+                D &= \frac{C_\delta a^{\rm p}}{w^{\rm p}} \max( 0, B^{\rm p}) - a^{\rm p}w^{\rm p}\delta_0  \end{align*}</script>
+==========================================================================<br />
+ Compute <script type="math/tex"> B^{\rm p}_{k} </script>
+<script type="math/tex; mode=display"> B^{\rm p}_{k} = - \frac{g}{\rho_0} \left( \rho^{\rm p}_{k+1/2} - \overline{\rho}_k \right) </script>
+ Compute <script type="math/tex"> w^{\rm p}_{k-1/2} </script>
+<script type="math/tex; mode=display"> (w^{\rm p})^{2}_{k+1/2} - (w^{\rm p})^{2}_{k-1/2} =
+  h_k b' \left((w^{\rm p})^{2}_{k+1/2} + (w^{\rm p})^{2}_{k-1/2}\right)
+ + 2 h_k \left( a \max(B^{\rm p}_{k},0) + (a-b C_\epsilon) \min(B^{\rm p}_{k},0)  \right)</script>
+ Compute <script type="math/tex"> a^{\rm p}_{k-1/2} </script>
+<script type="math/tex; mode=display"> (a^{\rm p}w^{\rm p})_{k+1/2} -(a^{\rm p}w^{\rm p})_{k-1/2} =
+ \frac{a^{\rm p}_{k+1/2}+a^{\rm p}_{k-1/2}}{w^{\rm p}_{k+1/2}+w^{\rm p}_{k-1/2}}
+ \left( C_\epsilon h_k \min(B^{\rm p}_{k},0) - C_\delta h_k \max(B^{\rm p}_{k},
+ - \frac{\delta_0}{2 C_\delta} \left((w^{\rm p})^{2}_{k+1/2} + (w^{\rm p})^{2}_{k-1/2}\right) )   \right)  </script>
+ Compute environment <script type="math/tex"> \phi^{\rm e}_k </script>
+</p></td></tr>
+			   <tr><td><a href='../proc/mass_flux_r10.html'>mass_flux_R10</a></td><td><a href='../module/scm_mfc.html'>scm_mfc</a></td><td>Subroutine</td><td><p>==========================================================================<br />
+                  ***  ROUTINE mass_flux_R10  ***                         <br />
+ ** Purposes : solve mass-flux equations for Rio et al. (2010)
+                        entrainment/detrainement closure                  <br />
+ <script type="math/tex; mode=display">\begin{align*} E &= a^{\rm p} \beta_1 \max(0, \partial_z w^{\rm p}) \\
+                D &= - a^{\rm p} \beta_2 \min\left( 0 , \partial_z w^{\rm p} \right) -  a^{\rm p} w^{\rm p} \delta_0  \end{align*}</script> <br /></p><a href="../proc/mass_flux_r10.html" class="pull-right"><emph>Read more&hellip;</emph></a></td></tr>
+			   <tr><td><a href='../proc/rho_eos.html'>rho_eos</a></td><td><a href='../module/scm_oce.html'>scm_oce</a></td><td>Subroutine</td><td><p>==========================================================================<br />
+                  ***  ROUTINE rho_eos  ***                           <br />
+ ** Purposes : Compute density anomaly and Brunt Vaisala frequency via nonlinear
+                                                  Equation Of State (EOS) <br />
+==========================================================================<br /></p></td></tr>
+			   <tr><td><a href='../proc/rho_eos2.html'>rho_eos2</a></td><td><a href='../module/scm_oce.html'>scm_oce</a></td><td>Subroutine</td><td><p>==========================================================================<br />
+                  ***  ROUTINE rho_eos  ***                           <br />
+ ** Purposes : Compute density anomaly and Brunt Vaisala frequency via nonlinear
+                                                  Equation Of State (EOS) <br />
+==========================================================================<br /></p></td></tr>
+			   <tr><td><a href='../proc/rho_eos_lin.html'>rho_eos_lin</a></td><td><a href='../module/scm_oce.html'>scm_oce</a></td><td>Subroutine</td><td><p>==========================================================================<br />
+                  ***  ROUTINE rho_eos_lin  ***                           <br />
+ ** Purposes : Compute density anomaly and Brunt Vaisala frequency via linear
+                                                  Equation Of State (EOS) <br />
+==========================================================================<br />
+ <script type="math/tex">   \rho_{k} = \rho_0 \left( 1 - \alpha (\theta - 2) + \beta (S - 35)   \right)  </script>  <br />
+  <script type="math/tex">   (N^2)_{k+1/2} = - \frac{g}{\rho_0}  \frac{ \rho_{k+1}-\rho_{k} }{\Delta z_{k+1/2}} </script>
+</p></td></tr>
+			   <tr><td><a href='../proc/tridiag_solve.html'>tridiag_solve</a></td><td><a href='../module/scm_oce.html'>scm_oce</a></td><td>Subroutine</td><td><p>============================================================================<br />
+                  ***  ROUTINE tridiag_solve  ***                           <br />
+ ** Purposes : solve the tridiagonal problem associated with the implicit
+                         in time treatment of vertical diffusion/viscosity  <br />
+============================================================================<br /></p></td></tr>
+			   <tr><td><a href='../proc/tridiag_solve_tke.html'>tridiag_solve_tke</a></td><td><a href='../module/scm_tke.html'>scm_tke</a></td><td>Subroutine</td><td><p>============================================================================<br />
+                  ***  ROUTINE tridiag_solve_tke  ***                       <br />
+ ** Purposes : solve the tridiagonal problem associated with the implicit
+                                         in time treatment of TKE equation  <br />
+============================================================================<br /></p></td></tr>
+			 </tbody></table>
+             
+        </div>
+      </div>
+      <hr>
+    </div> <!-- /container -->
+    <footer>
+      <div class="container">
+        <div class="row justify-content-between">
+          <div class="col"><p>SCM-EDMF ocean was developed by M. Perrot / F. Lemarié<br>&copy; 2024 
+</p>
+          </div>
+          <div class="col">
+            <p class="text-end">
+              Documentation generated by
+              <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
+            </p>
+          </div>
+        </div>
+        <br>
+      </div> <!-- /container -->
+    </footer>
+
+    <!-- Bootstrap core JavaScript -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>    
+
+    <!-- MathJax JavaScript
+             ================================================== -->
+             <!-- Placed at the end of the document so the pages load faster -->
+        <script type="text/x-mathjax-config">
+          MathJax.Hub.Config({
+          TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } },
+          jax: ['input/TeX','input/MathML','output/HTML-CSS'],
+          extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']
+          });
+        </script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+          <script src="../tipuesearch/tipuesearch_content.js"></script>
+          <script src="../tipuesearch/tipuesearch_set.js"></script>
+          <script src="../tipuesearch/tipuesearch.js"></script>
+
+  </body>
+</html>
