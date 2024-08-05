@@ -88,7 +88,7 @@ mld = (-z_r_les[(-WTH[instant]).argmax()])
 # Define the common parameters (attention some of them will be overwritten by case_configurations.py):
 common_params = {
     'nz': 450,
-    'dt': 50.,
+    'dt': 200.,
     'h0': 4500.,
     'thetas': 6.5,
     'hc': 4000000000000,
@@ -97,8 +97,7 @@ common_params = {
     'output_filename': "scm_output.nc",
     'T0': 3.,
     'N0': 1.5865490613891073e-08, #equals to f(60°)
-    'mld_ini': -1000.,
-    'Tcoef': 0.2048,
+    'mld_ini_temp': -1000.,
     'SaltCst': 32.6,
     'lat0': 60.,
     'sustr': 0.,
@@ -112,21 +111,21 @@ common_params = {
     'mass_flux_dyn': True,
     'mass_flux_tke': True,
     'mass_flux_tke_trplCorr': True,
-    'mass_flux_small_ap': True,
+    'mass_flux_small_ap': False,
     'lin_eos': True,
     'extrap_ak_surf': True,
     'tke_sfc_dirichlet': False,
     'eddy_diff_tke_const': 'MNH',
     'entr_scheme': 'R10',
-    'Cent': 0.9,
-    'Cdet': 1.95,       # 'Cdet': 2.5,
-    'wp_a': .2,
-    'wp_b': .2,      # 'wp_b': 1.
-    'wp_bp': 0.0055*250,     #      0.002,
+    'Cent': 0.99,
+    'Cdet': 1.99,       # 'Cdet': 2.5,
+    'wp_a': 0.2,
+    'wp_b': 0.2,      # 'wp_b': 1.
+    'wp_bp': 0.003*250,     #      0.002,
     'up_c': 0.25,
     'vp_c': 0.25,
     'bc_ap': 0.2,    #0.3,
-    'delta_bkg': 0.006*250,   # 0.006,
+    'delta_bkg': 0.0045*250,   # 0.006,
     'output_filename': 'run',
     'wp0':-1.e-08,
     'write_netcdf': True
@@ -137,11 +136,11 @@ common_params.update(case_params[case])  # Update with the specific case configu
 
 # Define parameters specific to each run (overwrite common parameters):
 
-run_label = ['ED',  'EDMF-Energy','EDMF-Energy-cor' ]
+run_label = ['ED+EVD',  'EDMF-Energy','EDMF-Energy-cor' ]
 runs = [
     {
         'eddy_diff': True,
-        'evd': False,
+        'evd': True,
         'mass_flux_tra': False,
         'mass_flux_dyn': False,
         'mass_flux_tke': False,
@@ -203,8 +202,9 @@ instant = -1
 # compute LES mixed layer depth
 # to non-dimensionalize depths
 mld = (-z_r_les[(-WTH[instant]).argmax()]).data
+mld=1
 
-################################# PLOTTING
+################################# PLOTTING #################################
 styles = ['-', '-', '-']
 #colors = ['k',blue,orange]
 colors = ['k','tab:blue','tab:orange']
@@ -239,7 +239,7 @@ for i, label in enumerate(run_label):
             alpha=alpha[i], linewidth=linewidth[i], label=label)
 
 #ax.set_xlim((1.55, 1.8))
-ax.set_ylim((-1.3, 0))
+#ax.set_ylim((-1.3, 0))
 
 
 # ===============================================================
@@ -261,7 +261,7 @@ for i, label in enumerate(run_label):
     #         alpha=alpha[i], linewidth=linewidth[i], label=label)
 
 ax.ticklabel_format(style='sci', axis='x', scilimits=(0, 0))
-ax.set_ylim((-1.3, 0))
+#ax.set_ylim((-1.3, 0))
 
 
 # ===============================================================
@@ -296,7 +296,7 @@ ax.plot(WTH[instant], z_r_les/mld, style_les,
 #ax.plot( -out[2]['WT_ED'][-1,:], out[2].z_w/mld, color ='tab:orange', linestyle ='--', alpha=1.0 , linewidth=3 )
 
 
-ax.set_ylim((-1.3, 0))
+#ax.set_ylim((-1.3, 0))
 
 ax.set_xlabel(r'${\rm K}\;{\rm m}\;{\rm s}^{-1}$')
 
@@ -316,7 +316,7 @@ for i, label in enumerate(run_label):
 ax.ticklabel_format(style='sci', axis='x', scilimits=(0, 0))
 
 #ax.set_xlim((-0.0001, 0.001))
-ax.set_ylim((-1.3, 0))
+#ax.set_ylim((-1.3, 0))
 
 ax.set_xlabel(r'${\rm m}^2\;{\rm s}^{-2}$')
 # ===============================================================
@@ -339,7 +339,7 @@ for i, label in enumerate(run_label):
 
 
 #ax.set_xlim((- 1e-5, 0))
-ax.set_ylim((-1.3, 0))
+#ax.set_ylim((-1.3, 0))
 
 ax.set_xlabel(r'${\rm m}^3\;{\rm s}^{-3}$')
 
@@ -362,7 +362,7 @@ ax.plot(-WU[instant], z_r_les/mld, style_les,alpha=alpha_les, linewidth=linewidt
 # ax.plot( scm[1].wued, scm[1].z_w/mld, color ='tab:blue'  , linestyle ='--', alpha=1.0 , linewidth=3 )
 # ax.plot( scm[2].wued, scm[2].z_w/mld, color ='tab:orange', linestyle ='--', alpha=1.0 , linewidth=3 )
 
-ax.set_ylim((-1.3, 0))
+#ax.set_ylim((-1.3, 0))
 
 # ===============================================================
 ax_index+=1
@@ -377,7 +377,7 @@ for i, label in enumerate(run_label):
         ax.plot((scm[i].vortp), scm[i].z_w/mld, linestyle=styles[i], color = colors[i],
             alpha=alpha[i], linewidth=linewidth[i], label=label)
 
-ax.set_ylim((-1.3, 0))
+#ax.set_ylim((-1.3, 0))
 
 # ===============================================================
 
@@ -393,7 +393,7 @@ for i, label in enumerate(run_label):
         ax.plot((scm[i].wp), scm[i].z_w/mld, linestyle=styles[i], color = colors[i],
             alpha=alpha[i], linewidth=linewidth[i], label=label)
 
-ax.set_ylim((-1.3, 0))
+#ax.set_ylim((-1.3, 0))
 
 # ===============================================================
 
@@ -403,6 +403,7 @@ subplot_label = [r'\rm{(a)}', r'\rm{(b)}', r'\rm{(c)}',
                 r'\rm{(d)}', r'\rm{(e)}', r'\rm{(f)}',r'\rm{(g)}',r'\rm{(h)}',r'\rm{(i)}']
 
 for i,ax in enumerate(axes.flat):
+    # ax.set_ylim((-2, 0))
     ax.set_box_aspect(1)
     ax.text(0.15, 0.98, subplot_label[i], transform=ax.transAxes,
             fontsize=16, bbox=dict(facecolor='1.', edgecolor='none', pad=3.0), fontweight='bold', va='top', ha='right')

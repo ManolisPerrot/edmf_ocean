@@ -86,16 +86,23 @@
 case_params = {
     'WANG1_FR':{
         'nz': 450,
-        'dt': 50.,
+        'dt': 200.,
         'h0': 4500.,
         'thetas': 6.5,
         'hc': 4000000000000,
         'h0': 4500.,
         'nbhours': 276,
         'T0': 3.,
-        'mld_ini': -1000.,
+        'mld_ini_temp': -1000.,
         'N0': 1.5865490613891073e-08, #equals to f(60°)
         'SaltCst': 32.6,
+        'cpoce': 3900.,
+        'lin_eos': True,
+        'rho0': 1027.,
+        'alpha': 2.85e-4, # very strange but true... /!\ this is not WANG1 value...
+        'Tref':  13.5,         #reference temperature 
+        'beta': 7.7475E-4,      
+        'Sref':  32.6,        #reference salinity 
         'lat0': 60.,
         'sustr': 0.,
         'svstr': 0.,

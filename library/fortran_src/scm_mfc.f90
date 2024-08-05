@@ -898,7 +898,7 @@ CONTAINS
     t_p(N,1:ntra) = tp0(1:ntra)   ; t_p(0:N-1,1:ntra) = 0.
     B_p(0:N) = 0.; ent(1:N) = 0.  ; det(1:N) = 0.  ; eps(1:N) = 0.
     !
-    vort_p(0:N) = 0.
+    vort_p(0:N) = fcor
     !
     DO k = 2,N
       du_m(k) = u_m(k) - u_m(k-1)
