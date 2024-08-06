@@ -607,6 +607,17 @@ class SCM:
            tke_sfc,tke_bot, flux_sfc = scm_tke.compute_tke_bdy(
                                       self.ustr_sfc,  self.vstr_sfc, self.ED_tke_const,
                                       0.*self.bc_ap, 0.*self.wp0, tkemin)
+        #############
+        #test alternative conditions to correct WANG WTKE surface bias
+        # Dirichlet (not working)
+        # B0 = self.g*self.alpha/(self.rho0*self.cp)*self.stflx[self.itemp]
+        # wstar = (np.abs(B0*self.zinv))**(1/3)
+        # tke_sfc = 10*wstar**2
+        # tke_sfc=0.5e-3
+        # # Neumann
+        # flux_sfc=wstar**3
+        # print('flx_sfc ', flux_sfc)
+        #############
         #=======================================
         # Compute TKE production by shear
         self.shear = scm_tke.compute_shear(
@@ -848,6 +859,7 @@ class SCM:
             var  = fh01.createVariable('WV_ED','f8',('time','z_w')); var[0,:] = self.wved[:]; var.units = 'm2 s-2'; del var
             var  = fh01.createVariable('Prdtl','f8',('time','z_w')); var[0,:] = self.akv[:]/self.akt[:]; var.units = 'none'; del var
             var  = fh01.createVariable('epsil','f8',('time','z_w')); var[0,:] = self.eps_n[:]; var.units = 'm2 s-3'; del var
+            var  = fh01.createVariable('Buoy_prod','f8',('time','z_w')); var[0,:] = self.Bprod[:]; var.units = 'm2 s-3'; del var
             if self.ED_scheme=='Keps':
                 var = fh01.createVariable('varT','f8',('time','z_w')); var[0,:] = self.varT_n[:]; del var
         if self.MF_tra:
@@ -908,7 +920,7 @@ class SCM:
         fh01.variables['WT'][kout,:]       = self.wted[:]+self.wtmf[:]
         fh01.variables['WU'][kout,:]       = self.wued[:]+self.wumf[:]
         fh01.variables['WV'][kout,:]       = self.wved[:]+self.wvmf[:]
-
+        fh01.variables['Buoy_prod'][kout,:]= self.Bprod[:]
 
         if self.ED:
             fh01.variables['tke'][kout,:] = self.tke_n[:]
@@ -941,6 +953,7 @@ class SCM:
             if self.MF_tke:
                 fh01.variables['buoyMF'][kout,:] = self.buoyMF[:]
                 fh01.variables['shearMF'][kout,:] = self.shearMF[:]
+                fh01.variables['Buoy_prod'][kout,:]= self.Bprod[:] + self.buoyMF[:] #ED+MF buoyancy production
             if self.MF_tke_trplCorr:
                 fh01.variables['we'][kout,:] = self.triple_corr[:]
                 fh01.variables['tke_p'][kout,:] = self.tp[:,self.isalt+1]
