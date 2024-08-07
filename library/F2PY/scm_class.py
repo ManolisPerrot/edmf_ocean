@@ -308,7 +308,8 @@ class SCM:
         #
         self.tFlx        = np.zeros(self.nz+1); self.uFlx        = np.zeros(self.nz+1); self.vFlx        = np.zeros(self.nz+1)
         self.buoyMF      = np.zeros(self.nz+1); self.shearMF     = np.zeros(self.nz+1)
-        self.wtke        = np.zeros(self.nz  ); self.triple_corr = np.zeros(self.nz+1)
+        self.wtke        = np.zeros(self.nz  ) #ED+MF wtke
+        self.triple_corr = np.zeros(self.nz+1) # MF contrib to d(wtke)/dz
         self.tFlx[-1]    = - self.stflx[self.itemp]
         ####################################
         # Energy diagnostics
@@ -812,6 +813,7 @@ class SCM:
         fh01.mass_flux_dyn   = str(self.MF_dyn)
         fh01.mass_flux_tke   = str(self.MF_tke)
         fh01.mass_flux_tke_trplCorr = str(self.MF_tke_trplCorr)
+        fh01.cp              = self.cp
         fh01.rho0            = self.eos_params[0]
         fh01.alpha           = self.eos_params[1]
         fh01.beta            = self.eos_params[2]
@@ -822,6 +824,7 @@ class SCM:
         fh01.akvmin          = self.min_Threshold[1]
         fh01.aktmin          = self.min_Threshold[2]
         fh01.mxlmin          = self.min_Threshold[3]
+      
         #
         ocean_time = fh01.createVariable('ocean_time','f8',('time')); ocean_time[:] = 0.
         ocean_time.units = 'seconds'
@@ -846,6 +849,8 @@ class SCM:
         var  = fh01.createVariable('WT','f8',('time','z_w')); var[0,:] = self.wted[:]+self.wtmf[:]; var.units = 'K m s-1'; del var
         var  = fh01.createVariable('WU','f8',('time','z_w')); var[0,:] = self.wued[:]+self.wumf[:]; var.units = 'm2 s-2'; del var
         var  = fh01.createVariable('WV','f8',('time','z_w')); var[0,:] = self.wved[:]+self.wvmf[:]; var.units = 'm2 s-2'; del var
+        var  = fh01.createVariable('WTKE','f8',('time','z_r')); var[0,:] = self.wtke[:] ; var.units = 'm3 s-3'; del var
+
 
         if self.ED:
             var  = fh01.createVariable('tke','f8',('time','z_w')); var[0,:] = self.tke_n[:]; var.units = 'm2 s-2'; del var
@@ -880,7 +885,7 @@ class SCM:
                 var = fh01.createVariable('buoyMF','f8',('time','z_w')); var[0,:] = self.buoyMF[:]; del var
                 var = fh01.createVariable('shearMF','f8',('time','z_w')); var[0,:] = self.shearMF[:]; del var
             if self.MF_tke_trplCorr:
-                var = fh01.createVariable('we','f8',('time','z_w')); var[0,:] = self.triple_corr[:]; del var
+                var = fh01.createVariable('d_we_dz_MF','f8',('time','z_w')); var[0,:] = self.triple_corr[:]; del var
                 var = fh01.createVariable('tke_p','f8',('time','z_w')); var[0,:] = self.tp[:,self.isalt+1]; del var
             if self.mass_flux_entr=='R10corNT':
                 var = fh01.createVariable('vort_p','f8',('time','z_w')); var[0,:] = self.vortp[:]; del var
@@ -921,6 +926,7 @@ class SCM:
         fh01.variables['WU'][kout,:]       = self.wued[:]+self.wumf[:]
         fh01.variables['WV'][kout,:]       = self.wved[:]+self.wvmf[:]
         fh01.variables['Buoy_prod'][kout,:]= self.Bprod[:]
+        fh01.variables['WTKE'][kout,:]= self.wtke[:]
 
         if self.ED:
             fh01.variables['tke'][kout,:] = self.tke_n[:]
@@ -955,7 +961,7 @@ class SCM:
                 fh01.variables['shearMF'][kout,:] = self.shearMF[:]
                 fh01.variables['Buoy_prod'][kout,:]= self.Bprod[:] + self.buoyMF[:] #ED+MF buoyancy production
             if self.MF_tke_trplCorr:
-                fh01.variables['we'][kout,:] = self.triple_corr[:]
+                fh01.variables['d_we_dz_MF'][kout,:] = self.triple_corr[:]
                 fh01.variables['tke_p'][kout,:] = self.tp[:,self.isalt+1]
             if self.mass_flux_entr=='R10corNT':
                 fh01.variables['vort_p'][kout,:] = self.vortp[:]
