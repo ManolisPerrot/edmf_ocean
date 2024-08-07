@@ -44,13 +44,13 @@ CONTAINS
       flux_sfc = 0.5*bc_ap*(wp0)**3 !! energetically consistent boundary condition \( F_{\rm sfc}^k = \left.  K_e \partial_z k \right|_{\rm sfc} \)
       !flux_sfc =0.
     ELSE
-      IF(tke_const==0) THEN
+    IF(tke_const==0) THEN
         cff = 1./SQRT(cm_nemo*ceps_nemo)
       ELSE IF(tke_const==1) THEN
-        cff = 1./SQRT( cm_mnh*ceps_mnh )
-      ELSE
-        cff = 1./SQRT( cm_r81*ceps_r81 )
-      ENDIF
+          cff = 1./SQRT( cm_mnh*ceps_mnh )
+        ELSE
+          cff = 1./SQRT( cm_r81*ceps_r81 )
+        ENDIF
       tke_sfc  = cff*ustar2
       !tke_sfc  = 67.83*ustar2
       flux_sfc = 0.5*bc_ap*(wp0)**3 !! energetically consistent boundary condition \( F_{\rm sfc}^k = \left.  K_e \partial_z k \right|_{\rm sfc} \)
@@ -121,7 +121,7 @@ CONTAINS
     INTEGER, INTENT(IN   )   :: tke_const                    !! choice of TKE constants
     LOGICAL, INTENT(IN   )   :: dirichlet_bdy_sfc            !! Nature of the TKE surface boundary condition (T:dirichlet,F:Neumann)
     REAL(8), INTENT(IN   )   :: tkemin
-    REAL(8), INTENT(INOUT)   :: wtke(1:N)                    !! Diagnostics : w'e term  [m3/s3]
+    REAL(8), INTENT(INOUT)   :: wtke(1:N)                    !! Diagnostics : w'e term (IN: MF, OUT: ED+MF)  [m3/s3]
     REAL(8), INTENT(  OUT)   :: tke_np1(0:N)                 !! TKE at time n+1    [m2/s2]
     REAL(8), INTENT(  OUT)   :: pdlr(0:N)                    !! inverse of turbulent Prandtl number
     REAL(8), INTENT(  OUT)   :: eps(0:N)                     !! TKE dissipation term [m2/s3]
@@ -212,7 +212,7 @@ CONTAINS
     !  vint_eps = vint_eps + (zr(k+1)-zr(k))*eps(k)
     !ENDDO
     !print*,'vint_eps (TKE) = ',vint_eps
-    !         Store the ED contribution to w'e turbulent flux
+    !         Add the ED contribution to w'e turbulent flux
     DO k = 1,N
       wtke(k) = wtke(k) - 0.5*isch*(akv(k)+akv(k-1))*(tke_np1(k)-tke_np1(k-1))/Hz(k)
     ENDDO
