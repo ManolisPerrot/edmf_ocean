@@ -898,7 +898,7 @@ CONTAINS
     t_p(N,1:ntra) = tp0(1:ntra)   ; t_p(0:N-1,1:ntra) = 0.
     B_p(0:N) = 0.; ent(1:N) = 0.  ; det(1:N) = 0.  ; eps(1:N) = 0.
     !
-    vort_p(0:N) = fcor
+    vort_p(N) = fcor
     !
     DO k = 2,N
       du_m(k) = u_m(k) - u_m(k-1)
@@ -933,6 +933,19 @@ CONTAINS
     N2sfc  = -(grav/eos_params(1))*(rho_m(N)-rho_m(N-1))/Hz(N)
     !=======================================================================
     DO k=N,1,-1
+
+      ! TESTS : Modulate ent/det by vorticity
+      ! fait pas grand chose...
+      !
+      ! cff=(1+EXP(-vort_p(k)/fcor))*0.5
+      ! beta1 = cff*mf_params(1)
+      ! beta2 = cff*mf_params(2)
+      ! bb    = cff*mf_params(4)
+      ! aa    = cff*mf_params(3)
+      ! delta0= cff*mf_params(9)/ABS(zinv)
+      ! bp    = cff*mf_params(5)/ABS(zinv)
+      !
+      !
       ! Compute B_p
       temp_p = t_p(k,1); salt_p = t_p(k,2)
       !
@@ -981,7 +994,9 @@ CONTAINS
       u_env = u_m(k); v_env = v_m(k) ! m/s
       frc_u = Cu*du_m(k)-Hz(k)*ecor  ! m/s
       frc_v = Cv*dv_m(k)             ! m/s
-      !=======
+      ! frc_u = Cu*du_m(k)-Hz(k)*ecor + Cu*u_p(k) ! m/s, test
+      ! frc_v = Cv*dv_m(k)            + Cu*v_p(k) ! m/s, test
+      !==v====
       ! Compute up
       cor_u   =   fcor*Hz(k)*v_p(k) ! m2/s2
       CALL get_u_p_R10(u_p(k-1),u_p(k),u_env,a_p(k-1),a_p(k),w_p(k-1),w_p(k),   &
