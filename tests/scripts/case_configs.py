@@ -96,10 +96,10 @@ case_params = {
         'mld_ini_temp': -1000.,
         'N0': 1.5865490613891073e-08, #equals to f(60°)
         'SaltCst': 32.6,
-        'cpoce': 3900.,
+        'cpoce': 4178.,
         'lin_eos': True,
         'rho0': 1027.,
-        'alpha': 2.85e-4, # very strange but true... /!\ this is not WANG1 value...
+        'alpha': 0.0002874190618908656, # very strange but true... /!\ this is not WANG1 value...
         'Tref':  13.5,         #reference temperature 
         'beta': 7.7475E-4,      
         'Sref':  32.6,        #reference salinity 
