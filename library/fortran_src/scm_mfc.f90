@@ -884,6 +884,16 @@ CONTAINS
     !======================================================================
     !print*,'in mass_flux_R10_cor **',zinv
     ! unpack parameters (mf_params  = [Cent,Cdet,wp_a,wp_b,wp_bp,up_c,vp_c,bc_ap,delta0]
+    !!!!! TEST modulation of plume radius by Ro (not working)
+    ! REAL(8)                                :: B0, Ro
+    ! B0=7.302579717857959e-08
+    ! Ro = min((B0/fcor)**(1/2)/(fcor*abs(zinv)) , (B0/fcor)**(1/2)/(fcor*1000))
+    ! cff= tanh(Ro**2)
+    ! beta1 = mf_params(1); aa     = mf_params(3)
+    ! bb    = mf_params(4); bp     = mf_params(5)/ABS(zinv*cff) !bp     = mf_params(5)/(-zinv)
+    ! Cu    = mf_params(6); Cv     = mf_params(7)
+    ! beta2 = mf_params(2); delta0 = mf_params(9)/ABS(zinv*cff) !delta0 = mf_params(9)/(-zinv)
+    !!!!!!!!!
     beta1 = mf_params(1); aa     = mf_params(3)
     bb    = mf_params(4); bp     = mf_params(5)/ABS(zinv) !bp     = mf_params(5)/(-zinv)
     Cu    = mf_params(6); Cv     = mf_params(7)
