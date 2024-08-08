@@ -60,6 +60,8 @@ LG_RES = xr.open_dataset(
     path+file, group='/LES_budgets/Resolved/Cartesian/Not_time_averaged/Not_normalized/cart')
 LG_SBG = xr.open_dataset(
     path+file, group='/LES_budgets/Subgrid/Cartesian/Not_time_averaged/Not_normalized/cart')
+BU_KE = xr.open_dataset(path+file,group ='/LES_budgets/BU_KE/Cartesian/Not_time_averaged/Not_normalized/cart')
+
 WTH = (LG_RES.RES_WTH + LG_SBG.SBG_WTHL).data
 WU = (LG_RES.RES_WU + LG_SBG.SBG_WU).data
 WV = (LG_RES.RES_WV + LG_SBG.SBG_WV).data
@@ -87,7 +89,7 @@ mld = (-z_r_les[(-WTH[instant]).argmax()])
 # ====================================Define configurations=======================
 # Define the common parameters (attention some of them will be overwritten by case_configurations.py):
 common_params = {
-    'nz': 450,
+    'nz': 4500,
     'dt': 200.,
     'h0': 4500.,
     'thetas': 6.5,
@@ -117,17 +119,17 @@ common_params = {
     'tke_sfc_dirichlet': False,
     'eddy_diff_tke_const': 'MNH',
     'entr_scheme': 'R10',
-    'Cent': 0.99,
+    'Cent': 0.3,
     'Cdet': 1.99,       # 'Cdet': 2.5,
     'wp_a': 1.,
     'wp_b': 1.,      # 'wp_b': 1.
     'wp_bp': 0.003*250,     #      0.002,
-    'up_c': 0.2,
-    'vp_c': 0.2,
-    'bc_ap': 0.2,    #0.3,
-    'delta_bkg': 0.02*250,   # 0.02,
+    'up_c': 0.5,
+    'vp_c': 0.5,
+    'bc_ap': 0.35,    #0.3,
+    'delta_bkg': 0.0045*250,   # 0.02,
     'output_filename': 'run',
-    'wp0':-1.e-08,
+    'wp0':-1.e-02,
     'write_netcdf': True
 }
 
@@ -218,12 +220,12 @@ for i, run_params in enumerate(runs):
         reference=mld
         is_in_range(value=scm[i].zinv, value_name='zinv', reference=reference,tolerance=10 )
 
-# # LOAD outputs
-# out = [0]*len(runs)
+# LOAD outputs
+out = [0]*len(runs)
 
-# for i, run_params in enumerate(runs):
-#     print('opening '+run_params['output_filename'])
-#     out[i] = xr.open_dataset(run_params['output_filename'])
+for i, run_params in enumerate(runs):
+    print('opening '+run_params['output_filename'])
+    out[i] = xr.open_dataset(run_params['output_filename'])
 
 # choose intant to plot    
 instant = -1
@@ -247,7 +249,7 @@ linewidth_les = 4
 
 if True:
     #============================================ WC ===============================================
-    fig, axes = plt.subplots(nrows=3, ncols=3, sharex=False,
+    fig, axes = plt.subplots(nrows=4, ncols=3, sharex=False,
                             sharey=True, figsize=(15, 12))
 
     ax_index=-1
@@ -285,6 +287,8 @@ if True:
     for i, label in enumerate(run_label):
         ax.plot((scm[i].u_np1), scm[i].z_r/mld, linestyle=styles[i], color = colors[i],
                 alpha=alpha[i], linewidth=linewidth[i], label=label)
+        ax.plot((scm[i].up), scm[i].z_w/mld, linestyle='--', color = colors[i],
+                alpha=alpha[i], linewidth=linewidth[i], label=label)
         # if i != 0: 
         #     ax.plot((out[i].w_p[instant]), out[i].z_w/mld, linestyle=':', color = colors[i],
         #         alpha=alpha[i], linewidth=linewidth[i], label=label)
@@ -294,8 +298,6 @@ if True:
 
 
     # ===============================================================
-
-
     ax_index+=1
     ax = axes.flat[ax_index]
 
@@ -303,32 +305,13 @@ if True:
 
     ax.plot(WTH[instant], z_r_les/mld, style_les,
             alpha=alpha_les, linewidth=linewidth_les, label='LES')
-
-    #for i, label in enumerate(run_label):
-    #    if run_label == 'ED':
-    #        ax.plot(-(scm[i].wted), scm[i].z_w/mld, styles[i], color = colors[i],
-    #                alpha=alpha[i], linewidth=linewidth[i], label=label)
-    #    else:
-    #        ax.plot(-(scm[i].wted + scm[i].wtmf), scm[i].z_w/mld, styles[i], color = colors[i],
-    #                alpha=alpha[i], linewidth=linewidth[i], label=label)
-    #ax.ticklabel_format(style='sci', axis='x', scilimits=(0, 0))
-    #for i, label in enumerate(run_label):
-    #    if run_label == 'ED':
-    #        ax.plot(-(scm[i].wted), scm[i].z_w/mld, linestyle=styles[i], color = colors[i],
-    #                alpha=alpha[i], linewidth=linewidth[i], label=label)
-    #    else:
-    #        ax.plot(-(scm[i].wted + scm[i].wtmf), scm[i].z_w/mld, linestyle=styles[i], color = colors[i],
-    #                alpha=alpha[i], linewidth=linewidth[i], label=label)
-    #ax.ticklabel_format(style='sci', axis='x', scilimits=(0, 0))
-
-    #ax.plot( -out[1]['WT_ED'][-1,:], out[1].z_w/mld, color ='tab:blue'  , linestyle ='--', alpha=1.0 , linewidth=3 )
-    #ax.plot( -out[2]['WT_ED'][-1,:], out[2].z_w/mld, color ='tab:orange', linestyle ='--', alpha=1.0 , linewidth=3 )
-
-
-    #ax.set_ylim((-1.3, 0))
+    
+    for i, label in enumerate(run_label):
+        ax.plot( -out[i]['WT'][-1,:], out[i].z_w/mld, color ='tab:blue'  , linestyle ='-', alpha=1.0 , linewidth=3 )
+        ax.plot( -out[i]['WT_ED'][-1,:], out[i].z_w/mld, color ='tab:blue'  , linestyle =':', alpha=1.0 , linewidth=3 )
+        ax.plot( -out[i]['WT_MF'][-1,:], out[i].z_w/mld, color ='tab:blue'  , linestyle ='--', alpha=1.0 , linewidth=3 )
 
     ax.set_xlabel(r'${\rm K}\;{\rm m}\;{\rm s}^{-1}$')
-
 
     # ===============================================================
     # ===============================================================
@@ -373,27 +356,58 @@ if True:
     ax.set_xlabel(r'${\rm m}^3\;{\rm s}^{-3}$')
 
     # ===============================================================
+    # ax_index+=1
+    # ax = axes.flat[ax_index]
+
+    # ax.set_title(r'$\overline{w^\prime b^\prime}$')
+
+    # coef = 9.81*out[0].attrs['alpha']
+    # ax.plot((BU_KE['RES_TP'] + BU_KE['SBG_TP'])[instant], z_r_les/mld, style_les,
+    #         alpha=alpha_les, linewidth=linewidth_les, label='LES')
+    
+    # for i, label in enumerate(run_label):
+    #     ax.plot( -coef*out[i]['WT'][-1,:], out[i].z_w/mld, color ='tab:blue'  , linestyle ='--', alpha=1.0 , linewidth=3 )
+    # ax.set_xlabel(r'${\rm K}\;{\rm m}\;{\rm s}^{-1}$')
+
+    # # ===============================================================
+
+    # ===============================================================
     ax_index+=1
     ax = axes.flat[ax_index]
 
-    ax.set_xlabel(r'${\rm m}^2\;{\rm s}^{-2}$')
     ax.set_title(r'$\overline{w^\prime u^\prime}$')
 
-    ax.plot(-WU[instant], z_r_les/mld, style_les,alpha=alpha_les, linewidth=linewidth_les, label='LES')
+    ax.plot(-(WU)[instant], z_r_les/mld, style_les,
+    # ax.plot((WV)[instant], z_r_les/mld, style_les,
+            alpha=alpha_les, linewidth=linewidth_les, label='LES')
+    
+    for i, label in enumerate(run_label):
+        ax.plot( out[i]['WU'][-1,:], out[i].z_w/mld, color ='tab:blue'  , linestyle ='-', alpha=1.0 , linewidth=3 )
+        ax.plot( out[i]['WU_MF'][-1,:], out[i].z_w/mld, color ='tab:blue'  , linestyle ='--', alpha=1.0 , linewidth=3 )
+        ax.plot( out[i]['WU_ED'][-1,:], out[i].z_w/mld, color ='tab:blue'  , linestyle =':', alpha=1.0 , linewidth=3 )
 
-
-    # for i, label in enumerate(run_label):
-    #         ax.plot((scm[i].wued + scm[i].wumf), scm[i].z_w/mld, linestyle=styles[i], color = colors[i],
-    #                 alpha=alpha[i], linewidth=linewidth[i], label=label)
-
-    # ax.ticklabel_format(style='sci', axis='x', scilimits=(0, 0))
-
-    # ax.plot( scm[1].wued, scm[1].z_w/mld, color ='tab:blue'  , linestyle ='--', alpha=1.0 , linewidth=3 )
-    # ax.plot( scm[2].wued, scm[2].z_w/mld, color ='tab:orange', linestyle ='--', alpha=1.0 , linewidth=3 )
-
-    #ax.set_ylim((-1.3, 0))
+    ax.set_xlabel(r'${\rm m^2}\;{\rm s}^{-2}$')
 
     # ===============================================================
+        # ===============================================================
+    ax_index+=1
+    ax = axes.flat[ax_index]
+
+    ax.set_title(r'$\overline{w^\prime v^\prime}$')
+
+    ax.plot(-(WV)[instant], z_r_les/mld, style_les,
+    # ax.plot((WU)[instant], z_r_les/mld, style_les,
+            alpha=alpha_les, linewidth=linewidth_les, label='LES')
+    
+    for i, label in enumerate(run_label):
+        ax.plot( out[i]['WV'][-1,:], out[i].z_w/mld, color ='tab:blue'  , linestyle ='-', alpha=1.0 , linewidth=3 )
+        ax.plot( out[i]['WV_MF'][-1,:], out[i].z_w/mld, color ='tab:blue'  , linestyle ='--', alpha=1.0 , linewidth=3 )
+        ax.plot( out[i]['WV_ED'][-1,:], out[i].z_w/mld, color ='tab:blue'  , linestyle =':', alpha=1.0 , linewidth=3 )
+
+    ax.set_xlabel(r'${\rm m^2}\;{\rm s}^{-2}$')
+
+    # ===============================================================
+
     ax_index+=1
     ax = axes.flat[ax_index]
 
@@ -448,7 +462,7 @@ if True:
 
     # adding subplot labels
     subplot_label = [r'\rm{(a)}', r'\rm{(b)}', r'\rm{(c)}',
-                    r'\rm{(d)}', r'\rm{(e)}', r'\rm{(f)}',r'\rm{(g)}',r'\rm{(h)}',r'\rm{(i)}']
+                    r'\rm{(d)}', r'\rm{(e)}', r'\rm{(f)}',r'\rm{(g)}',r'\rm{(h)}',r'\rm{(i)}',r'\rm{(j)}',r'\rm{(k)}',r'\rm{(l)}']
 
     for i,ax in enumerate(axes.flat):
         # ax.set_ylim((-2, 0))
