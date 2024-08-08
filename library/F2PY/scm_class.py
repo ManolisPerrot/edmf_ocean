@@ -611,12 +611,22 @@ class SCM:
         #############
         #test alternative conditions to correct WANG WTKE surface bias
         # Dirichlet (not working)
-        # B0 = self.g*self.alpha/(self.rho0*self.cp)*self.stflx[self.itemp]
+        # B0 = self.g*self.alpha*self.stflx[self.itemp]
+        # print('##################')
+        # print('g',self.g)
+        # print('alpha',self.alpha)
+        # print('rho0',self.rho0)
+        # print('cp',self.cp)
+        # print('stflx',self.stflx[self.itemp])
+        # print(B0)
+        # print('##################')
         # wstar = (np.abs(B0*self.zinv))**(1/3)
         # tke_sfc = 10*wstar**2
         # tke_sfc=0.5e-3
         # # Neumann
         # flux_sfc=wstar**3
+        # flux_sfc = 0.5*self.bc_ap*self.wp0*(self.wp0**2 + (self.up[self.nz]-self.u_np1_star[self.nz-1])**2
+        #                                                 + (self.vp[self.nz]-self.v_np1_star[self.nz-1])**2)
         # print('flx_sfc ', flux_sfc)
         #############
         #=======================================
