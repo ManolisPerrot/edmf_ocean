@@ -78,7 +78,10 @@ time = ((time_les - time_les[0]) / np.timedelta64(1, 'h')).data.astype(int) + 1
 z_r_les = (les.level_les - (les.level_les[0] + les.level_les[-1])).data
 
 # choose intant to plot    
-instant = -1
+instant = -1 
+### ATTENTION: scm contains time 0 + 276 hours = 277 instants
+###            les contains hour 1 to 276 = 276 instants
+### so SAME END but different start in the lsit
 
 # compute LES mixed layer depth
 # to non-dimensionalize depths
@@ -119,15 +122,15 @@ common_params = {
     'tke_sfc_dirichlet': False,
     'eddy_diff_tke_const': 'MNH',
     'entr_scheme': 'R10',
-    'Cent': 0.3,
+    'Cent': 0.99,    
     'Cdet': 1.99,       # 'Cdet': 2.5,
     'wp_a': 1.,
     'wp_b': 1.,      # 'wp_b': 1.
     'wp_bp': 0.003*250,     #      0.002,
-    'up_c': 0.5,
-    'vp_c': 0.5,
+    'up_c': 0.25,
+    'vp_c': 0.25,
     'bc_ap': 0.35,    #0.3,
-    'delta_bkg': 0.0045*250,   # 0.02,
+    'delta_bkg': 0.009*250,   # 0.02,
     'output_filename': 'run',
     'wp0':-1.e-02,
     'write_netcdf': True
@@ -146,6 +149,17 @@ common_params = {
     # 'output_filename': 'run',
     # 'wp0':-1.e-08,
 
+    # 'Cent': 0.3,
+    # 'Cdet': 1.99,       # 'Cdet': 2.5,
+    # 'wp_a': 1.,
+    # 'wp_b': 1.,      # 'wp_b': 1.
+    # 'wp_bp': 0.003*250,     #      0.002,
+    # 'up_c': 0.5,
+    # 'vp_c': 0.5,
+    # 'bc_ap': 0.35,    #0.3,
+    # 'delta_bkg': 0.02*250,   # 0.02,
+    # 'output_filename': 'run',
+    # 'wp0':-1.e-02,
 
 
 common_params.update(case_params[case])  # Update with the specific case configuration in case_params[case]
@@ -228,7 +242,10 @@ for i, run_params in enumerate(runs):
     out[i] = xr.open_dataset(run_params['output_filename'])
 
 # choose intant to plot    
-instant = -1
+instant = -1 
+### ATTENTION: scm contains time 0 + 276 hours = 277 instants
+###            les contains hour 1 to 276 = 276 instants
+### so SAME END but different start in the lsit
 
 # compute LES mixed layer depth
 # to non-dimensionalize depths
@@ -247,7 +264,7 @@ alpha_les = 1
 linewidth_les = 4
 
 
-if True:
+def plot_intant_panel(instant=instant):
     #============================================ WC ===============================================
     fig, axes = plt.subplots(nrows=4, ncols=3, sharex=False,
                             sharey=True, figsize=(15, 12))
@@ -266,7 +283,9 @@ if True:
             alpha=alpha_les, linewidth=linewidth_les,  label='LES')
 
     for i, label in enumerate(run_label):
-        ax.plot(scm[i].t_np1[:, 0], scm[i].z_r/mld, linestyle=styles[i], color = colors[i],
+        # ax.plot(scm[i].t_np1[:, 0], scm[i].z_r/mld, linestyle=styles[i], color = colors[i],
+        ax.plot(out[i].temp[instant], out[i].z_r/mld, linestyle=styles[i], color = colors[i],
+
                 alpha=alpha[i], linewidth=linewidth[i], label=label)
 
     #ax.set_xlim((1.55, 1.8))
@@ -285,18 +304,41 @@ if True:
             alpha=alpha_les, linewidth=linewidth_les, label='LES')
 
     for i, label in enumerate(run_label):
-        ax.plot((scm[i].u_np1), scm[i].z_r/mld, linestyle=styles[i], color = colors[i],
-                alpha=alpha[i], linewidth=linewidth[i], label=label)
-        ax.plot((scm[i].up), scm[i].z_w/mld, linestyle='--', color = colors[i],
-                alpha=alpha[i], linewidth=linewidth[i], label=label)
+        # ax.plot((scm[i].u_np1), scm[i].z_r/mld, linestyle=styles[i], color = colors[i],
+        #         alpha=alpha[i], linewidth=linewidth[i], label=label)
+        # ax.plot((scm[i].up), scm[i].z_w/mld, linestyle='--', color = colors[i],
+        #         alpha=alpha[i], linewidth=linewidth[i], label=label)
         # if i != 0: 
         #     ax.plot((out[i].w_p[instant]), out[i].z_w/mld, linestyle=':', color = colors[i],
         #         alpha=alpha[i], linewidth=linewidth[i], label=label)
-
+        ax.plot((out[i]['u'][instant]), out[i].z_r/mld, linestyle=styles[i], color = colors[i],
+                alpha=alpha[i], linewidth=linewidth[i], label=label)
     ax.ticklabel_format(style='sci', axis='x', scilimits=(0, 0))
     #ax.set_ylim((-1.3, 0))
 
+    # ===============================================================
 
+    ax_index+=1
+    ax = axes.flat[ax_index]
+    ax.set_title(r'$\overline{v}$')
+
+    ax.set_xlabel(r'${\rm m}\;{\rm s}^{-1}$')
+
+    ax.plot(V_les[instant], z_r_les/mld, style_les,
+            alpha=alpha_les, linewidth=linewidth_les, label='LES')
+
+    for i, label in enumerate(run_label):
+        # ax.plot((scm[i].u_np1), scm[i].z_r/mld, linestyle=styles[i], color = colors[i],
+        #         alpha=alpha[i], linewidth=linewidth[i], label=label)
+        # ax.plot((scm[i].up), scm[i].z_w/mld, linestyle='--', color = colors[i],
+        #         alpha=alpha[i], linewidth=linewidth[i], label=label)
+        # if i != 0: 
+        #     ax.plot((out[i].w_p[instant]), out[i].z_w/mld, linestyle=':', color = colors[i],
+        #         alpha=alpha[i], linewidth=linewidth[i], label=label)
+        ax.plot((out[i]['v'][instant]), out[i].z_r/mld, linestyle=styles[i], color = colors[i],
+                alpha=alpha[i], linewidth=linewidth[i], label=label)
+    ax.ticklabel_format(style='sci', axis='x', scilimits=(0, 0))
+    #ax.set_ylim((-1.3, 0))
     # ===============================================================
     ax_index+=1
     ax = axes.flat[ax_index]
@@ -307,9 +349,9 @@ if True:
             alpha=alpha_les, linewidth=linewidth_les, label='LES')
     
     for i, label in enumerate(run_label):
-        ax.plot( -out[i]['WT'][-1,:], out[i].z_w/mld, color ='tab:blue'  , linestyle ='-', alpha=1.0 , linewidth=3 )
-        ax.plot( -out[i]['WT_ED'][-1,:], out[i].z_w/mld, color ='tab:blue'  , linestyle =':', alpha=1.0 , linewidth=3 )
-        ax.plot( -out[i]['WT_MF'][-1,:], out[i].z_w/mld, color ='tab:blue'  , linestyle ='--', alpha=1.0 , linewidth=3 )
+        ax.plot( -out[i]['WT'][instant,:], out[i].z_w/mld, color ='tab:blue'  , linestyle ='-', alpha=1.0 , linewidth=3 )
+        ax.plot( -out[i]['WT_ED'][instant,:], out[i].z_w/mld, color ='tab:blue'  , linestyle =':', alpha=1.0 , linewidth=3 )
+        ax.plot( -out[i]['WT_MF'][instant,:], out[i].z_w/mld, color ='tab:blue'  , linestyle ='--', alpha=1.0 , linewidth=3 )
 
     ax.set_xlabel(r'${\rm K}\;{\rm m}\;{\rm s}^{-1}$')
 
@@ -323,7 +365,10 @@ if True:
             alpha=alpha_les, linewidth=linewidth_les, label='LES')
 
     for i, label in enumerate(run_label):
-        ax.plot(scm[i].tke_np1, scm[i].z_w/mld, linestyle=styles[i], color = colors[i],
+        #ax.plot(scm[i].tke_np1, scm[i].z_w/mld, linestyle=styles[i], color = colors[i],
+        #        alpha=alpha[i], linewidth=linewidth[i], label=label)
+        
+        ax.plot(out[i]['tke'][instant], out[i].z_w/mld, linestyle=styles[i], color = colors[i],
                 alpha=alpha[i], linewidth=linewidth[i], label=label)
     ax.ticklabel_format(style='sci', axis='x', scilimits=(0, 0))
 
@@ -342,7 +387,9 @@ if True:
             alpha=alpha_les, linewidth=linewidth_les, label='LES')
 
     for i, label in enumerate(run_label):
-        ax.plot((scm[i].wtke), scm[i].z_r/mld, linestyle=styles[i], color = colors[i],
+        # ax.plot((scm[i].wtke), scm[i].z_r/mld, linestyle=styles[i], color = colors[i],
+        #         alpha=alpha[i], linewidth=linewidth[i], label=label)
+        ax.plot(out[i]['WTKE'][instant], out[i].z_r/mld, linestyle=styles[i], color = colors[i],
                 alpha=alpha[i], linewidth=linewidth[i], label=label)
         
     # if i==1:
@@ -382,9 +429,9 @@ if True:
             alpha=alpha_les, linewidth=linewidth_les, label='LES')
     
     for i, label in enumerate(run_label):
-        ax.plot( out[i]['WU'][-1,:], out[i].z_w/mld, color ='tab:blue'  , linestyle ='-', alpha=1.0 , linewidth=3 )
-        ax.plot( out[i]['WU_MF'][-1,:], out[i].z_w/mld, color ='tab:blue'  , linestyle ='--', alpha=1.0 , linewidth=3 )
-        ax.plot( out[i]['WU_ED'][-1,:], out[i].z_w/mld, color ='tab:blue'  , linestyle =':', alpha=1.0 , linewidth=3 )
+        ax.plot( out[i]['WU'][instant,:], out[i].z_w/mld, color ='tab:blue'  , linestyle ='-', alpha=1.0 , linewidth=3 )
+        ax.plot( out[i]['WU_MF'][instant,:], out[i].z_w/mld, color ='tab:blue'  , linestyle ='--', alpha=1.0 , linewidth=3 )
+        ax.plot( out[i]['WU_ED'][instant,:], out[i].z_w/mld, color ='tab:blue'  , linestyle =':', alpha=1.0 , linewidth=3 )
 
     ax.set_xlabel(r'${\rm m^2}\;{\rm s}^{-2}$')
 
@@ -400,9 +447,9 @@ if True:
             alpha=alpha_les, linewidth=linewidth_les, label='LES')
     
     for i, label in enumerate(run_label):
-        ax.plot( out[i]['WV'][-1,:], out[i].z_w/mld, color ='tab:blue'  , linestyle ='-', alpha=1.0 , linewidth=3 )
-        ax.plot( out[i]['WV_MF'][-1,:], out[i].z_w/mld, color ='tab:blue'  , linestyle ='--', alpha=1.0 , linewidth=3 )
-        ax.plot( out[i]['WV_ED'][-1,:], out[i].z_w/mld, color ='tab:blue'  , linestyle =':', alpha=1.0 , linewidth=3 )
+        ax.plot( out[i]['WV'][instant,:], out[i].z_w/mld, color ='tab:blue'  , linestyle ='-', alpha=1.0 , linewidth=3 )
+        ax.plot( out[i]['WV_MF'][instant,:], out[i].z_w/mld, color ='tab:blue'  , linestyle ='--', alpha=1.0 , linewidth=3 )
+        ax.plot( out[i]['WV_ED'][instant,:], out[i].z_w/mld, color ='tab:blue'  , linestyle =':', alpha=1.0 , linewidth=3 )
 
     ax.set_xlabel(r'${\rm m^2}\;{\rm s}^{-2}$')
 
@@ -417,7 +464,9 @@ if True:
 
     for i, label in enumerate(run_label):
         if label=='EDMF-Energy-cor':
-            ax.plot((scm[i].vortp), scm[i].z_w/mld, linestyle=styles[i], color = colors[i],
+            # ax.plot((scm[i].vortp), scm[i].z_w/mld, linestyle=styles[i], color = colors[i],
+            #     alpha=alpha[i], linewidth=linewidth[i], label=label)
+            ax.plot((out[i].vort_p)[instant], out[i].z_w/mld, linestyle=styles[i], color = colors[i],
                 alpha=alpha[i], linewidth=linewidth[i], label=label)
 
     #ax.set_ylim((-1.3, 0))
@@ -433,7 +482,10 @@ if True:
 
     for i, label in enumerate(run_label):
         if (label=='EDMF-Energy-cor') or (label=='EDMF-Energy'):
-            ax.plot((scm[i].wp), scm[i].z_w/mld, linestyle=styles[i], color = colors[i],
+            # ax.plot((scm[i].wp), scm[i].z_w/mld, linestyle=styles[i], color = colors[i],
+            #     alpha=alpha[i], linewidth=linewidth[i], label=label)
+            
+            ax.plot((out[i].w_p)[instant], out[i].z_w/mld, linestyle=styles[i], color = colors[i],
                 alpha=alpha[i], linewidth=linewidth[i], label=label)
 
     #ax.set_ylim((-1.3, 0))
@@ -449,12 +501,18 @@ if True:
 
     for i, label in enumerate(run_label):
         if (label=='EDMF-Energy-cor') or (label=='EDMF-Energy'):
-            ax.plot((scm[i].ent), scm[i].z_r/mld, linestyle='-', color = colors[i],
+            # ax.plot((scm[i].ent), scm[i].z_r/mld, linestyle='-', color = colors[i],
+            #     alpha=alpha[i], linewidth=linewidth[i], label=label)
+            # ax.plot((scm[i].det), scm[i].z_r/mld, linestyle='--', color = colors[i],
+            #     alpha=alpha[i], linewidth=linewidth[i], label=label)
+            # ax.plot((scm[i].ent-scm[i].det), scm[i].z_r/mld, linestyle=':', color = colors[i],
+            # alpha=alpha[i], linewidth=linewidth[i], label=label)
+            ax.plot(out[i]['Ent'][instant], out[i].z_r/mld, linestyle=styles[i], color = colors[i],
                 alpha=alpha[i], linewidth=linewidth[i], label=label)
-            ax.plot((scm[i].det), scm[i].z_r/mld, linestyle='--', color = colors[i],
+            ax.plot(out[i]['Det'][instant], out[i].z_r/mld, linestyle=styles[i], color = colors[i],
                 alpha=alpha[i], linewidth=linewidth[i], label=label)
-            ax.plot((scm[i].ent-scm[i].det), scm[i].z_r/mld, linestyle=':', color = colors[i],
-            alpha=alpha[i], linewidth=linewidth[i], label=label)
+            ax.plot((out[i]['Ent'][instant]-out[i]['Det'][instant]), out[i].z_r/mld, linestyle=styles[i], color = colors[i],
+                alpha=alpha[i], linewidth=linewidth[i], label=label)
     ax.set_xlim(-0.01,0.01)
     #ax.set_ylim((-1.3, 0))
 
@@ -479,19 +537,12 @@ if True:
 
     fig.tight_layout()
 
+    plt.savefig(saving_path+saving_name, bbox_inches='tight', dpi=300)
+    print('figure saved at'+saving_path+saving_name)
 
+plot_intant_panel()
 
-
-
-
-
-plt.savefig(saving_path+saving_name, bbox_inches='tight', dpi=300)
-
-
-print('figure saved at'+saving_path+saving_name)
-
+### Plot velocity panel
 subprocess.run(["python", "WANG1_LES_vs_SCM_velocities.py"])
-
-
 
 #plt.show()

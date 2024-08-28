@@ -38,5 +38,18 @@
     'delta_bkg': 0.02*250,   # 0.02,
     'output_filename': 'run',
     'wp0':-1.e-02,
+
+### Pb de CL de U ? 
+
+![alt text](image-4.png)
+cf wu coincident proche surface pour les et scm, mais dz_u ne part pas dans le même sens:
+- [ ] changer à la main dans le fortran pour voir
+    - dans advance_dyn_mf -uFlx ne fait rien
+    - dans advance_dyn_mf changer + FC en - FC fait des instabilités pas bonnes
+    - 
+- [ ] demander à Florian simu CROCO, pour voir si c'est pas un pb de CL de MNH...
+
 ### explication delta0 plus fort
 doit ere du au fait que le terme c'est $\delta_0 / h$. Mais avec rot, il faut remplacer $h$ par le rayon $r$ qui doit tendre vers $l_{\rm rot}$ quand $Ro \ll 1$ ? Utiliser une interpolation en tanh entre lrot et h? Besoin d'être justifiée par plusieurs LES... Ou même LES a des instanst différents ? + utiliser longueur intégrale de WANG.
+
+Avec une modulation cff = tanh(Ro^0.37) comme dans Wang de Cent, Cdet (réduit), et de lrot = h x cff pour detla0 et wp_bp, on arrive à retrouver bon résultats sans les coeff (sauf ) !!  
