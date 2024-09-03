@@ -40,7 +40,7 @@ class SCM:
                         Cent  = 0.55         , Cdet = -1         , wp_a =  1        , wp_b  = 1   ,
                         wp_bp = 0.0002       , up_c = 0.5        , vp_c = 0.5       , bc_ap = 0.1 ,
                         delta_bkg = 0.       , wp0=-1.e-08       ,
-                        entr_scheme = 'R10'  , write_netcdf=False, avg_last_hour=False, bc_P09='false', beta_bc_P09=0.3 ):
+                        entr_scheme = 'R10'  , write_netcdf=False, avg_last_hour=False, bc_P09='false', beta_bc_P09=0.3, trad_coriolis_mod=False ):
         """[summary]
         Args:
             nz: Number of grid points. Defaults to 100.
@@ -83,6 +83,7 @@ class SCM:
             eddy_diff_tke_const: constants to be used in the TKE scheme ('NEMO', 'MNH' or 'RS81').    Defaults to 'NEMO'
             write_netcdf (bool): Do we write a netcdf file (containing detailed energy diagnostics, but slower to run)? Default to False
             bc_P09 (str): Do you want to use Pergaud (2009) temperature boundary condition? Defaults to 'false'; options are 'inconsistent' (original version) or 'consistent' (fixed version)
+            trad_coriolis_mod (bool): activate modulation of ent/det, wp_bp and delta_bkg by traditional Coriolis. Defaults to False. 
         """
 ################################################################################################################
         ## simulation parameters
@@ -180,6 +181,7 @@ class SCM:
         self.wp0 = wp0                    ; self.bc_ap = bc_ap
         self.delta_bkg = delta_bkg        ; self.wp_bp = wp_bp
         self.Cent = Cent ; self.Cdet = Cdet
+        self.trad_coriolis_mod = trad_coriolis_mod
         ####################################
         # define vertical grid
         #-----------------------------------
@@ -720,15 +722,9 @@ class SCM:
         tkepmin = self.min_Threshold[0]
         mxlpmin = self.min_Threshold[3]
         #
-        if self.mass_flux_entr=='R10' or self.mass_flux_entr=='R10_HB09' or self.mass_flux_entr=='R10_Wi11':
-          self.ap,self.up,self.vp,self.wp,self.tp,self.Bp,self.ent,self.det, self.epsPlume = scm_mfc.mass_flux_r10(
-                                    u_mean, v_mean, t_mean, self.tke_n, self.z_w, self.Hz,
-                                    tp0   , up0   , vp0   , wp0     , self.mf_params,
-                                    self.eos_params, tkepmin, mxlpmin, self.MF_small_ap, self.lineos, self.triple_corr_opt, self.zinv,
-                                    self.nz , self.ntraMF , len(self.mf_params), len(self.eos_params)   )
-        if self.mass_flux_entr=='R10corNT':
-    #####################
-    # MODULATION due to rotation
+        #####################
+        if self.trad_coriolis_mod:
+          # MODULATION due to traditional rotation
           B0 = self.g*self.alpha*self.stflx[self.itemp]
           Ro = np.minimum((np.abs(B0)/self.fcor)**(0.5)/(self.fcor*np.abs(self.zinv)) , (np.abs(B0)/self.fcor)**(0.5)/(self.fcor*1000.))
           cff= np.tanh(Ro**0.37) #modulation coefficient, Wang 2006
@@ -738,8 +734,14 @@ class SCM:
           # reduce lateral exchanges
           self.mf_params[0] = self.Cent*cff
           self.mf_params[1] = self.Cdet*cff
-    ######################
-
+        ######################
+        if self.mass_flux_entr=='R10' or self.mass_flux_entr=='R10_HB09' or self.mass_flux_entr=='R10_Wi11':
+          self.ap,self.up,self.vp,self.wp,self.tp,self.Bp,self.ent,self.det, self.epsPlume = scm_mfc.mass_flux_r10(
+                                    u_mean, v_mean, t_mean, self.tke_n, self.z_w, self.Hz,
+                                    tp0   , up0   , vp0   , wp0     , self.mf_params,
+                                    self.eos_params, tkepmin, mxlpmin, self.MF_small_ap, self.lineos, self.triple_corr_opt, self.zinv,
+                                    self.nz , self.ntraMF , len(self.mf_params), len(self.eos_params)   )
+        if self.mass_flux_entr=='R10corNT':
           self.ap,self.up,self.vp,self.wp,self.tp,self.Bp,self.ent,self.det, self.vortp, self.epsPlume = scm_mfc.mass_flux_r10_cor(
                                     u_mean, v_mean, t_mean, self.tke_n, self.z_w, self.Hz,
                                     tp0   , up0   , vp0   , wp0     , self.mf_params,

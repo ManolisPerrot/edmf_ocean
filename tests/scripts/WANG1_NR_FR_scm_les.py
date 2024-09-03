@@ -7,7 +7,6 @@ import sys  # to put the SCM into the PYTHONPATH
 
 sys.path.append('../../library/F2PY')
 
-
 ###########################################
 # Imports
 ###########################################
@@ -36,46 +35,44 @@ plt.rcParams.update({'savefig.facecolor': 'white'})
 blue, orange, magenta, grey, green = '#0db4c3', '#eea021', '#ff0364', '#606172', '#3fb532'
 
 # ===========================================================================
-case = 'WANG1_FR'
+cases = ['WANG1_NR','WANG1_FR']
+les = {}
+LG_MEAN={}
+LG_RES={}
+LG_SBG={}
+BU_KE={}
+TH_les={}
+U_les={}
+V_les={}
+WTH={}
+WU={}
+WV={}
+TKE={}
+WTKE={}
+for case in cases:
+    file = 'GN_01.1.OC_01.000.nc'
+    path = '../../tests/data/'+case+'/'
+    les[case] = xr.open_dataset(path+file)
+    LG_MEAN[case]= xr.open_dataset(path+file,group ='/LES_budgets/Mean/Cartesian/Not_time_averaged/Not_normalized/cart')
+    LG_RES[case] = xr.open_dataset(path+file,group ='/LES_budgets/Resolved/Cartesian/Not_time_averaged/Not_normalized/cart')    
+    LG_SBG[case] = xr.open_dataset(path+file,group ='/LES_budgets/Subgrid/Cartesian/Not_time_averaged/Not_normalized/cart')
+    BU_KE[case] = xr.open_dataset(path+file,group ='/LES_budgets/BU_KE/Cartesian/Not_time_averaged/Not_normalized/cart')
+    TH_les[case] = (LG_MEAN[case].MEAN_TH - 273.15).data
+    U_les [case] = (LG_MEAN[case].MEAN_U).data
+    V_les [case] = (LG_MEAN[case].MEAN_V).data
+    WTH   [case] = (LG_RES[case].RES_WTH + LG_SBG[case].SBG_WTHL).data
+    WU    [case] = (LG_RES[case].RES_WU  + LG_SBG[case].SBG_WU).data
+    WV    [case] = (LG_RES[case].RES_WV  + LG_SBG[case].SBG_WV).data
+    TKE   [case] = (LG_RES[case].RES_KE  + LG_SBG[case].SBG_TKE).data 
+    WTKE  [case] = (LG_RES[case].RES_WKE + LG_SBG[case].SBG_WTKE).data
 
-
-saving_path = '../figures/'
-saving_name = case+'_profile_LES_vs_EDMF.png'
-
-
-# loading LES output once before using the function
-
-file = 'GN_01.1.OC_01.000.nc'
-
-
-path = '../data/'+case+'/'
-les = xr.open_dataset(path+file)
-LG_MEAN = xr.open_dataset(
-    path+file, group='/LES_budgets/Mean/Cartesian/Not_time_averaged/Not_normalized/cart')
-TH_les = (LG_MEAN.MEAN_TH - 273.15).data
-U_les = (LG_MEAN.MEAN_U).data
-V_les = (LG_MEAN.MEAN_V).data
-
-LG_RES = xr.open_dataset(
-    path+file, group='/LES_budgets/Resolved/Cartesian/Not_time_averaged/Not_normalized/cart')
-LG_SBG = xr.open_dataset(
-    path+file, group='/LES_budgets/Subgrid/Cartesian/Not_time_averaged/Not_normalized/cart')
-BU_KE = xr.open_dataset(path+file,group ='/LES_budgets/BU_KE/Cartesian/Not_time_averaged/Not_normalized/cart')
-
-WTH = (LG_RES.RES_WTH + LG_SBG.SBG_WTHL).data
-WU = (LG_RES.RES_WU + LG_SBG.SBG_WU).data
-WV = (LG_RES.RES_WV + LG_SBG.SBG_WV).data
-corr_tke_les = 0. #-2e-04+1.0e-08
-TKE = (LG_RES.RES_KE + LG_SBG.SBG_TKE).data + corr_tke_les
-WTKE = (LG_RES.RES_WKE + LG_SBG.SBG_WTKE).data
-
-time_les = les.time_les
+time_les = les[case].time_les
 
 # numpy array of integer hours, starting at inital time + 1h
 time = ((time_les - time_les[0]) / np.timedelta64(1, 'h')).data.astype(int) + 1
 
 # remap level_les on negative depth values
-z_r_les = (les.level_les - (les.level_les[0] + les.level_les[-1])).data
+z_r_les = (les[case].level_les - (les[case].level_les[0] + les[case].level_les[-1])).data
 
 # choose intant to plot    
 instant = -1 
@@ -85,7 +82,7 @@ instant = -1
 
 # compute LES mixed layer depth
 # to non-dimensionalize depths
-mld = (-z_r_les[(-WTH[instant]).argmax()])
+mld = (-z_r_les[(-WTH[cases[0]][instant]).argmax()])
 
 # ===========================================================================
 
@@ -162,49 +159,24 @@ common_params = {
     # 'wp0':-1.e-02,
 
 
-common_params.update(case_params[case])  # Update with the specific case configuration in case_params[case]
+common_params.update(case_params['WANG1_FR'])  # Update with the specific case configuration in case_params[case]
 
 
-# Define parameters specific to each run (overwrite common parameters):
-
-# run_label = ['ED+EVD',  'EDMF-Energy','EDMF-Energy-cor' ]
-# runs = [
-#     {
-#         'eddy_diff': True,
-#         'evd': True,
-#         'mass_flux_tra': False,
-#         'mass_flux_dyn': False,
-#         'mass_flux_tke': False,
-#         'mass_flux_tke_trplCorr': False,
-#         'output_filename': 'run1.nc',
-#     'write_netcdf': False
-#     },
-#             {
-#         'eddy_diff': True,
-#         'evd': False,
-#         'mass_flux_tra': True,
-#         'mass_flux_dyn': True,
-#         'mass_flux_tke': True,
-#         'mass_flux_tke_trplCorr': True,
-#         'entr_scheme': 'R10',
-#         'output_filename': 'run2.nc',
-#     'write_netcdf': False
-#     },
-#         {
-#         'eddy_diff': True,
-#         'evd': False,
-#         'mass_flux_tra': True,
-#         'mass_flux_dyn': True,
-#         'mass_flux_tke': True,
-#         'mass_flux_tke_trplCorr': True,
-#         'entr_scheme': 'R10corNT',
-#         'output_filename': 'scm_WANG1_FR.nc',
-#     'write_netcdf': True
-#     }
-#         ]
-
-run_label = ['EDMF-Energy-cor' ]
+run_label = ['No rotation','Traditional Coriolis' ]
 runs = [
+        {
+        'eddy_diff': True,
+        'evd': False,
+        'mass_flux_tra': True,
+        'mass_flux_dyn': True,
+        'mass_flux_tke': True,
+        'mass_flux_tke_trplCorr': True,
+        # 'entr_scheme': 'R10corNT',
+        'entr_scheme': 'R10',
+        'output_filename': 'scm_WANG1_NR.nc',
+        'write_netcdf': True,
+        'trad_coriolis_mod': False
+    },
         {
         'eddy_diff': True,
         'evd': False,
@@ -251,20 +223,21 @@ instant = -1
 
 # compute LES mixed layer depth
 # to non-dimensionalize depths
-mld = (-z_r_les[(-WTH[instant]).argmax()]).data
+mld = (-z_r_les[(-WTH[cases[0]][instant]).argmax()])
 mld=1
 
 ################################# PLOTTING #################################
+#SCM
 styles = ['-', '-', '-']
-#colors = ['k',blue,orange]
-colors = ['k','tab:blue','tab:orange']
-alpha = [0.5,1,1]
-linewidth = [4]*(len(run_label))
+colors = ['tab:blue','tab:blue']
+alpha = [0.5,1]
+linewidth = [2]*(len(run_label))
 
-style_les = 'ko'
-alpha_les = 1
-linewidth_les = 4
-
+#LES
+marker_les='o'
+color_les = ['k','k']
+alpha_les = [0.5,1]
+linewidth_les = 1
 
 def plot_intant_panel(instant=instant):
     #============================================ WC ===============================================
@@ -281,14 +254,14 @@ def plot_intant_panel(instant=instant):
     ax.set_title(r'$\overline{\theta}$')
 
 
-    ax.plot(TH_les[instant], z_r_les/mld, style_les,
-            alpha=alpha_les, linewidth=linewidth_les,  label='LES')
-
     for i, label in enumerate(run_label):
         # ax.plot(scm[i].t_np1[:, 0], scm[i].z_r/mld, linestyle=styles[i], color = colors[i],
         ax.plot(out[i].temp[instant], out[i].z_r/mld, linestyle=styles[i], color = colors[i],
 
                 alpha=alpha[i], linewidth=linewidth[i], label=label)
+        
+        ax.plot(TH_les[cases[i]][instant], z_r_les/mld, color_les[i], 
+            alpha=alpha_les[i], linewidth=linewidth_les)
 
     #ax.set_xlim((1.55, 1.8))
     #ax.set_ylim((-1.3, 0))
@@ -302,19 +275,13 @@ def plot_intant_panel(instant=instant):
 
     ax.set_xlabel(r'${\rm m}\;{\rm s}^{-1}$')
 
-    ax.plot(U_les[instant], z_r_les/mld, style_les,
-            alpha=alpha_les, linewidth=linewidth_les, label='LES')
 
     for i, label in enumerate(run_label):
-        # ax.plot((scm[i].u_np1), scm[i].z_r/mld, linestyle=styles[i], color = colors[i],
-        #         alpha=alpha[i], linewidth=linewidth[i], label=label)
-        # ax.plot((scm[i].up), scm[i].z_w/mld, linestyle='--', color = colors[i],
-        #         alpha=alpha[i], linewidth=linewidth[i], label=label)
-        # if i != 0: 
-        #     ax.plot((out[i].w_p[instant]), out[i].z_w/mld, linestyle=':', color = colors[i],
-        #         alpha=alpha[i], linewidth=linewidth[i], label=label)
         ax.plot((out[i]['u'][instant]), out[i].z_r/mld, linestyle=styles[i], color = colors[i],
                 alpha=alpha[i], linewidth=linewidth[i], label=label)
+        
+        ax.plot(U_les[cases[i]][instant], z_r_les/mld, color_les[i], 
+            alpha=alpha_les[i], linewidth=linewidth_les,  label='LES')
     ax.ticklabel_format(style='sci', axis='x', scilimits=(0, 0))
     #ax.set_ylim((-1.3, 0))
 
@@ -326,19 +293,14 @@ def plot_intant_panel(instant=instant):
 
     ax.set_xlabel(r'${\rm m}\;{\rm s}^{-1}$')
 
-    ax.plot(V_les[instant], z_r_les/mld, style_les,
-            alpha=alpha_les, linewidth=linewidth_les, label='LES')
+
 
     for i, label in enumerate(run_label):
-        # ax.plot((scm[i].u_np1), scm[i].z_r/mld, linestyle=styles[i], color = colors[i],
-        #         alpha=alpha[i], linewidth=linewidth[i], label=label)
-        # ax.plot((scm[i].up), scm[i].z_w/mld, linestyle='--', color = colors[i],
-        #         alpha=alpha[i], linewidth=linewidth[i], label=label)
-        # if i != 0: 
-        #     ax.plot((out[i].w_p[instant]), out[i].z_w/mld, linestyle=':', color = colors[i],
-        #         alpha=alpha[i], linewidth=linewidth[i], label=label)
         ax.plot((out[i]['v'][instant]), out[i].z_r/mld, linestyle=styles[i], color = colors[i],
                 alpha=alpha[i], linewidth=linewidth[i], label=label)
+        ax.plot(V_les[cases[i]][instant], z_r_les/mld, color_les[i], 
+            alpha=alpha_les[i], linewidth=linewidth_les,  label='LES')       
+
     ax.ticklabel_format(style='sci', axis='x', scilimits=(0, 0))
     #ax.set_ylim((-1.3, 0))
     # ===============================================================
@@ -346,14 +308,14 @@ def plot_intant_panel(instant=instant):
     ax = axes.flat[ax_index]
 
     ax.set_title(r'$\overline{w^\prime \theta^\prime}$')
-
-    ax.plot(WTH[instant], z_r_les/mld, style_les,
-            alpha=alpha_les, linewidth=linewidth_les, label='LES')
     
     for i, label in enumerate(run_label):
         ax.plot( -out[i]['WT'][instant,:], out[i].z_w/mld, color ='tab:blue'  , linestyle ='-', alpha=1.0 , linewidth=3 )
         ax.plot( -out[i]['WT_ED'][instant,:], out[i].z_w/mld, color ='tab:blue'  , linestyle =':', alpha=1.0 , linewidth=3 )
         ax.plot( -out[i]['WT_MF'][instant,:], out[i].z_w/mld, color ='tab:blue'  , linestyle ='--', alpha=1.0 , linewidth=3 )
+
+        ax.plot(WTH[cases[i]][instant], z_r_les/mld, color_les[i], 
+            alpha=alpha_les[i], linewidth=linewidth_les,  label='LES')
 
     ax.set_xlabel(r'${\rm K}\;{\rm m}\;{\rm s}^{-1}$')
 
@@ -363,15 +325,13 @@ def plot_intant_panel(instant=instant):
     ax = axes.flat[ax_index]
     ax.set_title(r'$k$')
 
-    ax.plot(TKE[instant], z_r_les/mld, style_les,
-            alpha=alpha_les, linewidth=linewidth_les, label='LES')
 
     for i, label in enumerate(run_label):
-        #ax.plot(scm[i].tke_np1, scm[i].z_w/mld, linestyle=styles[i], color = colors[i],
-        #        alpha=alpha[i], linewidth=linewidth[i], label=label)
-        
         ax.plot(out[i]['tke'][instant], out[i].z_w/mld, linestyle=styles[i], color = colors[i],
                 alpha=alpha[i], linewidth=linewidth[i], label=label)
+        ax.plot(TKE[cases[i]][instant], z_r_les/mld, color_les[i], 
+            alpha=alpha_les[i], linewidth=linewidth_les,  label='LES')
+
     ax.ticklabel_format(style='sci', axis='x', scilimits=(0, 0))
 
     #ax.set_xlim((-0.0001, 0.001))
@@ -379,28 +339,16 @@ def plot_intant_panel(instant=instant):
 
     ax.set_xlabel(r'${\rm m}^2\;{\rm s}^{-2}$')
     # ===============================================================
-
-
     ax_index+=1
     ax = axes.flat[ax_index]
     ax.set_title(r'$\overline{w^\prime \frac{u^{\prime 2}}{2}  }$')
 
-    ax.plot(WTKE[instant], z_r_les/mld, style_les,
-            alpha=alpha_les, linewidth=linewidth_les, label='LES')
 
     for i, label in enumerate(run_label):
-        # ax.plot((scm[i].wtke), scm[i].z_r/mld, linestyle=styles[i], color = colors[i],
-        #         alpha=alpha[i], linewidth=linewidth[i], label=label)
         ax.plot(out[i]['WTKE'][instant], out[i].z_r/mld, linestyle=styles[i], color = colors[i],
                 alpha=alpha[i], linewidth=linewidth[i], label=label)
-        
-    # if i==1:
-    #     ax.plot((out[i]['we'][instant]), out[i].z_w/mld, linestyle=':', color = colors[i],
-    #             alpha=alpha[i], linewidth=linewidth[i], label=label)
-
-
-    #ax.set_xlim((- 1e-5, 0))
-    #ax.set_ylim((-1.3, 0))
+        ax.plot(WTKE[cases[i]][instant], z_r_les/mld, color_les[i], 
+            alpha=alpha_les[i], linewidth=linewidth_les,  label='LES')
 
     ax.set_xlabel(r'${\rm m}^3\;{\rm s}^{-3}$')
 
@@ -411,8 +359,8 @@ def plot_intant_panel(instant=instant):
     # ax.set_title(r'$\overline{w^\prime b^\prime}$')
 
     # coef = 9.81*out[0].attrs['alpha']
-    # ax.plot((BU_KE['RES_TP'] + BU_KE['SBG_TP'])[instant], z_r_les/mld, style_les,
-    #         alpha=alpha_les, linewidth=linewidth_les, label='LES')
+    # ax.plot((BU_KE['RES_TP'] + BU_KE['SBG_TP'])[instant], z_r_les/mld, color_les[i], 
+    #         alpha=alpha_les[i], linewidth=linewidth_les, label='LES')
     
     # for i, label in enumerate(run_label):
     #     ax.plot( -coef*out[i]['WT'][-1,:], out[i].z_w/mld, color ='tab:blue'  , linestyle ='--', alpha=1.0 , linewidth=3 )
@@ -425,16 +373,13 @@ def plot_intant_panel(instant=instant):
     ax = axes.flat[ax_index]
 
     ax.set_title(r'$\overline{w^\prime u^\prime}$')
-
-    ax.plot(-(WU)[instant], z_r_les/mld, style_les,
-    # ax.plot((WV)[instant], z_r_les/mld, style_les,
-            alpha=alpha_les, linewidth=linewidth_les, label='LES')
     
     for i, label in enumerate(run_label):
         ax.plot( out[i]['WU'][instant,:], out[i].z_w/mld, color ='tab:blue'  , linestyle ='-', alpha=1.0 , linewidth=3 )
         ax.plot( out[i]['WU_MF'][instant,:], out[i].z_w/mld, color ='tab:blue'  , linestyle ='--', alpha=1.0 , linewidth=3 )
         ax.plot( out[i]['WU_ED'][instant,:], out[i].z_w/mld, color ='tab:blue'  , linestyle =':', alpha=1.0 , linewidth=3 )
-
+        ax.plot(-WU[cases[i]][instant], z_r_les/mld, color_les[i], 
+            alpha=alpha_les[i], linewidth=linewidth_les,  label='LES')
     ax.set_xlabel(r'${\rm m^2}\;{\rm s}^{-2}$')
 
     # ===============================================================
@@ -443,16 +388,13 @@ def plot_intant_panel(instant=instant):
     ax = axes.flat[ax_index]
 
     ax.set_title(r'$\overline{w^\prime v^\prime}$')
-
-    ax.plot(-(WV)[instant], z_r_les/mld, style_les,
-    # ax.plot((WU)[instant], z_r_les/mld, style_les,
-            alpha=alpha_les, linewidth=linewidth_les, label='LES')
     
     for i, label in enumerate(run_label):
         ax.plot( out[i]['WV'][instant,:], out[i].z_w/mld, color ='tab:blue'  , linestyle ='-', alpha=1.0 , linewidth=3 )
         ax.plot( out[i]['WV_MF'][instant,:], out[i].z_w/mld, color ='tab:blue'  , linestyle ='--', alpha=1.0 , linewidth=3 )
         ax.plot( out[i]['WV_ED'][instant,:], out[i].z_w/mld, color ='tab:blue'  , linestyle =':', alpha=1.0 , linewidth=3 )
-
+        ax.plot(-(WV)[cases[i]][instant], z_r_les/mld, color_les[i], 
+            alpha=alpha_les[i], linewidth=linewidth_les,  label='LES')
     ax.set_xlabel(r'${\rm m^2}\;{\rm s}^{-2}$')
 
     # ===============================================================
@@ -539,12 +481,14 @@ def plot_intant_panel(instant=instant):
 
     fig.tight_layout()
 
+    saving_path = '../figures/'
+    saving_name = 'WANG1_NR_FR_profiles.png'    
     plt.savefig(saving_path+saving_name, bbox_inches='tight', dpi=300)
     print('figure saved at'+saving_path+saving_name)
 
 plot_intant_panel()
 
 ### Plot velocity panel
-subprocess.run(["python", "WANG1_LES_vs_SCM_velocities.py"])
+# subprocess.run(["python", "WANG1_LES_vs_SCM_velocities.py"])
 
 #plt.show()
