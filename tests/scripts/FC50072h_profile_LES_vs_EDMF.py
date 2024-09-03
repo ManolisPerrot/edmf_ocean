@@ -106,20 +106,32 @@ scm_params = {
     'tke_sfc_dirichlet': False,
     'eddy_diff_tke_const': 'NEMO',
     'entr_scheme': 'R10',
-    'Cent': 0.99,
-    'Cdet': 1.99,       # 'Cdet': 2.5,
-    'wp_a': 1.3,
-    'wp_b': 1.3,      # 'wp_b': 1.
-    'wp_bp': 0.003*250,     #      0.002,
-    'up_c': 0.5,
-    'vp_c': 0.5,
-    'bc_ap': 0.2,    #0.3,
-    'delta_bkg': 0.009*250,   # 0.006,
-    'wp0' : -0.5e-08,
+#     'Cent': 0.99,
+#     'Cdet': 1.99,       # 'Cdet': 2.5,
+#     'wp_a': 1.3,
+#     'wp_b': 1.3,      # 'wp_b': 1.
+#     'wp_bp': 0.003*250,     #      0.002,
+#     'up_c': 0.5,
+#     'vp_c': 0.5,
+#     'bc_ap': 0.2,    #0.3,
+#     'delta_bkg': 0.009*250,   # 0.006,
+#     'wp0' : -0.5e-08,
+#     'output_filename': 'run',
+#     'write_netcdf': True
+# }
+    'Cent': 0.57,
+    'Cdet': 1.07749965e+00,       # 'Cdet': 2.5,
+    'wp_a': 4.81204658e-01,
+    'wp_b': 7.09035356e-01,      # 'wp_b': 1.
+    'wp_bp': 2.21564064e+00,     #      0.002,
+    'up_c': 7.63362741e-01,
+    'vp_c': 4.67343733e-01,
+    'bc_ap': 8.27957276e-01,    #0.3,
+    'delta_bkg':2.5,   # 0.006,
+    'wp0' : -1.15566295e-08,
     'output_filename': 'run',
     'write_netcdf': True
 }
-
 
 
 # Define parameters specific to each run (overwrite common parameters):
@@ -255,7 +267,7 @@ if case == 'FC500':
         ax.plot(scm[i].t_np1[:, 0], scm[i].z_r/mld, linestyle=styles[i], color = colors[i],
                 alpha=alpha[i], linewidth=linewidth[i], label=label)
 
-    ax.set_xlim((1.65, 1.76))
+    # ax.set_xlim((1.65, 1.76))
     ax.set_ylim((-1.3, 0))
 
     # ===============================================================
