@@ -948,12 +948,19 @@ CONTAINS
       ! fait pas grand chose...
       !
       ! cff=(1+EXP(-vort_p(k)/fcor))*0.5
+      ! if (fcor/vort_p(k)>0) then
+      !   cff = 1
+      ! else
+      !   cff=tanh((abs(fcor/vort_p(k)))**0.37)
+      ! endif 
+      ! cff=tanh(abs((1-abs(vort_p(k)/fcor)))**0.37+0.31)
+      ! !
       ! beta1 = cff*mf_params(1)
       ! beta2 = cff*mf_params(2)
-      ! bb    = cff*mf_params(4)
-      ! aa    = cff*mf_params(3)
-      ! delta0= cff*mf_params(9)/ABS(zinv)
-      ! bp    = cff*mf_params(5)/ABS(zinv)
+      ! ! bb    = cff*mf_params(4)
+      ! ! aa    = cff*mf_params(3)
+      ! delta0= (1/cff)*mf_params(9)/ABS(zinv)
+      ! bp    = (1/cff)*mf_params(5)/ABS(zinv)
       !
       !
       ! Compute B_p

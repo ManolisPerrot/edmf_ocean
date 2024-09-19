@@ -727,7 +727,9 @@ class SCM:
           # MODULATION due to traditional rotation
           B0 = self.g*self.alpha*self.stflx[self.itemp]
           Ro = np.minimum((np.abs(B0)/self.fcor)**(0.5)/(self.fcor*np.abs(self.zinv)) , (np.abs(B0)/self.fcor)**(0.5)/(self.fcor*1000.))
+          # cff= np.tanh(Ro**0.37) #modulation coefficient, Wang 2006
           cff= np.tanh(Ro**0.37) #modulation coefficient, Wang 2006
+
           # reduce integral lenth scale: L_int = cff*zinv (division by zinv is done in the fortran routine)
           self.mf_params[-1] = self.delta_bkg/cff
           self.mf_params[4] = self.wp_bp/cff
