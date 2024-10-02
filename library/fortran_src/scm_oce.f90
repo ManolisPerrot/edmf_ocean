@@ -17,18 +17,19 @@ MODULE scm_oce
 
 CONTAINS
   !===================================================================================================
-  SUBROUTINE advance_tra_ED(t_n,stflx,srflx,swr_frac,btflx,Hz,Akt,zr,eps,alpha,dt,N,ntra,t_np1,tFlx)
+  SUBROUTINE advance_tra_ED(t_n,stflx,srflx,swr_frac,btflx,Hz,Akt,zr,eps,alpha,dt,cpoce,N,ntra,t_np1,tFlx)
   !---------------------------------------------------------------------------------------------------
     !!============================================================================<br />
     !!                  ***  ROUTINE advance_tra_ED  ***                          <br />
     !! ** Purposes : integrate vertical diffusion term for tracers                <br />
     !!============================================================================<br />
     !! \[ \overline{\phi}^{n+1,*} = \overline{\phi}^n + \Delta t \partial_z \left(  K_m \partial_z  \overline{\phi}^{n+1,*} \right) \]
-    USE scm_par, ONLY: cp, grav
+    USE scm_par, ONLY: grav
     IMPLICIT NONE
     INTEGER, INTENT(IN   )          :: N                !! number of vertical levels
     INTEGER, INTENT(IN   )          :: ntra             !! number of tracers to integrate
     REAL(8), INTENT(IN   )          :: dt               !! time-step [s]
+    REAL(8), INTENT(IN   )          :: cpoce
     REAL(8), INTENT(IN   )          :: t_n  (1:N,ntra)  !! tracer at time step n
     REAL(8), INTENT(IN   )          :: stflx(  ntra)    !! surface tracer fluxes
     REAL(8), INTENT(IN   )          :: btflx(  ntra)    !! surface tracer fluxes
@@ -64,8 +65,8 @@ CONTAINS
       IF(itrc.eq.1) then
         !vint_eps = 0.
         DO k=1,N
-          cffp  = eps(k  ) / ( cp-alpha*grav*zr(k) )
-          cffm  = eps(k-1) / ( cp-alpha*grav*zr(k) )
+          cffp  = eps(k  ) / ( cpoce-alpha*grav*zr(k) )
+          cffm  = eps(k-1) / ( cpoce-alpha*grav*zr(k) )
           rhs(k)=rhs(k)+dt*0.5*Hz(k)*(cffp+cffm)
         !  vint_eps = vint_eps + 0.5*Hz(k)*( eps(k  )+eps(k-1)  )
         ENDDO

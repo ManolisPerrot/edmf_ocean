@@ -3,8 +3,8 @@ MODULE scm_par
    PUBLIC
    REAL(8), PUBLIC, PARAMETER ::   grav     = 9.81           !! Gravity of Earth
    REAL(8), PUBLIC, PARAMETER ::   vkarmn   = 0.41           !! Von Karman constant
-   REAL(8), PUBLIC, PARAMETER ::   rho0     = 1027.          !! Boussinesq reference density [kg/m3]
-   REAL(8), PUBLIC, PARAMETER ::   cp       = 3985.0d0       !! Specific heat capacity of saltwater [J/kg K]
+!   REAL(8), PUBLIC, PARAMETER ::   rho0     = 1027.          !! Boussinesq reference density [kg/m3]
+!   REAL(8), PUBLIC, PARAMETER ::   cp       = 3985.0d0       !! Specific heat capacity of saltwater [J/kg K]
    REAL(8), PUBLIC, PARAMETER ::   rpi      = 4.*ATAN(1.)    !! \( \pi \)
    REAL(8), PUBLIC, PARAMETER ::   wpmin    = 1.e-08         !! Minimum value of \( w^{\rm p} \) [m/s] <br />
    !
@@ -50,51 +50,65 @@ MODULE scm_par
    !=======================================================================
    ! CANUTO A stability function (Canuto & al. A 2001)
    !=======================================================================
-   REAL(8), PARAMETER ::  c1 = 5.
-   REAL(8), PARAMETER ::  c2 = 0.8
-   REAL(8), PARAMETER ::  c3 = 1.968
-   REAL(8), PARAMETER ::  c4 = 1.136
-   REAL(8), PARAMETER ::  c5 = 0.
-   REAL(8), PARAMETER ::  c6 = 0.4
-   REAL(8), PARAMETER ::  cb1 = 5.95
-   REAL(8), PARAMETER ::  cb2 = 0.6
-   REAL(8), PARAMETER ::  cb3 = 1.
-   REAL(8), PARAMETER ::  cb4 = 0.
-   REAL(8), PARAMETER ::  cb5 = 0.33333
-   REAL(8), PARAMETER ::  cbb = 0.72
-   REAL(8), PARAMETER ::  a1  = 0.66666666667 - 0.5*c2
-   REAL(8), PARAMETER ::  a2  = 1.            - 0.5*c3
-   REAL(8), PARAMETER ::  a3  = 1.            - 0.5*c4
-   REAL(8), PARAMETER ::  a5  = 0.5           - 0.5*c6
-   REAL(8), PARAMETER ::  nn  = 0.5*c1  ! N
-   REAL(8), PARAMETER ::  nb  = cb1     ! Nt
-   REAL(8), PARAMETER ::  ab1 = 1. - cb2
-   REAL(8), PARAMETER ::  ab2 = 1. - cb3
-   REAL(8), PARAMETER ::  ab3 = 2.*(1.-cb4)
-   REAL(8), PARAMETER ::  ab5 = 2.*cbb*(1.-cb5)
-   REAL(8), PARAMETER ::  sf_d0 = 36.0*nn*nn*nn*nb*nb  ! d0
-   REAL(8), PARAMETER ::  sf_d1 = 84.0*a5*ab3*nn*nn*nb+36.0*ab5*nn*nn*nn*nb ! d1
-   REAL(8), PARAMETER ::  sf_d2 = 9.0*(ab2*ab2-ab1*ab1)*nn*nn*nn           &
-                                       - 12.0*(a2*a2-3.*a3*a3)*nn*nb*nb
-   REAL(8), PARAMETER ::  sf_d3 = 12.0*a5*ab3*(a2*ab1-3.0*a3*ab2)* nn      &
-                                      + 12.0*a5*ab3*(    a3*a3-a2*a2)* nb     &
-                                      + 12.0*   ab5*(3.0*a3*a3-a2*a2)*nn*nb
-   REAL(8), PARAMETER ::  sf_d4 = 48.0*a5*a5*ab3*ab3*nn + 36.0*a5*ab3*ab5*nn*nn
-   REAL(8), PARAMETER ::  sf_d5 = 3.0*(a2*a2-3.0*a3*a3)*(ab1*ab1-ab2*ab2)*nn
-   REAL(8), PARAMETER ::  sf_n0 = 36.0*a1*nn*nn*nb*nb
-   REAL(8), PARAMETER ::  sf_n1 = - 12.0*a5*ab3*(ab1+ab2)*nn*nn                         &
-             + 8.0*a5*ab3*(6.0*a1-a2-3.0*a3)*nn*nb + 36.0*a1*ab5*nn*nn*Nb
-   REAL(8), PARAMETER ::  sf_n2 = 9.0*a1*(ab2*ab2-ab1*ab1)*nn*nn
-   REAL(8), PARAMETER ::  sf_nb0 = 12.0*ab3*nn*nn*nn*nb   ! nt0
-   REAL(8), PARAMETER ::  sf_nb1 = 12.0*a5*ab3*ab3*nn*nn  ! nt1
-   REAL(8), PARAMETER ::  sf_nb2 = 9.0*a1*ab3*(ab1-ab2)*nn*nn + ( 6.0*a1*(a2-3.0*a3)     &
-                                  - 4.0*(a2*a2-3.0*a3*a3) )*ab3 * nn * nb  ! nt2
-   REAL(8), PARAMETER ::  lim_am0 = sf_d0*sf_n0
-   REAL(8), PARAMETER ::  lim_am1 = sf_d0*sf_n1 + sf_d1*sf_n0
-   REAL(8), PARAMETER ::  lim_am2 = sf_d1*sf_n1 + sf_d4*sf_n0
-   REAL(8), PARAMETER ::  lim_am3 = sf_d4*sf_n1
-   REAL(8), PARAMETER ::  lim_am4 = sf_d2*sf_n0
-   REAL(8), PARAMETER ::  lim_am5 = sf_d2*sf_n1+sf_d3*sf_n0
-   REAL(8), PARAMETER ::  lim_am6 = sf_d3*sf_n1
+   REAL(8),  parameter                :: ce1         =  1.44D0
+   REAL(8),  parameter                :: ce2         =  1.92D0
+   REAL(8),  parameter                :: ce3minus    = -0.62D0
+   REAL(8),  parameter                :: ce3plus     =  1.0D0
+   REAL(8),  parameter                :: sig_k       =  1.0D0
+   REAL(8),  parameter                :: sig_e       =  1.3D0
+   REAL(8),  parameter                :: anLimitFact =  0.5D0
+   REAL(8),  parameter                :: asLimitFact =  1.0D0
+   REAL(8),  parameter                :: small       =  1.0D-10
+   REAL(8),  parameter                :: avmolT      = 1.4D-07
+   REAL(8),  parameter                :: avmolu      = 1.3D-06
+!
+   REAL(8),  parameter                :: cc1       =  5.0000D0
+   REAL(8),  parameter                :: cc2       =  0.8000D0
+   REAL(8),  parameter                :: cc3       =  1.9680D0
+   REAL(8),  parameter                :: cc4       =  1.1360D0
+   REAL(8),  parameter                :: cc5       =  0.0000D0
+   REAL(8),  parameter                :: cc6       =  0.4000D0
+   REAL(8),  parameter                :: ct1       =  5.9500D0
+   REAL(8),  parameter                :: ct2       =  0.6000D0
+   REAL(8),  parameter                :: ct3       =  1.0000D0
+   REAL(8),  parameter                :: ct4       =  0.0000D0
+   REAL(8),  parameter                :: ct5       =  0.3333D0
+   REAL(8),  parameter                :: ctt       =  0.7200D0
+   REAL(8),  parameter                :: a1        =  2./3. - cc2/2.
+   REAL(8),  parameter                :: a2        =  1.    - cc3/2.
+   REAL(8),  parameter                :: a3        =  1.    - cc4/2.
+   REAL(8),  parameter                :: a4        =          cc5/2.
+   REAL(8),  parameter                :: a5        =  1./2. - cc6/2.
+   REAL(8),  parameter                :: at1       =           1. - ct2
+   REAL(8),  parameter                :: at2       =           1. - ct3
+   REAL(8),  parameter                :: at3       =  2. *   ( 1. - ct4)
+   REAL(8),  parameter                :: at4       =  2. *   ( 1. - ct5)
+   REAL(8),  parameter                :: at5       =  2.*ctt*( 1. - ct5)
+   REAL(8),  parameter                :: xN        =   0.5*cc1
+   REAL(8),  parameter                :: xNt       =   ct1
+   REAL(8),  parameter                :: d0        =   36.* xN**3. * xNt**2.
+   REAL(8),  parameter                :: d1        =   84.*a5*at3 * xN**2. * xNt  + 36.*at5 * xN**3. * xNt
+   REAL(8),  parameter                :: d2        =   9.*(at2**2.-at1**2.) * xN**3. - 12.*(a2**2.-3.*a3**2.) * xN * xNt**2.
+   REAL(8),  parameter                :: d3        =   12.*a5*at3*(a2*at1-3.*a3*at2) * xN + 12.*a5*at3*(a3**2.-a2**2.) * xNt       &
+                                                        + 12.*at5*(3.*a3**2.-a2**2.) * xN * xNt
+   REAL(8),  parameter                :: d4        =   48.*a5**2.*at3**2. * xN + 36.*a5*at3*at5 * xN**2.
+   REAL(8),  parameter                :: d5        =   3.*(a2**2.-3.*a3**2.)*(at1**2.-at2**2.) * xN
+   REAL(8),  parameter                :: n0        =   36.*a1 * xN**2. * xNt**2.
+   REAL(8),  parameter                :: n1        = - 12.*a5*at3*(at1+at2) * xN**2.              &
+                                                     + 8.*a5*at3*(6.*a1-a2-3.*a3) * xN * xNt      &
+                                                     + 36.*a1*at5 * xN**2. * xNt
+   REAL(8),  parameter                :: n2        =   9.*a1*(at2**2.-at1**2.) * xN**2.
+   REAL(8),  parameter                :: nt0       =   12.*at3 * xN**3. * xNt
+   REAL(8),  parameter                :: nt1       =   12.*a5*at3**2.  * xN**2.
+   REAL(8),  parameter                :: nt2       =   9.*a1*at3*(at1-at2) * xN**2. + (  6.*a1*(a2-3.*a3)                         &
+                                                          - 4.*(a2**2.-3.*a3**2.) )*at3 * xN * xNt
+   REAL(8),  parameter                :: cm0       =  ( (a2*a2 - 3.0*a3*a3 + 3.0*a1*xN)/(3.0*xN*xN) )**0.25
+   REAL(8),  parameter                :: cm3       = cm0**3
+   REAL(8),  parameter                :: cm3_inv   = 1./cm3
+   REAL(8),  parameter                :: cm0inv2   = 1./cm0**2
+   REAL(8),  parameter                :: anMinNum  = -(d1 + nt0) + sqrt((d1+nt0)**2. - 4.*d0*(d4+nt1))
+   REAL(8),  parameter                :: anMinDen  = 2.*(d4+nt1)
+   REAL(8),  parameter                :: anMin     = anMinNum / anMinDen
+   !=======================================================================
    !
 END MODULE scm_par
