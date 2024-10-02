@@ -317,7 +317,7 @@
 
 
           !===================================================================================================
-          SUBROUTINE tkeeq (tke_n,NN,SS,num,nuh,eps_n,h,dt,tke_min,bdy_sfc,bdy_bot,N,tke_np1)
+          SUBROUTINE tkeeq (tke_n,NN,SS,num,nuh,eps_n,h,dt,tke_min,bdy_sfc,bdy_bot,N,tke_np1,wtke)
           !---------------------------------------------------------------------------------------------------
               USE scm_par
               IMPLICIT NONE
@@ -334,6 +334,7 @@
               REAL(8), INTENT(IN   )  :: bdy_sfc(3)       ! bdy_sfc(1) = 0. -> Dirichlet, bdy_sfc(1) = 1. -> Neumann
               REAL(8), INTENT(IN   )  :: bdy_bot(3)       ! bdy_bot(1) = 0. -> Dirichlet, bdy_top(1) = 1. -> Neumann
               REAL(8), INTENT(  OUT)  :: tke_np1(0:N)
+              REAL(8), INTENT(  OUT)  :: wtke(1:N)
               !local variables
               INTEGER                 :: k,k_ubc,k_lbc
               REAL(8)                 :: avh(0:N), prod, buoyan, diss
@@ -372,6 +373,10 @@
               !  clip at k_min
               DO k=0,N
                 tke_np1(k) = MAX(tke_np1(k),tke_min)
+              ENDDO
+              !
+              DO k=1,N
+                wtke(k) = - 0.5*(avh(k)+avh(k-1))*( tke_np1(k)-tke_np1(k-1) )/h(k)
               ENDDO
           !---------------------------------------------------------------------------------------------------
           END SUBROUTINE tkeeq

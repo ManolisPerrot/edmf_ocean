@@ -795,7 +795,7 @@ class SCM:
         #
         #================================================
         #
-        self.tke_np1[:] = scm_keps.tkeeq(self.tke_n,self.bvf, self.shear,
+        self.tke_np1[:], self.wtke[:] = scm_keps.tkeeq(self.tke_n,self.bvf, self.shear,
                            self.akv,self.akt, self.eps_n,
                            self.Hz,self.dt,self.tkemin,
                            self.bdy_tke_sfc,self.bdy_tke_bot,self.nz)
@@ -814,7 +814,7 @@ class SCM:
                         self.tke_np1, self.eps_np1, self.shear, self.bvf,
                         self.min_Threshold[1], self.min_Threshold[2],  self.nz )
         #=========================
-#
+        #
     def output_init(self):
         fh01 = Dataset(self.output, mode='w',format="NETCDF4")
         fh01.createDimension('z_r',self.nz)
