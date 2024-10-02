@@ -53,7 +53,7 @@ case_settings={
 ###############        
 'kato_phillips':{   
     'dt': 360.,
-    'gridType': 'croco_old',                           
+    'gridType': 'croco_new',                           
     'nz': 256,
     'h0': 50.,                         
     'thetas': 6.5,                           
@@ -82,7 +82,7 @@ case_settings={
     ,
     'FC':{   
     'dt': 360.,
-    'gridType': 'croco_old',                           
+    'gridType': 'croco_new',                           
     'nz': 512,
     'h0': 100.,                         
     'thetas': 6.5,                           

@@ -212,8 +212,8 @@ runs = [
         'mass_flux_dyn': True,
         'mass_flux_tke': True,
         'mass_flux_tke_trplCorr': True,
-        # 'entr_scheme': 'R10corNT',
-        'entr_scheme': 'R10',
+        'entr_scheme': 'R10corNT',
+        # 'entr_scheme': 'R10',
         'output_filename': 'scm_WANG1_FR.nc',
         'write_netcdf': True,
         'trad_coriolis_mod': True
@@ -352,8 +352,8 @@ def plot_intant_panel(instant=instant):
     
     for i, label in enumerate(run_label):
         ax.plot( -out[i]['WT'][instant,:], out[i].z_w/mld, color ='tab:blue'  , linestyle ='-', alpha=1.0 , linewidth=3 )
-        ax.plot( -out[i]['WT_ED'][instant,:], out[i].z_w/mld, color ='tab:blue'  , linestyle =':', alpha=1.0 , linewidth=3 )
-        ax.plot( -out[i]['WT_MF'][instant,:], out[i].z_w/mld, color ='tab:blue'  , linestyle ='--', alpha=1.0 , linewidth=3 )
+        # ax.plot( -out[i]['WT_ED'][instant,:], out[i].z_w/mld, color ='tab:blue'  , linestyle =':', alpha=1.0 , linewidth=3 )
+        # ax.plot( -out[i]['WT_MF'][instant,:], out[i].z_w/mld, color ='tab:blue'  , linestyle ='--', alpha=1.0 , linewidth=3 )
 
     ax.set_xlabel(r'${\rm K}\;{\rm m}\;{\rm s}^{-1}$')
 
@@ -432,8 +432,8 @@ def plot_intant_panel(instant=instant):
     
     for i, label in enumerate(run_label):
         ax.plot( out[i]['WU'][instant,:], out[i].z_w/mld, color ='tab:blue'  , linestyle ='-', alpha=1.0 , linewidth=3 )
-        ax.plot( out[i]['WU_MF'][instant,:], out[i].z_w/mld, color ='tab:blue'  , linestyle ='--', alpha=1.0 , linewidth=3 )
-        ax.plot( out[i]['WU_ED'][instant,:], out[i].z_w/mld, color ='tab:blue'  , linestyle =':', alpha=1.0 , linewidth=3 )
+        # ax.plot( out[i]['WU_MF'][instant,:], out[i].z_w/mld, color ='tab:blue'  , linestyle ='--', alpha=1.0 , linewidth=3 )
+        # ax.plot( out[i]['WU_ED'][instant,:], out[i].z_w/mld, color ='tab:blue'  , linestyle =':', alpha=1.0 , linewidth=3 )
 
     ax.set_xlabel(r'${\rm m^2}\;{\rm s}^{-2}$')
 
@@ -450,8 +450,8 @@ def plot_intant_panel(instant=instant):
     
     for i, label in enumerate(run_label):
         ax.plot( out[i]['WV'][instant,:], out[i].z_w/mld, color ='tab:blue'  , linestyle ='-', alpha=1.0 , linewidth=3 )
-        ax.plot( out[i]['WV_MF'][instant,:], out[i].z_w/mld, color ='tab:blue'  , linestyle ='--', alpha=1.0 , linewidth=3 )
-        ax.plot( out[i]['WV_ED'][instant,:], out[i].z_w/mld, color ='tab:blue'  , linestyle =':', alpha=1.0 , linewidth=3 )
+        # ax.plot( out[i]['WV_MF'][instant,:], out[i].z_w/mld, color ='tab:blue'  , linestyle ='--', alpha=1.0 , linewidth=3 )
+        # ax.plot( out[i]['WV_ED'][instant,:], out[i].z_w/mld, color ='tab:blue'  , linestyle =':', alpha=1.0 , linewidth=3 )
 
     ax.set_xlabel(r'${\rm m^2}\;{\rm s}^{-2}$')
 
@@ -484,11 +484,12 @@ def plot_intant_panel(instant=instant):
 
     for i, label in enumerate(run_label):
         if (label=='EDMF-Energy-cor') or (label=='EDMF-Energy'):
+            True
             # ax.plot((scm[i].wp), scm[i].z_w/mld, linestyle=styles[i], color = colors[i],
             #     alpha=alpha[i], linewidth=linewidth[i], label=label)
             
-            ax.plot((out[i].w_p)[instant], out[i].z_w/mld, linestyle=styles[i], color = colors[i],
-                alpha=alpha[i], linewidth=linewidth[i], label=label)
+            # ax.plot((out[i].w_p)[instant], out[i].z_w/mld, linestyle=styles[i], color = colors[i],
+                # alpha=alpha[i], linewidth=linewidth[i], label=label)
 
     #ax.set_ylim((-1.3, 0))
 
@@ -503,19 +504,20 @@ def plot_intant_panel(instant=instant):
 
     for i, label in enumerate(run_label):
         if (label=='EDMF-Energy-cor') or (label=='EDMF-Energy'):
+            True
             # ax.plot((scm[i].ent), scm[i].z_r/mld, linestyle='-', color = colors[i],
             #     alpha=alpha[i], linewidth=linewidth[i], label=label)
             # ax.plot((scm[i].det), scm[i].z_r/mld, linestyle='--', color = colors[i],
             #     alpha=alpha[i], linewidth=linewidth[i], label=label)
             # ax.plot((scm[i].ent-scm[i].det), scm[i].z_r/mld, linestyle=':', color = colors[i],
             # alpha=alpha[i], linewidth=linewidth[i], label=label)
-            ax.plot(out[i]['Ent'][instant], out[i].z_r/mld, linestyle=styles[i], color = colors[i],
-                alpha=alpha[i], linewidth=linewidth[i], label=label)
-            ax.plot(out[i]['Det'][instant], out[i].z_r/mld, linestyle=styles[i], color = colors[i],
-                alpha=alpha[i], linewidth=linewidth[i], label=label)
-            ax.plot((out[i]['Ent'][instant]-out[i]['Det'][instant]), out[i].z_r/mld, linestyle=styles[i], color = colors[i],
-                alpha=alpha[i], linewidth=linewidth[i], label=label)
-    ax.set_xlim(-0.01,0.01)
+            # ax.plot(out[i]['Ent'][instant], out[i].z_r/mld, linestyle=styles[i], color = colors[i],
+            #     alpha=alpha[i], linewidth=linewidth[i], label=label)
+            # ax.plot(out[i]['Det'][instant], out[i].z_r/mld, linestyle=styles[i], color = colors[i],
+            #     alpha=alpha[i], linewidth=linewidth[i], label=label)
+            # ax.plot((out[i]['Ent'][instant]-out[i]['Det'][instant]), out[i].z_r/mld, linestyle=styles[i], color = colors[i],
+            #     alpha=alpha[i], linewidth=linewidth[i], label=label)
+    # ax.set_xlim(-0.01,0.01)
     #ax.set_ylim((-1.3, 0))
 
     # ===============================================================

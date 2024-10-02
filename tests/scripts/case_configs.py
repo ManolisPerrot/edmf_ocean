@@ -84,6 +84,174 @@
 ### OVERWRITE the parameter entered in the SCM simulation
 
 case_params = {
+        'WANG1_FR_Q2000_dT1e-3_lat60_120h':{
+        'nz': 450,
+        'dt': 400.,
+        'h0': 4500.,
+        'thetas': 6.5,
+        'hc': 4000000000000,
+        'h0': 4500.,
+        'nbhours': 120,
+        'T0': 10.,
+        'mld_ini_temp': -1000.,
+        'N0': 3.013173363486812e-06, #equals to f(60°)
+        'SaltCst': 32.6,
+        'cpoce': 4178.,
+        'lin_eos': True,
+        'rho0': 1000.,
+        'alpha': 2.6e-4, 
+        'Tref':  13.5,         #reference temperature 
+        'beta': 7.7475E-4,      
+        'Sref':  32.6,        #reference salinity 
+        'lat0': 30.,
+        'sustr': 0.,
+        'svstr': 0.,
+        'stflx': -2000, #Wm-2
+        'srflx': 0.,
+        'ssflx': 0.,
+                },
+        'WANG1_FR_Q2000_lat60_120h':{
+        'nz': 450,
+        'dt': 400.,
+        'h0': 4500.,
+        'thetas': 6.5,
+        'hc': 4000000000000,
+        'h0': 4500.,
+        'nbhours': 120,
+        'T0': 3.,
+        'mld_ini_temp': -1000.,
+        'N0': 1.5865490613891073e-08, #equals to f(60°)
+        'SaltCst': 32.6,
+        'cpoce': 4178.,
+        'lin_eos': True,
+        'rho0': 1027.,
+        'alpha': 0.0002874190618908656, # very strange but true... /!\ this is not WANG1 value...
+        'Tref':  13.5,         #reference temperature 
+        'beta': 7.7475E-4,      
+        'Sref':  32.6,        #reference salinity 
+        'lat0': 30.,
+        'sustr': 0.,
+        'svstr': 0.,
+        'stflx': -2000, #Wm-2
+        'srflx': 0.,
+        'ssflx': 0.,
+                },
+        'WANG1_FR_lat30':{
+        'nz': 450,
+        'dt': 400.,
+        'h0': 4500.,
+        'thetas': 6.5,
+        'hc': 4000000000000,
+        'h0': 4500.,
+        'nbhours': 276,
+        'T0': 3.,
+        'mld_ini_temp': -1000.,
+        'N0': 1.44149424e-08,
+        # 'N0': 1.5865490613891073e-08, #equals to f(60°)
+        'SaltCst': 32.6,
+        'cpoce': 4178.,
+        'lin_eos': True,
+        # 'rho0': 1027.,
+        'rho0': 1000,
+        # 'alpha': 0.0002874190618908656, # very strange but true... /!\ this is not WANG1 value...
+        'alpha': 2.6e-4,
+        'Tref':  13.5,         #reference temperature 
+        'beta': 7.7475E-4,      
+        'Sref':  32.6,        #reference salinity 
+        'lat0': 30.,
+        'sustr': 0.,
+        'svstr': 0.,
+        'stflx': -111.12982, #Wm-2
+        'srflx': 0.,
+        'ssflx': 0.,
+                },
+        'WANG1_FR_lat60':{
+        'nz': 450,
+        'dt': 400.,
+        'h0': 4500.,
+        'thetas': 6.5,
+        'hc': 4000000000000,
+        'h0': 4500.,
+        'nbhours': 276,
+        'T0': 3.,
+        'mld_ini_temp': -1000.,
+         'N0': 1.44149424e-08,
+        # 'N0': 1.5865490613891073e-08, #equals to f(60°)
+        'SaltCst': 32.6,
+        'cpoce': 4178.,
+        'lin_eos': True,
+        # 'rho0': 1027.,
+        'rho0': 1000,
+        # 'alpha': 0.0002874190618908656, # very strange but true... /!\ this is not WANG1 value...
+        'alpha': 2.6e-4,
+        'Tref':  13.5,         #reference temperature 
+        'beta': 7.7475E-4,      
+        'Sref':  32.6,        #reference salinity 
+        'lat0': 60.,
+        'sustr': 0.,
+        'svstr': 0.,
+        'stflx': -111.12982, #Wm-2
+        'srflx': 0.,
+        'ssflx': 0.,
+                },
+        'WANG1_FR_lat90':{
+        'nz': 450,
+        'dt': 400.,
+        'h0': 4500.,
+        'thetas': 6.5,
+        'hc': 4000000000000,
+        'h0': 4500.,
+        'nbhours': 276,
+        'T0': 3.,
+        'mld_ini_temp': -1000.,
+        'N0': 1.44149424e-08,
+        # 'N0': 1.5865490613891073e-08, #equals to f(60°)
+        'SaltCst': 32.6,
+        'cpoce': 4178.,
+        'lin_eos': True,
+        # 'rho0': 1027.,
+        'rho0': 1000,
+        # 'alpha': 0.0002874190618908656, # very strange but true... /!\ this is not WANG1 value...
+        'alpha': 2.6e-4,
+        'Tref':  13.5,         #reference temperature 
+        'beta': 7.7475E-4,      
+        'Sref':  32.6,        #reference salinity 
+        'lat0': 90.,
+        'sustr': 0.,
+        'svstr': 0.,
+        'stflx': -111.12982, #Wm-2
+        'srflx': 0.,
+        'ssflx': 0.,
+                },
+        'WANG1_NR_new':{
+        'nz': 450,
+        'dt': 400.,
+        'h0': 4500.,
+        'thetas': 6.5,
+        'hc': 4000000000000,
+        'h0': 4500.,
+        'nbhours': 276,
+        'T0': 3.,
+        'mld_ini_temp': -1000.,
+        'N0': 1.44149424e-08,
+        # 'N0': 1.5865490613891073e-08, #equals to f(60°)
+        'SaltCst': 32.6,
+        'cpoce': 4178.,
+        'lin_eos': True,
+        # 'rho0': 1027.,
+        'rho0': 1000,
+        # 'alpha': 0.0002874190618908656, # very strange but true... /!\ this is not WANG1 value...
+        'alpha': 2.6e-4,
+        'Tref':  13.5,         #reference temperature 
+        'beta': 7.7475E-4,      
+        'Sref':  32.6,        #reference salinity 
+        'lat0': 0.,
+        'sustr': 0.,
+        'svstr': 0.,
+        'stflx': -111.12982, #Wm-2
+        'srflx': 0.,
+        'ssflx': 0.,
+                },
     'WANG1_FR':{
         'nz': 450,
         'dt': 400.,
@@ -110,6 +278,35 @@ case_params = {
         'srflx': 0.,
         'ssflx': 0.,
                 },
+    'WANG1_FR_no_mld':{
+        'nz': 450,
+        'dt': 400.,
+        'h0': 4500.,
+        'thetas': 6.5,
+        'hc': 4000000000000,
+        'h0': 4500.,
+        'nbhours': 276,
+        'T0': 3. - 0.002,
+        'mld_ini_temp': -0.,
+        'N0': 1.5865490613891073e-08, #equals to f(60°)
+        'SaltCst': 32.6,
+        'cpoce': 4178.,
+        # 'cpoce': 3984.,
+        'lin_eos': True,
+        'rho0': 1000.,
+        'alpha': 0.00041064051922423895, # very strange but true... /!\ this is not WANG1 value...
+        # 'alpha': 0.000369576467301815, # very strange but true... /!\ this is not WANG1 value...
+        # 'Tref':  13.5,         #reference temperature 
+        'Tref': 20.,
+        'beta': 7.7475E-4,      
+        'Sref':  32.6,        #reference salinity 
+        'lat0': 60.,
+        'sustr': 0.,
+        'svstr': 0.,
+        'stflx': -111.12982, #Wm-2
+        'srflx': 0.,
+        'ssflx': 0.,
+                },                
     'W005_C500_NO_COR':{
         'h0': 2000.,
         'T0': 2.,

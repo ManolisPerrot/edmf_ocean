@@ -67,3 +67,18 @@ WOUHOU! trad_coriolis_mod permet reproduire les effets trad !
   - pour WANG1_FR à zinv= 100, Ro = 1.9 et cff=0.85
 **C'est le plus efficace pour faire varier les parm, car varier la latitude n'influe pas beaucoup** (<-- garder ça pour justifier de pas avoir fait des simuis où la lat changeait + dire que la conv profonde n'est que aux hautes latitudes)
 Conclusion: relancer run MNH pour zinv=100 -- 1000
+
+# Tradi: valider formulation empirique
+
+- [ ] comparer snapshots SCM et LES pour différents Ro
+  - [ ] lister les Ro d'intérêts en fonctions des LES dispos
+  - [ ] faire une figure qui calcule les Ro
+  - [ ] calculer MLD de façon robuste --> zinv
+- tester EVD sur No rotation
+
+# Non-trad: corriger signe u-v
+
+- [X] comparer MNH et Croco: ![alt text](image-9.png)
+    ça laisse penser qu'il y a bien une erreur dans MNH... On va dire ça du coup !
+
+ 

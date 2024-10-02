@@ -25,10 +25,8 @@ plt.rcParams.update({'savefig.facecolor':'white'})
 ###########################################
 
 
-# cases = ['WANG1_NR','WANG1_FR','WANG1_lat_90','W005_C500_NO_COR','WANG1_FR_domain_div_2','WANG1_FR_10f2']
-# cases = ['WANG1_FR']
-cases = ['WANG1_NR_new','WANG1_FR_lat30','WANG1_FR_lat60','WANG1_FR_lat90']
-
+#cases = ['WANG1_NR','WANG1_FR','WANG1_lat_90','W005_C500_NO_COR','WANG1_FR_domain_div_2','WANG1_FR_10f2']
+cases = ['WANG1_FR']
 
 les = {}
 LG_MEAN={}
