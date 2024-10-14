@@ -238,6 +238,35 @@ case_settings={
     'srflx': 0.,         #penetrative surface heat flux      
     'ssflx': 0.,         #freshwater flux
     'diurnal_cycle': False,  
-    'btflx': 'no flux' }
+    'btflx': 'no flux' },
+'WANG1_FR_lat60':{
+        'nz': 100,
+        'dt': 400.,
+        'h0': 4500.,
+        'h0': 2000.,                         
+        'thetas': 6.5,                           
+        'hc': 4500, 
+        'nbhours': 276,
+        'T0': 3.,
+        'mld_ini_temp': -1000.,
+         'N0': 1.44149424e-08,
+        # 'N0': 1.5865490613891073e-08, #equals to f(60°)
+        'SaltCst': 32.6,
+        'cpoce': 4178.,
+        'lin_eos': True,
+        # 'rho0': 1027.,
+        'rho0': 1000,
+        # 'alpha': 0.0002874190618908656, # very strange but true... /!\ this is not WANG1 value...
+        'alpha': 2.6e-4,
+        'Tref':  13.5,         #reference temperature 
+        'beta': 7.7475E-4,      
+        'Sref':  32.6,        #reference salinity 
+        'lat0': 60.,
+        'sustr': 0.,
+        'svstr': 0.,
+        'stflx': -111.12982, #Wm-2
+        'srflx': 0.,
+        'ssflx': 0.,
+                },
 }
 

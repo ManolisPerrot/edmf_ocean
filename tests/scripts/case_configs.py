@@ -85,8 +85,8 @@
 
 case_params = {
         'WANG1_FR_Q2000_dT1e-3_lat60_120h':{
-        'nz': 450,
-        'dt': 400.,
+        'nz': 180,
+        'dt': 100.,
         'h0': 4500.,
         'thetas': 6.5,
         'hc': 4000000000000,
@@ -103,7 +103,7 @@ case_params = {
         'Tref':  13.5,         #reference temperature 
         'beta': 7.7475E-4,      
         'Sref':  32.6,        #reference salinity 
-        'lat0': 30.,
+        'lat0': 60.,
         'sustr': 0.,
         'svstr': 0.,
         'stflx': -2000, #Wm-2
