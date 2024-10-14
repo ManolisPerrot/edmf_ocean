@@ -68,13 +68,13 @@ common_params = {
     'entr_scheme': 'R10',
     'Cent': 0.99,
     'Cdet': 1.99,       # 'Cdet': 2.5,
-    'wp_a': 1.3,
-    'wp_b': 1.3,      # 'wp_b': 1.
-    'wp_bp': 0.003*250,     #      0.002,
-    'up_c': 0.5,
+    'wp_a': 1.,   #1
+    'wp_b': 1.,     #1.
+    'wp_bp': 0.003*250,    
+    'up_c': 0.5, 
     'vp_c': 0.5,
     'bc_ap': 0.2,    #0.3,
-    'delta_bkg': 0.009*250,   # 0.006,
+    'delta_bkg': 0.0045*250,   # 0.005,
     'wp0' : -0.5e-08,
     'output_filename': 'run',
     'beta_bc_P09': 0.3,
@@ -179,12 +179,11 @@ linewidth_les = 4
 fig, axes = plt.subplots(nrows=1, ncols=1, sharex=True,
                         #  sharey=True , figsize=(9,6))
                          sharey=True , constrained_layout=True)
-
 # ===============================================================
 ax = axes
 ax.set_title(r'\rm{Vertically integrated total energy budget}')
 ax.set_xlabel(r'\rm{time} (hours)')
-ax.set_ylabel(r'${\rm m}^{3}\;{\rm s}^{-3}$')
+ax.set_ylabel(r'${\rm m}^{3}\;{\rm s}^{-3}$',fontsize=18)
 ax.plot( (out[2]['Etot'] )[1:]  ,color='tab:orange', linewidth=3 , alpha=0.75, linestyle = '-', label='EDMF-energy')
 
 ax.plot( (out[0]['Etot'] )[1:]  ,color='tab:blue'  , linewidth=3 , alpha=1, linestyle = '-', label=run_label[0])
@@ -198,7 +197,7 @@ ax.legend(fontsize=18)
 fig.tight_layout()
 plt.savefig(saving_path+'W005_C500_engy_budgets', bbox_inches = 'tight', dpi=300)
 print('fig saved at'+saving_path+'W005_C500_engy_budgets')
-plt.show()
+# plt.show()
 #================================================================
 #================================================================
 
@@ -223,4 +222,4 @@ plt.show()
 # print('fig saved at'+saving_path+saving_name)
 
 
-plt.show()
+# plt.show()

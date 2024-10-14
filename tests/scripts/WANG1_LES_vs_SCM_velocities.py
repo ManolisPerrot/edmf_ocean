@@ -27,8 +27,9 @@ plt.rcParams.update({'savefig.facecolor':'white'})
 
 # cases = ['WANG1_NR','WANG1_FR','WANG1_lat_90','W005_C500_NO_COR','WANG1_FR_domain_div_2','WANG1_FR_10f2']
 # cases = ['WANG1_FR']
-cases = ['WANG1_NR_new','WANG1_FR_lat30','WANG1_FR_lat60','WANG1_FR_lat90']
-
+# cases = ['WANG1_NR_new','WANG1_FR_lat30','WANG1_FR_lat60','WANG1_FR_lat90']
+# cases=['WANG1_FR_lat30']
+cases=['WANG1_FR_Q2000_dT1e-3_lat60_120h']
 
 les = {}
 LG_MEAN={}
@@ -61,7 +62,7 @@ zlim = mld - 50
 zadim = Z/(-mld)
 
 #open scm
-run_params ={'output_filename': 'scm_WANG1_FR.nc'}
+run_params ={'output_filename': 'scm_'+case+'.nc'}
 print('opening '+run_params['output_filename'])
 scm = xr.open_dataset(run_params['output_filename'])
 
@@ -83,6 +84,8 @@ def plot_waves_panel():
     time_scm_w_mesh, z_scm_w_mesh= np.meshgrid(scm['ocean_time']/np.timedelta64(1,'h'), scm['z_w'])
 
     fig, axs = plt.subplots(nrows=4, ncols=3, sharey=True, layout='constrained', figsize=(10,13))
+    # fig, axs = plt.subplots(nrows=4, ncols=3, sharey=True, layout='constrained')
+
     i=-1
     #-----------------------------------------------------
     i+=1; ax = axs.flat[i]
@@ -188,16 +191,16 @@ def plot_waves_panel():
     #-----------------------------------------------------
     for ax in axs.flat:
         ax.set_ylim(-3300,0)
-        ax.set_box_aspect(1)
+        # ax.set_box_aspect(1)
 
     #fig.colorbar(im, orientation="vertical" , ticks=np.linspace(vmin,vmax,9))
     plt.suptitle(case)
 
-    saving_path = '../figures/WANG1_LES_vs_SCM_velocities.png'
-    plt.savefig(saving_path, bbox_inches='tight', dpi=300)
-    print('figure saved at '+saving_path)
+    # saving_path = '../figures/WANG1_LES_vs_SCM_velocities.png'
+    # plt.savefig(saving_path, bbox_inches='tight', dpi=300)
+    # print('figure saved at '+saving_path)
 
-    #plt.show()
+    plt.show()
 plot_waves_panel()
 
 

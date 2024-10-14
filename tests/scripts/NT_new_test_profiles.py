@@ -36,6 +36,7 @@ blue, orange, magenta, grey, green = '#0db4c3', '#eea021', '#ff0364', '#606172',
 
 # ===========================================================================
 cases = ['WANG1_FR_Q2000_dT1e-3_lat60_120h']
+# cases = ['WANG1_FR_lat30']
 les = {}
 LG_MEAN={}
 LG_RES={}
@@ -58,11 +59,11 @@ for case in cases:
     LG_SBG[case] = xr.open_dataset(path+file,group ='/LES_budgets/Subgrid/Cartesian/Not_time_averaged/Not_normalized/cart')
     BU_KE[case] = xr.open_dataset(path+file,group ='/LES_budgets/BU_KE/Cartesian/Not_time_averaged/Not_normalized/cart')
     TH_les[case] = (LG_MEAN[case].MEAN_TH - 273.15).data
-    U_les [case] = (LG_MEAN[case].MEAN_U).data
-    V_les [case] = (LG_MEAN[case].MEAN_V).data
+    V_les [case] = (LG_MEAN[case].MEAN_U).data
+    U_les [case] = (LG_MEAN[case].MEAN_V).data
     WTH   [case] = (LG_RES[case].RES_WTH + LG_SBG[case].SBG_WTHL).data
-    WU    [case] = (LG_RES[case].RES_WU  + LG_SBG[case].SBG_WU).data
-    WV    [case] = (LG_RES[case].RES_WV  + LG_SBG[case].SBG_WV).data
+    WV    [case] = (LG_RES[case].RES_WU  + LG_SBG[case].SBG_WU).data
+    WU    [case] = (LG_RES[case].RES_WV  + LG_SBG[case].SBG_WV).data
     TKE   [case] = (LG_RES[case].RES_KE  + LG_SBG[case].SBG_TKE).data 
     WTKE  [case] = (LG_RES[case].RES_WKE + LG_SBG[case].SBG_WTKE).data
 
@@ -107,7 +108,7 @@ edmf_params = {
     'wp_bp': 0.003*250,     #      0.002,
     'up_c': 0.25,
     'vp_c': 0.25,
-    'bc_ap': 0.35,    #0.3,
+    'bc_ap': 0.75,    #0.3,
     'delta_bkg': 0.006*250,   # 0.02,
     'output_filename': 'run',
     'wp0':-1e-2,
@@ -307,6 +308,93 @@ def several_instants_temperature(nb_plots=4):
     ax.plot(out_dic[scm]['temp'][instant], out_dic[scm]['z_r'],color=color,linestyle='--')
     plt.show()
 # several_instants_temperature()
+
+def plot_plume_variables(instant=instant):
+    condsamp = xr.open_dataset('../../tests/data/'+case+'/'+case+'_object_diags_Cw_m1_276h.nc')    
+
+    #============================================ WC ===============================================
+    fig, axes = plt.subplots(nrows=1, ncols=3, sharex=False,
+                            sharey=True, constrained_layout=True)
+
+    ax_index=-1
+
+    # ===============================================================
+    ax_index+=1
+    ax = axes.flat[ax_index]
+    ax.set_xlabel(r'$^{\circ}{\rm C}$')
+    ax.set_ylabel(r'$z / h $')
+    ax.set_title(r'$\overline{\theta}$')
+
+
+    for case in cases:
+        
+        ax.plot(out_dic[case].temp[instant], out_dic[case].z_r/mld, linestyle=styles[case], color = colors[case], alpha=alpha[case], label=case)
+        
+        ax.plot(TH_les[case][instant], z_r_les/mld, colors_les[case], 
+            alpha=alpha_les[case],linewidth=width_les[case])
+
+    ax.set_xlim((9.65,9.85))
+    ax.set_ylim((-1.3, 0))
+    # ===============================================================
+    ax_index+=1
+    ax = axes.flat[ax_index]
+
+    ax.set_title(r'$\overline{w^\prime \theta^\prime}$')
+
+    for case in cases:
+    
+        ax.plot(-out_dic[case]['WT'][instant], out_dic[case].z_w/mld, linestyle=styles[case], color = colors[case], alpha=alpha[case], label=case)
+    
+        ax.plot(WTH[case][instant], z_r_les/mld, colors_les[case], 
+        alpha=alpha_les[case],linewidth=width_les[case])
+
+    ax.set_xlabel(r'${\rm K}\;{\rm m}\;{\rm s}^{-1}$')
+
+    # ===============================================================
+    # ===============================================================
+    ax_index+=1
+    ax = axes.flat[ax_index]
+    ax.set_title(r'$k$')
+
+    for case in cases:
+    
+        ax.plot(out_dic[case]['tke'][instant], out_dic[case].z_w/mld, linestyle=styles[case], color = colors[case], alpha=alpha[case], label=case)
+    
+        ax.plot(TKE[case][instant], z_r_les/mld, colors_les[case], 
+        alpha=alpha_les[case],linewidth=width_les[case])
+
+    ax.ticklabel_format(style='sci', axis='x', scilimits=(0, 0))
+
+    #ax.set_xlim((-0.0001, 0.001))
+    #ax.set_ylim((-1.3, 0))
+
+    ax.set_xlabel(r'${\rm m}^2\;{\rm s}^{-2}$')
+    # ===============================================================
+    # ===============================================================
+
+    # adding subplot labels
+    subplot_label = [r'\rm{(a)}', r'\rm{(b)}', r'\rm{(c)}',
+                    r'\rm{(d)}', r'\rm{(e)}', r'\rm{(f)}',r'\rm{(g)}',r'\rm{(h)}',r'\rm{(i)}',r'\rm{(j)}',r'\rm{(k)}',r'\rm{(l)}']
+
+    for i,ax in enumerate(axes.flat):
+        # ax.set_ylim((-2, 0))
+        ax.set_box_aspect(1)
+        ax.text(0.15, 0.95, subplot_label[i], transform=ax.transAxes, bbox=dict(facecolor='1.', edgecolor='none'), fontweight='bold', va='top', ha='right')
+
+
+        # ax.text(0.15, 0.95, subplot_label[i], transform=ax.transAxes, bbox=dict(facecolor='1.', edgecolor='none', pad=3.0), fontweight='bold', va='top', ha='right')
+
+    handles, labels = axes.flat[0].get_legend_handles_labels()
+    fig.legend(handles, labels, loc='upper center', bbox_to_anchor=(
+        0.5, 0.2), fancybox=False, shadow=False, ncol=4)
+
+    # fig.tight_layout()
+
+    saving_path = '../figures/'
+    saving_name = 'NT_new_test.png'    
+    plt.savefig(saving_path+saving_name, bbox_inches='tight', dpi=300)
+    print('figure saved at'+saving_path+saving_name)
+
 
 # run_label = ['No rotation','Traditional Coriolis','EVD' ]
 ### Plot velocity panel

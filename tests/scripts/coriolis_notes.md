@@ -80,5 +80,34 @@ Conclusion: relancer run MNH pour zinv=100 -- 1000
 
 - [X] comparer MNH et Croco: ![alt text](image-9.png)
     ça laisse penser qu'il y a bien une erreur dans MNH... On va dire ça du coup !
+- [ ] bizarre, pour lat30 et lat60 scm et mnh sont inversés, avec biais trop profond. Par contre pour Q2000 ça semble être les bons signes...
 
- 
+
+# TODO
+- [ ] rajouter ASICS-MED
+- [X] comparer plume varz scm/LES: on obtient le bon theta moyen, mais clairement pas pour la bonne raison... voir WANG1_NR_FR_les_scm_condsamp.pdf    
+- [ ] continuer d'investiguer le trad
+- [X] sensibilité à dt, pas le mettre trop petit : OK, change pas grand chose    
+- [ ] récupérer les forçages ASICS-MED de Gonzales    
+- [ ] Obs de courants horizontaux asics-med, hervé ?    
+- [ ] journal: JPO (mais exigeant et payant), James (ok, ne pas mettre Legg car débat WANG/legg), Oc Mod (+ facile), DAO (non)
+- [ ] refaire Sobol ?    
+- [ ] contribution ED ?    
+- [ ] vérifier signes mnh sur wirth1
+- [X] vérifier signes mnh sur Q2000_croco (mail florian)--> en fait le signe était bon ! 
+![alt text](../figures/WANG1_FR_lat30_CROCO_MNH.pdf) . On dirait qu'il y il a un décalage entre les deux modèles en fait. 
+![alt text](../figures/WANG1_FR_lat60_CROCO_MNH.pdf)
+- [ ] continuer à explorer edmf NT vs les, pour lat30 semblait meilleur avec les anciennes modifs du trad...
+- [X] vérifier que Q2000 est avec bonne lat60 (et pas 30!!!)
+- [ ] scaler wp0 avec wstar ?
+
+
+# Biais TKE
+Q2000: meilleur TKE avec ap0=0.8 ?? ![alt text](image-10.png)
+
+# Trad modulation/plume varzz
+j'ai changé la formulation, ça marche super bien sur theta et wtheta !! ![alt text](../figures/WANG1_NR_FR306090_profiles.png)
+
+L'effet minimal est obtenu avec delta_bkg/cff et Cent/cff, ie augmenter ent ET det ! Pas encore compris, ressemble à ce que dis Julien/Legg. Ca améliore aussi la TKE (pcq wp mmoins fort).
+
+Par contre pour wp bon odg mais pas bonne dérivée, et pas du tout bon sur ap (0.5 near surface), il y a encore du travail ! ![alt text](../figures/WANG1_NR_FR_les_scm_condsamp.pdf)
