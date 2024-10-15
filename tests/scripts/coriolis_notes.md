@@ -111,3 +111,9 @@ j'ai changé la formulation, ça marche super bien sur theta et wtheta !! ![alt 
 L'effet minimal est obtenu avec delta_bkg/cff et Cent/cff, ie augmenter ent ET det ! Pas encore compris, ressemble à ce que dis Julien/Legg. Ca améliore aussi la TKE (pcq wp mmoins fort).
 
 Par contre pour wp bon odg mais pas bonne dérivée, et pas du tout bon sur ap (0.5 near surface), il y a encore du travail ! ![alt text](../figures/WANG1_NR_FR_les_scm_condsamp.pdf)
+
+# Tests à différentes latitudes
+
+- J'ai testé plein de combinaisons, rien n'est très concluant : on peut pas avoir moyennes, courants et plume varzz bonnes en même temps --> pour la thèse c'est une résultat en soi, qui permet de dire qu'il manque des choses...
+- il y a clairement une intéraction entre courants NT et mean_temp... ça fait des bugs sur lat30, alors que quand on repasse en R10 ça disparaît
+- est-ce que modulation est pas trop forte ?

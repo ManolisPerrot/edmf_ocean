@@ -26,9 +26,9 @@ from WANG1_plot_instant_panel import plot_instant_panel
 from WANG1_plot_velocities_mean_only import plot_mean_velocities
 from WANG1_plot_condsamp import plot_condsamp_panel
 # ===========================================================================
-# cases = ['WANG1_NR_new','WANG1_FR_lat30','WANG1_FR_lat60','WANG1_FR_lat90']
+cases = ['WANG1_FR_lat30','WANG1_FR_lat60','WANG1_FR_lat90']
 # cases = ['WANG1_NR_new','WANG1_FR_lat60','WANG1_FR_lat30']
-cases = ['WANG1_FR_lat30','WANG1_FR_lat60',]
+# cases = ['WANG1_FR_lat30','WANG1_FR_lat60',]
 
 # ====================================Define configurations=======================
 # Define the common parameters (attention some of them will be overwritten by case_configurations.py):
@@ -42,17 +42,18 @@ edmf_params = {
     'extrap_ak_surf': True,
     'tke_sfc_dirichlet': False,
     'eddy_diff_tke_const': 'NEMO',
-    'entr_scheme': 'R10corNT',
+    # 'entr_scheme': 'R10corNT',
+    'entr_scheme': 'R10',
     'trad_coriolis_mod': True,
     'Cent': 0.99,    
     'Cdet': 1.99,       # 'Cdet': 2.5,
     'wp_a': 1.,
     'wp_b': 1.,      # 'wp_b': 1.
     'wp_bp': 0.003*250,     #      0.002,
-    'up_c': 0.25,
-    'vp_c': 0.25,
-    'bc_ap': 0.1,    #0.3,
-    'delta_bkg': 0.006*250,   # 0.02,
+    'up_c': 0.5,
+    'vp_c': 0.5,
+    'bc_ap': 0.35,    #0.3,
+    'delta_bkg': 0.0045*250,   # 0.02,
     'output_filename': 'run',
     'wp0':-1e-02,
     'write_netcdf': True
@@ -78,14 +79,21 @@ run_label = cases
 #     #     'output_filename': 'scm_'+cases[4]+'.nc',
 #     # },
 #         ]
+# runs = [
+#     {
+#         # 'entr_scheme': 'R10',
+#         'output_filename': 'scm_'+cases[0]+'.nc',
+#     },]
+# for case in cases[1:]:
+#     runs.append({'output_filename': 'scm_'+case+'.nc'})
+
 runs = [
     {
-        # 'entr_scheme': 'R10',
         'output_filename': 'scm_'+cases[0]+'.nc',
+    },
+        {
+        'output_filename': 'scm_'+cases[1]+'.nc',
     },]
-for case in cases[1:]:
-    runs.append({'output_filename': 'scm_'+case+'.nc'})
-
 
 scm = [0]*len(runs)
 

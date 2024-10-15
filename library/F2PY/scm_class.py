@@ -172,6 +172,7 @@ class SCM:
         self.wp0 = wp0                    ; self.bc_ap = bc_ap
         self.delta_bkg = delta_bkg        ; self.wp_bp = wp_bp
         self.Cent = Cent ; self.Cdet = Cdet
+        self.wp_a = wp_a ; self.wp_b = wp_b
         self.trad_coriolis_mod = trad_coriolis_mod
         ####################################
         # define vertical grid
@@ -715,13 +716,19 @@ class SCM:
           Ro = np.minimum((np.abs(B0)/self.fcor)**(0.5)/(self.fcor*np.abs(self.zinv)) , (np.abs(B0)/self.fcor)**(0.5)/(self.fcor*1000.))
           # cff= np.tanh(Ro**0.37) #modulation coefficient, Wang 2006
           cff= np.tanh(Ro**0.37) #modulation coefficient, Wang 2006
-
+          # cff=1
           # reduce integral lenth scale: L_int = cff*zinv (division by zinv is done in the fortran routine)
-          self.mf_params[-1] = self.delta_bkg/cff
-          self.mf_params[4] = self.wp_bp/cff
-          # reduce lateral exchanges
-          self.mf_params[0] = self.Cent*cff
-          self.mf_params[1] = self.Cdet*cff
+          #self.mf_params  = np.array([Cent,Cdet,wp_a,wp_b,wp_bp,up_c,vp_c,bc_ap,delta_bkg])
+
+
+
+          # self.mf_params[-1] = self.delta_bkg/cff
+          # self.mf_params[4] =      self.wp_bp/cff
+          # # reduce lateral exchanges
+          # self.mf_params[0] = self.Cent/cff
+          # self.mf_params[1] = self.Cdet/cff
+          # self.mf_params[2] = self.wp_a*cff
+          # self.mf_params[3] = self.wp_b*cff
         ######################
         if self.mass_flux_entr=='R10' or self.mass_flux_entr=='R10_HB09' or self.mass_flux_entr=='R10_Wi11':
           self.ap,self.up,self.vp,self.wp,self.tp,self.Bp,self.ent,self.det, self.epsPlume = scm_mfc.mass_flux_r10(
