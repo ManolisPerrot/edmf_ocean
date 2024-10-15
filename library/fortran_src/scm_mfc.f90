@@ -285,7 +285,7 @@ CONTAINS
 
 
   !===================================================================================================
-  SUBROUTINE get_w_p_R10(wpm,wpp,aa,bb,bpr,beta1,Hz,Bp,wp_min,h,found)
+  SUBROUTINE get_w_p_R10(wpm,wpp,aa,bb,bpr,beta1,Hz,Bp,wp_min,h,found,Vortpm,Vortpp,fcor)
   !---------------------------------------------------------------------------------------------------
     !!==========================================================================<br />
     !!                  ***  ROUTINE get_w_p_R10  ***                           <br />
@@ -305,25 +305,31 @@ CONTAINS
     REAL(8), INTENT(IN   )      :: bpr          !! parameter of the MF scheme
     REAL(8), INTENT(IN   )      :: beta1        !! parameter of the MF scheme
     !REAL(8), INTENT(IN   )      :: wpmin        !! minimum vertical velociy
-
+    !-------------------------------------------------
+    REAL(8), INTENT(IN)         :: Vortpm    !! tracer value at the bottom of the grid cell
+    REAL(8), INTENT(IN   )      :: Vortpp    !! tracer value at the top   of the grid cell
+    REAL(8), INTENT(IN   )      :: fcor      !! traditional Coriolis term [m2/s2]
+    !-------------------------------------------------
     ! local variables
-    REAL(8)                     :: cff1,cff,rhsw,wpm2
+    REAL(8)                     :: cff1,cff,rhsw,wpm2,bpr1
     !
-    rhsw = bpr*(wpp*wpp+wpp*wpp)+2.*aa*Bp       !! \(   {\rm rhs}_{k}^{\star} = 2 b'( w^{\rm p}_{k+1/2} )^2 + 2 a B_{k}^{\rm p}  \)  <br />
+    ! Adding ent/det formulation from vorticity equation
+    bpr1 =  bpr - bb*beta1*MIN(0.,(Vortpp-Vortpm)/(fcor*Hz)) 
+    rhsw = bpr1*(wpp*wpp+wpp*wpp)+2.*aa*Bp       !! \(   {\rm rhs}_{k}^{\star} = 2 b'( w^{\rm p}_{k+1/2} )^2 + 2 a B_{k}^{\rm p}  \)  <br />
     cff  = 1.; IF(rhsw < 0.) cff = 1. + bb*beta1 !! if \( {\rm rhs}_{k}^{\star} < 0 \Rightarrow \alpha_w = 1 + b \beta_1 \), \( \alpha_w = 1 \) otherwise <br />
-    cff1 = 1./(cff+Hz*bpr)
-    wpm2 = cff1*( (cff-Hz*bpr)*wpp*wpp - aa*Hz*2.*Bp )  !! \(  ( w^{\rm p}_{k-1/2} )^2 = \frac{ (\alpha_w - h_k b') ( w^{\rm p}_{k+1/2} )^2 - 2 a h_k B_{k}^{\rm p} }{\alpha_w + h_k b'}\) <br />
+    cff1 = 1./(cff+Hz*bpr1)
+    wpm2 = cff1*( (cff-Hz*bpr1)*wpp*wpp - aa*Hz*2.*Bp )  !! \(  ( w^{\rm p}_{k-1/2} )^2 = \frac{ (\alpha_w - h_k b') ( w^{\rm p}_{k+1/2} )^2 - 2 a h_k B_{k}^{\rm p} }{\alpha_w + h_k b'}\) <br />
 ! in case the sign of the rhs has changed
-    rhsw = bpr*(wpp*wpp+wpm2)+2.*aa*Bp !! \(   {\rm rhs}_{k} = b'\left( ( w^{\rm p}_{k-1/2} )^2 + ( w^{\rm p}_{k+1/2} )^2 \right) + 2 a B_{k}^{\rm p}  \)  <br />
+    rhsw = bpr1*(wpp*wpp+wpm2)+2.*aa*Bp !! \(   {\rm rhs}_{k} = b'\left( ( w^{\rm p}_{k-1/2} )^2 + ( w^{\rm p}_{k+1/2} )^2 \right) + 2 a B_{k}^{\rm p}  \)  <br />
     cff  = 1.; IF(rhsw < 0.) cff = 1. + bb*beta1 !! if \( {\rm rhs}_{k} < 0 \Rightarrow \alpha_w = 1 + b \beta_1 \), \( \alpha_w = 1 \) otherwise <br />
-    cff1 = 1./(cff+Hz*bpr)
-    wpm2 = cff1*( (cff-Hz*bpr)*wpp*wpp - aa*Hz*2.*Bp ) !! \(  ( w^{\rm p}_{k-1/2} )^2 = \frac{ (\alpha_w - h_k b') ( w^{\rm p}_{k+1/2} )^2 - 2 a h_k B_{k}^{\rm p} }{\alpha_w + h_k b'}\) <br />
+    cff1 = 1./(cff+Hz*bpr1)
+    wpm2 = cff1*( (cff-Hz*bpr1)*wpp*wpp - aa*Hz*2.*Bp ) !! \(  ( w^{\rm p}_{k-1/2} )^2 = \frac{ (\alpha_w - h_k b') ( w^{\rm p}_{k+1/2} )^2 - 2 a h_k B_{k}^{\rm p} }{\alpha_w + h_k b'}\) <br />
     ! finalize computation
     wpm  = -SQRT( MAX(wpm2,wp_min*wp_min) )
     !
     IF(cff==1.) THEN                    ! the bottom of the plume is reached only if we are in the detrainment zone
       h = (wpp*wpp-wp_min*wp_min) /   &
-                    (2.*aa*Bp+bpr*(wpp*wpp+wp_min*wp_min))
+                    (2.*aa*Bp+bpr1*(wpp*wpp+wp_min*wp_min))
       IF(h>0. .AND. h<Hz) found = .true.
     ENDIF
     return
@@ -792,7 +798,7 @@ CONTAINS
       !  \[ (w^{\rm p})^{2}_{k+1/2} - (w^{\rm p})^{2}_{k-1/2} =
       !  h_k (b' + b \epsilon_k) \left((w^{\rm p})^{2}_{k+1/2} + (w^{\rm p})^{2}_{k-1/2})\right)
       ! + 2 a h_k B^{\rm p}_{k}\]
-      CALL get_w_p_R10(w_p(k-1),w_p(k),aa,zbb,zbp,beta1,Hz(k),B_p(k),wpmin,hinv,found)
+      CALL get_w_p_R10(w_p(k-1),w_p(k),aa,zbb,zbp,beta1,Hz(k),B_p(k),wpmin,hinv,found,vort_p(k-1),vort_p(k),fcor)
       ! diagnostics
       cff       = (w_p(k)-w_p(k-1))/(0.5*Hz(k)*(w_p(k)+w_p(k-1)))
       ent  (k)  = MAX(0., -beta1*cff)
@@ -1062,7 +1068,7 @@ CONTAINS
       !  \[ (w^{\rm p})^{2}_{k+1/2} - (w^{\rm p})^{2}_{k-1/2} =
       !  h_k (b' + b \epsilon_k) \left((w^{\rm p})^{2}_{k+1/2} + (w^{\rm p})^{2}_{k-1/2})\right)
       ! + 2 a h_k B^{\rm p}_{k}\]
-      CALL get_w_p_R10(w_p(k-1),w_p(k),aa,zbb,zbp,beta1,Hz(k),BpTilde,wpmin,hinv,found)
+      CALL get_w_p_R10(w_p(k-1),w_p(k),aa,zbb,zbp,beta1,Hz(k),BpTilde,wpmin,hinv,found,vort_p(k-1),vort_p(k),fcor)
       ! diagnostics
       cff       = (w_p(k)-w_p(k-1))/(0.5*Hz(k)*(w_p(k)+w_p(k-1)))
       ent  (k)  = MAX(0., -beta1*cff)
