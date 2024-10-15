@@ -334,7 +334,9 @@ CONTAINS
 
 
   !===================================================================================================
-  SUBROUTINE get_a_p_R10(apm,app,wpm,wpp,beta1,beta2,hk,delta0,wp_min)
+  SUBROUTINE get_a_p_R10(apm,app,wpm,wpp,beta1,beta2,hk,delta0,wp_min,Vortpm,Vortpp,fcor)
+  ! SUBROUTINE get_a_p_R10(apm,app,wpm,wpp,beta1,beta2,hk,delta0,wp_min)
+
   !---------------------------------------------------------------------------------------------------
     !!==========================================================================<br />
     !!                  ***  ROUTINE get_a_p_R10  ***                           <br />
@@ -351,11 +353,18 @@ CONTAINS
     REAL(8), INTENT(IN   )      :: delta0 !! background detrainement in the entrainment zone [m-1]
     REAL(8), INTENT(IN   )      :: wp_min
     REAL(8), INTENT(IN   )      :: beta2  !! parameter of the MF scheme for the detrainment zone
+    !-------------------------------------------------
+    REAL(8), INTENT(IN)         :: Vortpm    !! tracer value at the bottom of the grid cell
+    REAL(8), INTENT(IN   )      :: Vortpp    !! tracer value at the top   of the grid cell
+    REAL(8), INTENT(IN   )      :: fcor      !! traditional Coriolis term [m2/s2]
+    !-------------------------------------------------
     !local variables
     REAL(8)                 :: cff1,cff,EmD
     !
-    EmD = Ent_R10(beta1,wpp,wpm)  + &
-          Det_R10(beta1,beta2,wpp,wpm,delta0,hk,wp_min) !! \(   {\rm EmD}_k = \frac{h_k}{a^{\rm p}} \left( E_k - D_k \right) = {\rm Ent\_R10} + {\rm Det\_R10}  \)  <br />
+    ! EmD = Ent_R10(beta1,wpp,wpm)  + &
+    EmD = Ent_R10(beta1,wpp,wpm,Vortpm,Vortpp,fcor) + &
+          ! Det_R10(beta1,beta2,wpp,wpm,delta0,hk,wp_min) !! \(   {\rm EmD}_k = \frac{h_k}{a^{\rm p}} \left( E_k - D_k \right) = {\rm Ent\_R10} + {\rm Det\_R10}  \)  <br />
+          Det_R10(beta1,beta2,wpp,wpm,delta0,hk,wp_min,Vortpm,Vortpp,fcor) !! \(   {\rm EmD}_k = \frac{h_k}{a^{\rm p}} \left( E_k - D_k \right) = {\rm Ent\_R10} + {\rm Det\_R10}  \)  <br />
     cff  = 1. / (2.*wpm+EmD)
     cff1 = app *(2.*wpp-EmD)
     apm  = MAX(cff*cff1,0.)   !! \(  a^{\rm p}_{k-1/2} = a^{\rm p}_{k+1/2} \left(  \frac{2 w^{\rm p}_{k+1/2} - {\rm EmD}_k}{2 w^{\rm p}_{k-1/2} + {\rm EmD}_k}   \right)   \) <br />
@@ -364,15 +373,52 @@ CONTAINS
   END SUBROUTINE get_a_p_R10
   !===================================================================================================
 
-  REAL(8) FUNCTION Ent_R10(beta1,wpp,wpm)   !! Entrainment \( {\rm Ent\_R10} = \frac{E_k h_k}{a^p} = \max\left( \beta_1(w_{k+1/2}^p-w_{k-1/2}^p), 0 \right)  \)
-    IMPLICIT NONE
-    REAL(8), INTENT(IN)    :: beta1  !! parameter of the MF scheme for the entrainment zone
-    REAL(8), INTENT(IN)    :: wpp    !! \( w^{\rm p}_{k+1/2} \)
-    REAL(8), INTENT(IN)    :: wpm    !! \( w^{\rm p}_{k-1/2} \)
-    Ent_R10 = MAX( beta1*(wpp-wpm), 0. )
-  END FUNCTION Ent_R10
+  ! REAL(8) FUNCTION Ent_R10(beta1,wpp,wpm)   !! Entrainment \( {\rm Ent\_R10} = \frac{E_k h_k}{a^p} = \max\left( \beta_1(w_{k+1/2}^p-w_{k-1/2}^p), 0 \right)  \)
+  !   IMPLICIT NONE
+  !   REAL(8), INTENT(IN)    :: beta1  !! parameter of the MF scheme for the entrainment zone
+  !   REAL(8), INTENT(IN)    :: wpp    !! \( w^{\rm p}_{k+1/2} \)
+  !   REAL(8), INTENT(IN)    :: wpm    !! \( w^{\rm p}_{k-1/2} \)
+  !   Ent_R10 = MAX( beta1*(wpp-wpm), 0. )
+  ! END FUNCTION Ent_R10
+  !===================================================================================================
+  ! REAL(8) FUNCTION Det_R10(beta1,beta2,wpp,wpm,delta0,hk,wp_min)
+  !   !! Detrainment \( {\rm Det\_R10} = -\frac{D_k h_k}{a^p} = \min\left( \beta_2(w_{k+1/2}^p-w_{k-1/2}^p), 0 \right) + \min\left(-2 w^{\rm p}_{\min}, h_k \delta_0 \frac{w_{k+1/2}^p+w_{k-1/2}^p}{2} \right) \)  <br />
+  !   !! The minimum detrainment \( -2 w^{\rm p}_{\min} \) ensures that \( a^{\rm p}_{k-1/2} = 0 \) as soon as \( w^{\rm p}_{k+1/2} = w^{\rm p}_{k-1/2} = -w^{\rm p}_{\min} \)
+  !   USE scm_par, ONLY: wpmin
+  !   IMPLICIT NONE
+  !   REAL(8), INTENT(IN)    :: beta1   !! parameter of the MF scheme for the entrainment zone
+  !   REAL(8), INTENT(IN)    :: wpp     !! \( w^{\rm p}_{k+1/2} \)
+  !   REAL(8), INTENT(IN)    :: wpm     !! \( w^{\rm p}_{k-1/2} \)
+  !   REAL(8), INTENT(IN)    :: delta0  !! background detrainment [m-1]
+  !   REAL(8), INTENT(IN)    :: hk      !! Thickness \( h_k /) of layer k
+  !   REAL(8), INTENT(IN)    :: wp_min
+  !   REAL(8), INTENT(IN)    :: beta2   !! parameter of the MF scheme for the detrainment zone
+  !   REAL(8)                :: D0,D1
+  !   !REAL(8), INTENT(IN)    :: wpmin   !! minimum vertical velociy
+  !   D0 = 0.5*hk*delta0*(wpp+wpm)
+  !   Det_R10 = MIN( beta2*(wpp-wpm), 0. ) + MIN(D0, -2.*wp_min)
+  ! END FUNCTION Det_R10
+  !===================================================================================================
+  !===================================================================================================
 
-  REAL(8) FUNCTION Det_R10(beta1,beta2,wpp,wpm,delta0,hk,wp_min)
+  ! TEST NEW Ent/Det
+  REAL(8) FUNCTION Ent_R10(beta1,wpp,wpm,Vortpm,Vortpp,fcor)   !! Entrainment \( {\rm Ent\_R10} = \frac{E_k h_k}{a^p} = \max\left( \beta_1(w_{k+1/2}^p-w_{k-1/2}^p), 0 \right)  \)
+    IMPLICIT NONE
+    REAL(8), INTENT(IN)         :: beta1  !! parameter of the MF scheme for the entrainment zone
+    REAL(8), INTENT(IN)         :: wpp    !! \( w^{\rm p}_{k+1/2} \)
+    REAL(8), INTENT(IN)         :: wpm    !! \( w^{\rm p}_{k-1/2} \)
+    REAL(8), INTENT(IN)         :: Vortpm    !! tracer value at the bottom of the grid cell
+    REAL(8), INTENT(IN   )      :: Vortpp    !! tracer value at the top   of the grid cell
+    REAL(8), INTENT(IN   )      :: fcor      !! traditional Coriolis term [m2/s2]
+    REAL(8)                     :: w_int
+
+    w_int = 0.5*(wpp+wpm)
+    Ent_R10 = MAX( beta1*(wpp-wpm), 0. ) + MAX( 0.1*beta1*(w_int/fcor)*(Vortpp-Vortpm),0.)
+    ! Ent_R10 = MAX( beta1*(wpp-wpm), 0.1*beta1*(w_int/fcor)*(Vortpp-Vortpm))
+
+  END FUNCTION Ent_R10
+  !===================================================================================================
+  REAL(8) FUNCTION Det_R10(beta1,beta2,wpp,wpm,delta0,hk,wp_min,Vortpm,Vortpp,fcor)
     !! Detrainment \( {\rm Det\_R10} = -\frac{D_k h_k}{a^p} = \min\left( \beta_2(w_{k+1/2}^p-w_{k-1/2}^p), 0 \right) + \min\left(-2 w^{\rm p}_{\min}, h_k \delta_0 \frac{w_{k+1/2}^p+w_{k-1/2}^p}{2} \right) \)  <br />
     !! The minimum detrainment \( -2 w^{\rm p}_{\min} \) ensures that \( a^{\rm p}_{k-1/2} = 0 \) as soon as \( w^{\rm p}_{k+1/2} = w^{\rm p}_{k-1/2} = -w^{\rm p}_{\min} \)
     USE scm_par, ONLY: wpmin
@@ -384,14 +430,24 @@ CONTAINS
     REAL(8), INTENT(IN)    :: hk      !! Thickness \( h_k /) of layer k
     REAL(8), INTENT(IN)    :: wp_min
     REAL(8), INTENT(IN)    :: beta2   !! parameter of the MF scheme for the detrainment zone
-    REAL(8)                :: D0,D1
+    REAL(8), INTENT(IN)    :: Vortpm    !! tracer value at the bottom of the grid cell
+    REAL(8), INTENT(IN)    :: Vortpp    !! tracer value at the top   of the grid cell
+    REAL(8), INTENT(IN)    :: fcor      !! environmental value for tracer in the grid cell
+    REAL(8)                :: D0,D1,w_int,Vort_int
     !REAL(8), INTENT(IN)    :: wpmin   !! minimum vertical velociy
     D0 = 0.5*hk*delta0*(wpp+wpm)
-    Det_R10 = MIN( beta2*(wpp-wpm), 0. ) + MIN(D0, -2.*wp_min)
+    w_int = 0.5*(wpp+wpm)
+    Vort_int = 0.5*(Vortpm+Vortpp)
+    Det_R10 = MIN( beta2*(wpp-wpm), 0. ) + MIN(D0, -2.*wp_min) + MIN( 0.1*beta2*(w_int/(fcor+Vort_int))*(Vortpp-Vortpm), 0. )
+    ! Det_R10 = MIN( beta2*(wpp-wpm), 0.1*beta2*(w_int/(fcor+Vort_int))*(Vortpp-Vortpm) ) + MIN(D0, -2.*wp_min) 
+
   END FUNCTION Det_R10
 
+
   !===================================================================================================
-  SUBROUTINE get_t_p_R10(tpm,tpp,te,apm,app,wpm,wpp,beta1,beta2,hk,delta0,wp_min)
+  SUBROUTINE get_t_p_R10(tpm,tpp,te,apm,app,wpm,wpp,beta1,beta2,hk,delta0,wp_min,Vortpm,Vortpp,fcor)
+  ! SUBROUTINE get_t_p_R10(tpm,tpp,te,apm,app,wpm,wpp,beta1,beta2,hk,delta0,wp_min)
+
   !---------------------------------------------------------------------------------------------------
     !!==========================================================================<br />
     !!                  ***  ROUTINE get_t_p_R10  ***                           <br />
@@ -411,13 +467,20 @@ CONTAINS
     REAL(8), INTENT(IN   )      :: delta0 !! background detrainement in the entrainment zone [m-1]
     REAL(8), INTENT(IN   )      :: beta2  !! increase the detrainement coefficient beta1 [m-1]
     REAL(8), INTENT(IN   )      :: wp_min
+!-------------------------------------------------
+    REAL(8), INTENT(IN)         :: Vortpm    !! tracer value at the bottom of the grid cell
+    REAL(8), INTENT(IN   )      :: Vortpp    !! tracer value at the top   of the grid cell
+    REAL(8), INTENT(IN   )      :: fcor      !! traditional Coriolis term [m2/s2]
+!-------------------------------------------------
     ! local variables
     REAL(8)                 :: cffm,cffp,dwpm,dwpp,ap,cff
     !
     cffp = app*wpp*tpp         !! \(  \Phi^{\rm p}_{k+1/2} = a^{\rm p}_{k+1/2} w^{\rm p}_{k+1/2} \phi^{\rm p}_{k+1/2}  \)  <br />
     ap   = 0.5*(app+apm)       !! \(  a^{\rm p}_{k} = \frac{a^{\rm p}_{k+1/2}+a^{\rm p}_{k-1/2}}{2}  \)  <br />
-    dwpp = Ent_R10(beta1,wpp,wpm)
-    dwpm = Det_R10(beta1,beta2,wpp,wpm,delta0,hk,wp_min)
+    ! dwpp = Ent_R10(beta1,wpp,wpm)
+    dwpp  = Ent_R10(beta1,wpp,wpm,Vortpm,Vortpp,fcor)
+    ! dwpm = Det_R10(beta1,beta2,wpp,wpm,delta0,hk,wp_min)
+    dwpm = Det_R10(beta1,beta2,wpp,wpm,delta0,hk,wp_min,Vortpm,Vortpp,fcor)
     cffm = cffp - ap*(dwpp*te+dwpm*tpp) !! \( \Phi^{\rm p}_{k-1/2} = \Phi^{\rm p}_{k+1/2} - a^{\rm p}_{k} \left( \underbrace{\frac{E_k h_k}{a^p}}_{\rm Ent\_R10} \phi_{k}^{\rm e} \underbrace{- \frac{D_k h_k}{a^p}}_{\rm Det\_R10} \phi_{k+1/2}^{\rm p}     \right)    \) <br />
 !    IF(apm>0.) THEN
     IF( apm>0. .AND. wpm < -wp_min ) THEN
@@ -442,7 +505,7 @@ CONTAINS
     IMPLICIT NONE
     REAL(8), INTENT(INOUT)      :: Vortpm    !! tracer value at the bottom of the grid cell
     REAL(8), INTENT(IN   )      :: Vortpp    !! tracer value at the top   of the grid cell
-    REAL(8), INTENT(IN   )      :: fcor      !! environmental value for tracer in the grid cell
+    REAL(8), INTENT(IN   )      :: fcor      !! traditional Coriolis term [m2/s2]
     REAL(8), INTENT(IN   )      :: apm       !! fractional area at the bottom of the grid cell
     REAL(8), INTENT(IN   )      :: app       !! fractional area at the top   of the grid cell
     REAL(8), INTENT(IN   )      :: wpm       !! vertical velocity at the bottom of the grid cell [m/s]
@@ -456,7 +519,8 @@ CONTAINS
     REAL(8)                 :: cffm,num,hDet,dwpp,ap,Denom
     !
     ap     = 0.5*(app+apm)       !! \(  a^{\rm p}_{k} = \frac{a^{\rm p}_{k+1/2}+a^{\rm p}_{k-1/2}}{2}  \)  <br />
-    hDet   = ap*Det_R10(beta1,beta2,wpp,wpm,delta0,hk,wp_min) != - Dj x hj
+    ! hDet   = ap*Det_R10(beta1,beta2,wpp,wpm,delta0,hk,wp_min) != - Dj x hj
+    hDet   = ap*Det_R10(beta1,beta2,wpp,wpm,delta0,hk,wp_min,Vortpm,Vortpp,fcor) != - Dj x hj
     num    = apm*wpm+app*wpp+hDet
     IF(ABS(num) > 1.e-20) THEN
       Denom  = Vortpp*( apm*wpm+app*wpp-hDet ) - 2.*fcor*(app*wpp-apm*wpm)
@@ -527,7 +591,9 @@ CONTAINS
   !===================================================================================================
 
   !===================================================================================================
-  SUBROUTINE get_u_p_R10(tpm,tpp,te,apm,app,wpm,wpp,beta1,beta2,hk,delta0,frc,cor,wp_min)
+  SUBROUTINE get_u_p_R10(tpm,tpp,te,apm,app,wpm,wpp,beta1,beta2,hk,delta0,frc,cor,wp_min,Vortpm,Vortpp,fcor)
+  ! SUBROUTINE get_u_p_R10(tpm,tpp,te,apm,app,wpm,wpp,beta1,beta2,hk,delta0,frc,cor,wp_min)
+
   !---------------------------------------------------------------------------------------------------
     !!==========================================================================<br />
     !!                  ***  ROUTINE get_t_p_R10  ***                           <br />
@@ -549,6 +615,12 @@ CONTAINS
     REAL(8), INTENT(IN   )      :: cor    !! traditional Coriolis term [m2/s2]
     REAL(8), INTENT(IN   )      :: wp_min
     REAL(8), INTENT(IN   )      :: frc    !! forcing term for up/vp equation [m/s]
+    !-------------------------------------------------
+    REAL(8), INTENT(IN)         :: Vortpm    !! tracer value at the bottom of the grid cell
+    REAL(8), INTENT(IN   )      :: Vortpp    !! tracer value at the top   of the grid cell
+    REAL(8), INTENT(IN   )      :: fcor      !! traditional Coriolis term [m2/s2]
+
+    !-------------------------------------------------
     ! local variables
     REAL(8)                 :: cffm,cffp,dwpm,dwpp,ap,apwp,cff
     !
@@ -559,8 +631,11 @@ CONTAINS
     ap   = app
     apwp = app*wpp
     !
-    dwpp = Ent_R10(beta1,wpp,wpm)
-    dwpm = Det_R10(beta1,beta2,wpp,wpm,delta0,hk,wp_min)
+    ! dwpp = Ent_R10(beta1,wpp,wpm)
+    dwpp  = Ent_R10(beta1,wpp,wpm,Vortpm,Vortpp,fcor)
+
+    ! dwpm = Det_R10(beta1,beta2,wpp,wpm,delta0,hk,wp_min)
+    dwpm = Det_R10(beta1,beta2,wpp,wpm,delta0,hk,wp_min,Vortpm,Vortpp,fcor)
     cffm = cffp - ap*(dwpp*te+dwpm*tpp+cor) - apwp*frc !! \( \Phi^{\rm p}_{k-1/2} = \Phi^{\rm p}_{k+1/2} - a^{\rm p}_{k} \left( \underbrace{\frac{E_k h_k}{a^p}}_{\rm Ent\_R10} \phi_{k}^{\rm e} \underbrace{- \frac{D_k h_k}{a^p}}_{\rm Det\_R10} \phi_{k+1/2}^{\rm p}     \right)    \) <br />
     IF( apm>0. .AND. wpm < -wp_min ) THEN
     !IF( apm>0. ) THEN
@@ -585,7 +660,7 @@ CONTAINS
   !===================================================================================================
   SUBROUTINE mass_flux_R10(u_m,v_m,t_m,tke_m,z_w,Hz,tp0,up0,vp0,wp0,mf_params,eos_params,  &
                            tkep_min,mxlp_min,small_ap,lin_eos,opt,zinv, N,ntra,nparams,neos,   &
-                           a_p,u_p,v_p,w_p,t_p,B_p,ent,det,eps)
+                           a_p,u_p,v_p,w_p,t_p,B_p,ent,det,eps,vort_p,fcor)
   !---------------------------------------------------------------------------------------------------
     !!==========================================================================<br />
     !!                  ***  ROUTINE mass_flux_R10  ***                         <br />
@@ -638,6 +713,8 @@ CONTAINS
     REAL(8), INTENT(  OUT)                 :: det(1:N)              !! diagnostics : detrainment [m-1]
     REAL(8), INTENT(  OUT)                 :: eps(1:N)          !! diagnostics : TKE dissipation [m2 s-3]
     REAL(8), INTENT(INOUT)                 :: zinv                  !! depth at which w_p = wmin  [m]
+    REAL(8), INTENT(  OUT)                 :: vort_p(0:N)
+    REAL(8), INTENT(IN   )                 :: fcor      !! traditional Coriolis term [m2/s2]
     ! local variables
     REAL(8)                                :: delta0
     INTEGER                                :: k,itrc,iter,tke_comput
@@ -732,7 +809,8 @@ CONTAINS
       ! - \beta_1 \left(\frac{a^{\rm p}_{k+\frac{1}{2}} + a^{\rm p}_{k-\frac{1}{2}} }{2}\right)
       ! \left(  \max(0, (\delta_z w^{\rm p})_k) + \min\left( \frac{w^{\rm p} h_k}{\beta_1} \delta_0 ,
       ! (\delta_z w^{\rm p})_k + \frac{w^{\rm p} h_k}{\beta_1} (\delta_1)_k \right) \right) \\  \]
-      CALL get_a_p_R10(a_p(k-1),a_p(k),w_p(k-1),w_p(k),beta1,beta2,Hz(k),delta0,wpmin)
+      ! CALL get_a_p_R10(a_p(k-1),a_p(k),w_p(k-1),w_p(k),beta1,beta2,Hz(k),delta0,wpmin)
+      CALL get_a_p_R10(a_p(k-1),a_p(k),w_p(k-1),w_p(k),beta1,beta2,Hz(k),delta0,wpmin,vort_p(k-1),vort_p(k),fcor)
       cff = a_p(k)/(1.-a_p(k))
       IF(small_ap) cff = 0.
       ! Compute tracers (except TKE_p)
@@ -743,16 +821,19 @@ CONTAINS
               !! \phi^{\rm e}_k &= \overline{\phi}_k + \left( \frac{a^{\rm p}_{k+1/2}}{1-a^{\rm p}_{k+1/2}} \right) ( \overline{\phi}_k - \phi^{\rm p}_{k+1/2} ) \hspace{1cm} \mbox{small_ap = False}
               !! \end{align*}
         CALL get_t_p_R10(t_p(k-1,itrc),t_p(k,itrc),t_env,  &
-                     a_p(k-1),a_p(k),w_p(k-1),w_p(k),beta1,beta2,Hz(k),delta0,wpmin) !! Compute \( \phi^{\rm p}_{k-1/2}\) :: call \(  {\rm get\_t\_p\_R10}  \)
+                    !  a_p(k-1),a_p(k),w_p(k-1),w_p(k),beta1,beta2,Hz(k),delta0,wpmin) !! Compute \( \phi^{\rm p}_{k-1/
+                     a_p(k-1),a_p(k),w_p(k-1),w_p(k),beta1,beta2,Hz(k),delta0,wpmin,vort_p(k-1),vort_p(k),fcor) !! Compute \( \phi^{\rm p}_{k-1/2}\) :: call \(  {\rm get\_t\_p\_R10}  \)
       ENDDO
       ! Compute up - Cu umean
       u_env = (1.-Cu)*u_m(k) + cff*( (1.-Cu)*u_m(k) - u_p(k) )
       CALL get_t_p_R10(u_p(k-1),u_p(k),u_env,a_p(k-1),a_p(k),w_p(k-1),w_p(k),   &
-                                                      beta1,beta2,Hz(k),delta0,wpmin) !! Compute \( u^{\rm p}_{k-1/2}\) :: call \(  {\rm get\_t\_p\_R10}  \)
+                                                      ! beta1,beta2,Hz(k),delta0,wpmin) !! Compute \( u^{\rm p}_{k-1/2}\) :: call \(  {\rm 
+                                                      beta1,beta2,Hz(k),delta0,wpmin,vort_p(k-1),vort_p(k),fcor) !! Compute \( u^{\rm p}_{k-1/2}\) :: call \(  {\rm get\_t\_p\_R10}  \)
       ! Compute vp - Cv vmean
       v_env = (1.-Cv)*v_m(k) + cff*( (1.-Cv)*v_m(k) - v_p(k) )
       CALL get_t_p_R10(v_p(k-1),v_p(k),v_env,a_p(k-1),a_p(k),w_p(k-1),w_p(k),   &
-                                                      beta1,beta2,Hz(k),delta0,wpmin) !! Compute \( v^{\rm p}_{k-1/2}\) :: call \(  {\rm get\_t\_p\_R10}  \)
+                                                      ! beta1,beta2,Hz(k),delta0,wpmin) !! Compute \( v^{\rm p}_{k-1/2}
+                                                      beta1,beta2,Hz(k),delta0,wpmin,vort_p(k-1),vort_p(k),fcor) !! Compute \( v^{\rm p}_{k-1/2}\) :: call \(  {\rm get\_t\_p\_R10}  \)
       ! Compute TKEplume - TKEmean
       IF(tke_comput == 0) THEN
         cff       = a_p(k)/(1.-a_p(k))
@@ -908,6 +989,7 @@ CONTAINS
     t_p(N,1:ntra) = tp0(1:ntra)   ; t_p(0:N-1,1:ntra) = 0.
     B_p(0:N) = 0.; ent(1:N) = 0.  ; det(1:N) = 0.  ; eps(1:N) = 0.
     !
+    ! TODO: evaluate this!!!!!!!!
     vort_p(N) = fcor
     !
     DO k = 2,N
@@ -994,7 +1076,7 @@ CONTAINS
       ! - \beta_1 \left(\frac{a^{\rm p}_{k+\frac{1}{2}} + a^{\rm p}_{k-\frac{1}{2}} }{2}\right)
       ! \left(  \max(0, (\delta_z w^{\rm p})_k) + \min\left( \frac{w^{\rm p} h_k}{\beta_1} \delta_0 ,
       ! (\delta_z w^{\rm p})_k + \frac{w^{\rm p} h_k}{\beta_1} (\delta_1)_k \right) \right) \\  \]
-      CALL get_a_p_R10(a_p(k-1),a_p(k),w_p(k-1),w_p(k),beta1,beta2,Hz(k),delta0,wpmin)
+      CALL get_a_p_R10(a_p(k-1),a_p(k),w_p(k-1),w_p(k),beta1,beta2,Hz(k),delta0,wpmin,vort_p(k-1),vort_p(k),fcor)
       cff = a_p(k)/(1.-a_p(k))
       IF(small_ap) cff = 0.
       ! Compute tracers (except TKE_p)
@@ -1005,7 +1087,8 @@ CONTAINS
         !! \phi^{\rm e}_k &= \overline{\phi}_k + \left( \frac{a^{\rm p}_{k+1/2}}{1-a^{\rm p}_{k+1/2}} \right) ( \overline{\phi}_k - \phi^{\rm p}_{k+1/2} ) \hspace{1cm} \mbox{small_ap = False}
         !! \end{align*}
         CALL get_t_p_R10(t_p(k-1,itrc),t_p(k,itrc),t_env,  &
-        a_p(k-1),a_p(k),w_p(k-1),w_p(k),beta1,beta2,Hz(k),delta0,wpmin) !! Compute \( \phi^{\rm p}_{k-1/2}\) :: call \(  {\rm get\_t\_p\_R10}  \)
+        ! a_p(k-1),a_p(k),w_p(k-1),w_p(k),beta1,beta2,Hz(k),delta0,wpmin) !! Compute \( \phi^{\rm p}_{k-1/2}\) :: call \
+        a_p(k-1),a_p(k),w_p(k-1),w_p(k),beta1,beta2,Hz(k),delta0,wpmin,vort_p(k-1),vort_p(k),fcor) !! Compute \( \phi^{\rm p}_{k-1/2}\) :: call \(  {\rm get\_t\_p\_R10}  \)
       ENDDO
       !=======
       u_env = u_m(k); v_env = v_m(k) ! m/s
@@ -1017,7 +1100,8 @@ CONTAINS
       ! Compute up
       cor_u   =   fcor*Hz(k)*v_p(k) ! m2/s2
       CALL get_u_p_R10(u_p(k-1),u_p(k),u_env,a_p(k-1),a_p(k),w_p(k-1),w_p(k),   &
-                    beta1,beta2,Hz(k),delta0,frc_u,cor_u,wpmin) !! Compute \( u^{\rm p}_{k-1/2}\) :: call \(  {\rm get\_t\_p\_R10}  \)
+                    ! beta1,beta2,Hz(k),delta0,frc_u,cor_u,wpmin) !! Compute \( u^{\rm p}_{k-1/2}\) :: call \(  {\rm 
+                    beta1,beta2,Hz(k),delta0,frc_u,cor_u,wpmin,vort_p(k-1),vort_p(k),fcor) !! Compute \( u^{\rm p}_{k-1/2}\) :: call \(  {\rm get\_t\_p\_R10}  \)
       !if( u_p(k-1).ne.u_p(k-1) ) then
       !  print*,'NaN in get_u_p_R10 :: ',u_p(k-1),u_p(k),u_env,a_p(k-1),a_p(k)
       !  stop
@@ -1025,7 +1109,8 @@ CONTAINS
       ! Compute vp
       cor_v   = -fcor*Hz(k)*u_p(k) ! m2/s2
       CALL get_u_p_R10(v_p(k-1),v_p(k),v_env,a_p(k-1),a_p(k),w_p(k-1),w_p(k),   &
-                    beta1,beta2,Hz(k),delta0,frc_v,cor_v,wpmin) !! Compute \( v^{\rm p}_{k-1/2}\) :: call \(  {\rm get\_t\_p\_R10}  \)
+                    ! beta1,beta2,Hz(k),delta0,frc_v,cor_v,wpmin) !! Compute \( v^{\rm p}_{k-1/2}\) :: call \(  {\rm 
+                    beta1,beta2,Hz(k),delta0,frc_v,cor_v,wpmin,vort_p(k-1),vort_p(k),fcor) !! Compute \( v^{\rm p}_{k-1/2}\) :: call \(  {\rm get\_t\_p\_R10}  \)
       !if( v_p(k-1).ne.v_p(k-1) ) then
       !  print*,'NaN in get_v_p_R10 :: ',v_p(k-1),v_p(k),v_env,a_p(k-1),a_p(k)
       !  stop
