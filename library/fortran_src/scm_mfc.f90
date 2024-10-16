@@ -584,8 +584,8 @@ CONTAINS
 
   !===================================================================================================
   SUBROUTINE mass_flux_R10(u_m,v_m,t_m,tke_m,z_w,Hz,tp0,up0,vp0,wp0,mf_params,eos_params,  &
-                           tkep_min,mxlp_min,small_ap,lin_eos,opt,zinv, N,ntra,nparams,neos,   &
-                           a_p,u_p,v_p,w_p,t_p,B_p,ent,det,eps)
+                           tkep_min,mxlp_min,small_ap,lin_eos,opt,fcor,zinv, N,ntra,nparams,neos,   &
+                            a_p,u_p,v_p,w_p,t_p,B_p,ent,det,eps,vort_p)
   !---------------------------------------------------------------------------------------------------
     !!==========================================================================<br />
     !!                  ***  ROUTINE mass_flux_R10  ***                         <br />
@@ -628,6 +628,7 @@ CONTAINS
     LOGICAL, INTENT(IN   )                 :: small_ap              !! (T) small area approximation (F) no approximation
     LOGICAL, INTENT(IN   )                 :: lin_eos               !!
     INTEGER, INTENT(IN   )                 ::  opt                 !! option for the computation of wtke (=0 PL24, =1 HB09, = 2 Wi11)
+    REAL(8), INTENT(IN   )                 :: fcor
     REAL(8), INTENT(  OUT)                 :: a_p(0:N)              !! fractional area occupied by the plume
     REAL(8), INTENT(  OUT)                 :: w_p(0:N)              !! vertical velocity in the plume [m/s]
     REAL(8), INTENT(  OUT)                 :: u_p(0:N)              !! zonal velocity in the plume [m/s]
@@ -637,6 +638,7 @@ CONTAINS
     REAL(8), INTENT(  OUT)                 :: ent(1:N)              !! diagnostics : entrainment [m-1]
     REAL(8), INTENT(  OUT)                 :: det(1:N)              !! diagnostics : detrainment [m-1]
     REAL(8), INTENT(  OUT)                 :: eps(1:N)          !! diagnostics : TKE dissipation [m2 s-3]
+    REAL(8), INTENT(  OUT)                 :: vort_p(0:N)
     REAL(8), INTENT(INOUT)                 :: zinv                  !! depth at which w_p = wmin  [m]
     ! local variables
     REAL(8)                                :: delta0
@@ -666,6 +668,9 @@ CONTAINS
     v_p(N) = (1.-Cv)*vp0          ; v_p(0:N-1       ) = 0.
     t_p(N,1:ntra) = tp0(1:ntra)   ; t_p(0:N-1,1:ntra) = 0.
     B_p(0:N) = 0.; ent(1:N) = 0.  ; det(1:N) = 0.  ; eps(1:N) = 0.
+    !! make a motivated CHOICE for the b.c. of vorticity... 
+    ! vort_p(N) = fcor
+    vort_p(N)=0.
     !
     IF(tke_comput == 0) THEN
         t_p(N,ntra) = 0.  ! in this case t_p(ntra) contains t_p - tke
@@ -786,6 +791,8 @@ CONTAINS
         eps(k)    = epsilon
       ENDIF
       !=====================================================================
+      CALL get_vort_p_R10(vort_p(k-1),vort_p(k),fcor,a_p(k-1),a_p(k),w_p(k-1),w_p(k), &
+      beta1,beta2,Hz(k),delta0,wpmin)
     ENDDO
     !=======================================================================
     ! At this point, up and vp contain up-Cu ue  and vp-Cv ve

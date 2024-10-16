@@ -280,7 +280,7 @@ class SCM:
           self.ent    = np.zeros(self.nz  ); self.det    = np.zeros(self.nz  )
           self.up     = np.zeros(self.nz+1); self.vp     = np.zeros(self.nz+1)
           self.epsPlume = np.zeros(self.nz)  # TKE plume dissipation
-          if self.mass_flux_entr=='R10corNT': self.vortp  = np.zeros(self.nz+1)
+          self.vortp  = np.zeros(self.nz+1)
         ####################################
         # store MASS-FLUX solution (temperature, velocity)
         # in order to avoid writing a netcdf file
@@ -714,7 +714,7 @@ class SCM:
           # MODULATION due to traditional rotation
           B0 = self.g*self.alpha*self.stflx[self.itemp]
           Ro = np.minimum((np.abs(B0)/self.fcor)**(0.5)/(self.fcor*np.abs(self.zinv)) , (np.abs(B0)/self.fcor)**(0.5)/(self.fcor*1000.))
-          # cff= np.tanh(Ro**0.37) #modulation coefficient, Wang 2006
+          # cff= np.tanh(Ro**0.3) #modulation coefficient, Wang 2006
           cff= np.tanh(Ro**0.37) #modulation coefficient, Wang 2006
           # cff=1
           # reduce integral lenth scale: L_int = cff*zinv (division by zinv is done in the fortran routine)
@@ -722,19 +722,19 @@ class SCM:
 
 
 
-          # self.mf_params[-1] = self.delta_bkg/cff
-          # self.mf_params[4] =      self.wp_bp/cff
+          self.mf_params[-1] = self.delta_bkg/cff
+          self.mf_params[4] =      self.wp_bp/cff
           # # reduce lateral exchanges
-          # self.mf_params[0] = self.Cent/cff
-          # self.mf_params[1] = self.Cdet/cff
+          self.mf_params[0] = self.Cent/cff
+          self.mf_params[1] = self.Cdet/cff
           # self.mf_params[2] = self.wp_a*cff
           # self.mf_params[3] = self.wp_b*cff
         ######################
         if self.mass_flux_entr=='R10' or self.mass_flux_entr=='R10_HB09' or self.mass_flux_entr=='R10_Wi11':
-          self.ap,self.up,self.vp,self.wp,self.tp,self.Bp,self.ent,self.det, self.epsPlume = scm_mfc.mass_flux_r10(
+          self.ap,self.up,self.vp,self.wp,self.tp,self.Bp,self.ent,self.det, self.epsPlume, self.vortp = scm_mfc.mass_flux_r10(
                                     u_mean, v_mean, t_mean, self.tke_n, self.z_w, self.Hz,
                                     tp0   , up0   , vp0   , wp0     , self.mf_params,
-                                    self.eos_params, tkepmin, mxlpmin, self.MF_small_ap, self.lineos, self.triple_corr_opt, self.zinv,
+                                    self.eos_params, tkepmin, mxlpmin, self.MF_small_ap, self.lineos, self.triple_corr_opt, self.fcor, self.zinv,
                                     self.nz , self.ntraMF , len(self.mf_params), len(self.eos_params)   )
         if self.mass_flux_entr=='R10corNT':
           self.ap,self.up,self.vp,self.wp,self.tp,self.Bp,self.ent,self.det, self.vortp, self.epsPlume = scm_mfc.mass_flux_r10_cor(
@@ -907,8 +907,7 @@ class SCM:
             if self.MF_tke_trplCorr:
                 var = fh01.createVariable('d_we_dz_MF','f8',('time','z_w')); var[0,:] = self.triple_corr[:]; del var
                 var = fh01.createVariable('tke_p','f8',('time','z_w')); var[0,:] = self.tp[:,self.isalt+1]; del var
-            if self.mass_flux_entr=='R10corNT':
-                var = fh01.createVariable('vort_p','f8',('time','z_w')); var[0,:] = self.vortp[:]; del var
+            var = fh01.createVariable('vort_p','f8',('time','z_w')); var[0,:] = self.vortp[:]; del var
         fh01.close()
 #
 
@@ -981,6 +980,5 @@ class SCM:
             if self.MF_tke_trplCorr:
                 fh01.variables['d_we_dz_MF'][kout,:] = self.triple_corr[:]
                 fh01.variables['tke_p'][kout,:] = self.tp[:,self.isalt+1]
-            if self.mass_flux_entr=='R10corNT':
-                fh01.variables['vort_p'][kout,:] = self.vortp[:]
+            fh01.variables['vort_p'][kout,:] = self.vortp[:]
         fh01.close()
