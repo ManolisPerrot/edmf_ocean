@@ -711,7 +711,7 @@ class SCM:
         #
         #####################
         if self.trad_coriolis_mod:
-          # MODULATION due to traditional rotation
+          # MODULATION due to traditional rotation terms
           B0 = self.g*self.alpha*self.stflx[self.itemp]
           Ro = np.minimum((np.abs(B0)/self.fcor)**(0.5)/(self.fcor*np.abs(self.zinv)) , (np.abs(B0)/self.fcor)**(0.5)/(self.fcor*1000.))
           # cff= np.tanh(Ro**0.3) #modulation coefficient, Wang 2006

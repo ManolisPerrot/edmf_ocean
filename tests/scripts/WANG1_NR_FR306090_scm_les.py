@@ -52,7 +52,7 @@ edmf_params = {
     'wp_bp': 0.003*250,     #      0.002,
     'up_c': 0.5,
     'vp_c': 0.5,
-    'bc_ap': 0.35,    #0.3,
+    'bc_ap': 0.18,#     0.35,    #0.3,
     'delta_bkg': 0.0045*250,   # 0.02,
     'output_filename': 'run',
     'wp0':-1e-02,
@@ -87,13 +87,7 @@ run_label = cases
 # for case in cases[1:]:
 #     runs.append({'output_filename': 'scm_'+case+'.nc'})
 
-runs = [
-    {
-        'output_filename': 'scm_'+cases[0]+'.nc',
-    },
-        {
-        'output_filename': 'scm_'+cases[1]+'.nc',
-    },]
+runs = [ {'output_filename': 'scm_'+case+'.nc'} for case in cases]
 
 scm = [0]*len(runs)
 
@@ -114,6 +108,6 @@ for i, run_params in enumerate(runs):
     #     reference=mld
     #     is_in_range(value=scm[i].zinv, value_name='zinv', reference=reference,tolerance=10 )
 
-plot_mean_velocities(cases=cases)
+# plot_mean_velocities(cases=cases)
 plot_instant_panel(cases=cases)
-plot_condsamp_panel(cases=cases)
+plot_condsamp_panel(cases=cases,plot_vorticity=True)

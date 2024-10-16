@@ -24,7 +24,7 @@ plt.rcParams.update({'figure.facecolor':'white'})
 plt.rcParams.update({'savefig.facecolor':'white'})
 ###########################################
 
-def plot_condsamp_panel(instant=-1,cases=['WANG1_FR_lat60'],savefig=False,saving_name = 'WANG1_NR_condsamp.png' ):
+def plot_condsamp_panel(instant=-1,cases=['WANG1_FR_lat60'],savefig=False,saving_name = 'WANG1_NR_condsamp.png',plot_vorticity=False ):
 
     #== Opening LES and SCM
     les,scm = {},{}
@@ -146,16 +146,17 @@ def plot_condsamp_panel(instant=-1,cases=['WANG1_FR_lat60'],savefig=False,saving
     # # #-----------------------------------------------------------------------
 
     # #-----------------------------------------------------------------------
-    i_ax+=1
-    ax=axs.flat[i_ax]
-    ax.set_title(r'$\omega_p$')
-    ax.set_xlabel(r'$\mathrm{s^{-1}}$')
-    ax.set_ylabel(r'$z/h$')
+    if plot_vorticity:
+        i_ax+=1
+        ax=axs.flat[i_ax]
+        ax.set_title(r'$\omega_p$')
+        ax.set_xlabel(r'$\mathrm{s^{-1}}$')
+        ax.set_ylabel(r'$z/h$')
 
-    for case in cases:
-        mask='DW'
-        ax.plot(les[case][mask+'_VORT_z'][instant] , zadim, color=colors[case], linewidth=linewidth[mask], linestyle=linestyle[case],alpha=alpha_les[case])
-        ax.plot(scm[case]['vort_p'][instant] , scm[case]['z_w']/mld, color=colors[case], linewidth=linewidth[mask], linestyle=linestyle_scm[case],alpha=alpha[case],label=case+mask)
+        for case in cases:
+            mask='DW'
+            ax.plot(les[case][mask+'_VORT_z'][instant] , zadim, color=colors[case], linewidth=linewidth[mask], linestyle=linestyle[case],alpha=alpha_les[case])
+            ax.plot(scm[case]['vort_p'][instant] , scm[case]['z_w']/mld, color=colors[case], linewidth=linewidth[mask], linestyle=linestyle_scm[case],alpha=alpha[case],label=case+mask)
     # #-----------------------------------------------------------------------
     # #-----------------------------------------------------------------------
     i_ax+=1
