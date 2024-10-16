@@ -419,7 +419,7 @@ CONTAINS
     REAL(8)                     :: w_int
 
     w_int = 0.5*(wpp+wpm)
-    Ent_R10 = MAX( beta1*(wpp-wpm), 0. ) + MAX( 0.1*beta1*(w_int/fcor)*(Vortpp-Vortpm),0.)
+    Ent_R10 = MAX( beta1*(wpp-wpm), 0. ) + MAX( 1*beta1*(w_int/fcor)*(Vortpp-Vortpm),0.)
     ! Ent_R10 = MAX( beta1*(wpp-wpm), 0.1*beta1*(w_int/fcor)*(Vortpp-Vortpm))
 
   END FUNCTION Ent_R10
@@ -444,7 +444,7 @@ CONTAINS
     D0 = 0.5*hk*delta0*(wpp+wpm)
     w_int = 0.5*(wpp+wpm)
     Vort_int = 0.5*(Vortpm+Vortpp)
-    Det_R10 = MIN( beta2*(wpp-wpm), 0. ) + MIN(D0, -2.*wp_min) + MIN( 0.1*beta2*(w_int/(fcor+Vort_int))*(Vortpp-Vortpm), 0. )
+    Det_R10 = MIN( beta2*(wpp-wpm), 0. ) + MIN(D0, -2.*wp_min) + MIN( 1*beta2*(w_int/(fcor+Vort_int))*(Vortpp-Vortpm), 0. )
     ! Det_R10 = MIN( beta2*(wpp-wpm), 0.1*beta2*(w_int/(fcor+Vort_int))*(Vortpp-Vortpm) ) + MIN(D0, -2.*wp_min) 
 
   END FUNCTION Det_R10

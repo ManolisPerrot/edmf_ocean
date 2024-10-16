@@ -45,8 +45,8 @@ edmf_params = {
     'entr_scheme': 'R10corNT',
     # 'entr_scheme': 'R10',
     'trad_coriolis_mod': True,
-    'Cent': 0.99/2,    
-    'Cdet': 1.99/2,       # 'Cdet': 2.5,
+    'Cent': 0.99,    
+    'Cdet': 1.99,       # 'Cdet': 2.5,
     'wp_a': 1.,
     'wp_b': 1.,      # 'wp_b': 1.
     'wp_bp': 0.003*250,     #      0.002,
@@ -104,7 +104,7 @@ for i, run_params in enumerate(runs):
     params.update(run_params)  # Update with run_params
     params.update(case_params[cases[i]])
     # !!!!!!!!!!!!!!!!!!! Modifying dt to speed up preliminary tests, to remove !!!!!!!!!!!!!!!!!!
-    params.update({'dt':1000})
+    params.update({'dt':100})
     # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     scm[i] = SCM(**params)
     scm[i].run_direct()
