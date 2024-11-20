@@ -137,7 +137,7 @@ runs = [
         'mass_flux_dyn': True,
         'mass_flux_tke': False,
         'mass_flux_tke_trplCorr': False,
-        'output_filename': 'scm_W005_C500_NO_COR.nc'
+        'output_filename': 'run3.nc'
 
     },
         {
@@ -148,7 +148,7 @@ runs = [
         'mass_flux_tke': True,
         'mass_flux_tke_trplCorr': True,
         'bc_P09': 'false',
-        'output_filename': 'run3.nc'
+        'output_filename': 'scm_W005_C500_NO_COR.nc'
     },
     {
         'eddy_diff': True,

@@ -153,6 +153,8 @@ case_settings={
     # XG = 9.80665  #----> PB! si on veut mettre g en argument du SCM, il faut changer toutes les subroutines... 
     # XALPHAOC = 1.9E-4  # Coefficient of thermal expansion of water (K-1)
     # XBETAOC = 7.7475E-4  # Coeff of Haline contraction coeff (S-1)
+##########################
+##########################
     'FC500':{   
     'dt': 50.,
     'gridType': 'croco_new',                           
@@ -182,6 +184,37 @@ case_settings={
     'diurnal_cycle': False,  
     'btflx': 'no flux' }
     ,
+#--------------------------------------------
+    #     'FC500':{   
+    # 'dt': 50.,
+    # 'gridType': 'croco_new',                           
+    # 'nz': 100,
+    # 'h0': 2000.,                         
+    # 'thetas': 6.5,                           
+    # 'hc': 100,                           
+    # 'nbhours': 72,                           
+    # 'outfreq': 1,                        
+    # 'T0': 2.,       
+    # 'mld_ini_temp': -0., #initial MLD in temperature                
+    # 'N0': 1.8632635e-06, #1.9620001275490499e-6,
+    # 'SaltCst': 32.6,      # constant initial profile of Salt
+    # 'cpoce': 4178.,
+    # 'lin_eos': True,
+    # 'rho0': 1027.,
+    # 'alpha': 1.9e-4,      
+    # 'Tref':  13.5,         #reference temperature 
+    # 'beta': 7.7475E-4,      
+    # 'Sref':  32.6,        #reference salinity                 
+    # 'lat0': 0.,                          
+    # 'sustr': 0.,         #w'u'_ocean_sfc                
+    # 'svstr': 0.,         #w'v'_ocean_sfc       
+    # 'stflx': -500.,      #non-penetrative surface heat flux                  
+    # 'srflx': 0.,         #penetrative surface heat flux      
+    # 'ssflx': 0.,         #freshwater flux
+    # 'diurnal_cycle': False,  
+    # 'btflx': 'no flux' }
+    # ,
+#--------------------------------------------
     'W05_C500':{   
     'dt': 50.,
     'gridType': 'croco_new',                           
@@ -211,6 +244,7 @@ case_settings={
     'diurnal_cycle': False,  
     'btflx': 'no flux' }
     ,
+#--------------------------------------------
     'W005_C500_NO_COR':{   
     'dt': 50.,
     'gridType': 'croco_new',                           
@@ -239,6 +273,7 @@ case_settings={
     'ssflx': 0.,         #freshwater flux
     'diurnal_cycle': False,  
     'btflx': 'no flux' },
+#--------------------------------------------
 'WANG1_FR_lat60':{
         'nz': 100,
         'dt': 400.,

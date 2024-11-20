@@ -117,3 +117,8 @@ Par contre pour wp bon odg mais pas bonne dérivée, et pas du tout bon sur ap (
 - J'ai testé plein de combinaisons, rien n'est très concluant : on peut pas avoir moyennes, courants et plume varzz bonnes en même temps --> pour la thèse c'est une résultat en soi, qui permet de dire qu'il manque des choses...
 - il y a clairement une intéraction entre courants NT et mean_temp... ça fait des bugs sur lat30, alors que quand on repasse en R10 ça disparaît
 - est-ce que modulation est pas trop forte ?
+- [ ] revérifier le profil de w'u'
+
+
+
+

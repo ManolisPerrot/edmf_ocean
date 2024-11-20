@@ -6,17 +6,26 @@ import numpy as np
 import xarray as xr
 
 
-run_name = 'WANG1_FR_lat30'
+# run_name = 'WANG1_FR_lat30'
 #run_name = 'W05_C500'
-#run_name = 'W05_C500_NO_COR'
+# run_name = 'W05_C500_NO_COR'
 # run_name = 'test'
-#run_name = 'W005_C500_NO_COR'
+run_name = 'W005_C500_NO_COR'
 #sampling = 'Csv_m1'
 # sampling = 'w_sieb_p01'
-sampling = 'Cw_m1'
+# sampling = 'Cw_m1'
+sampling = 'Cw_m2'
 path = '../data/'+run_name+'/'
-saving_name = '_object_diags_'+sampling+'_276h.nc'
+# saving_name = '_object_diags_'+sampling+'_276h.nc'
 # saving_name = '_object_diags_'+sampling+'_264h.nc'
+saving_name = '_object_diags_'+sampling+'_72h.nc'
+
+
+files = ['GN_01.1.OC_01.036.nc']
+# files = ['GN_01.1.OC_01.022.nc']
+# files = ['GN_01.1.OC_01.023.nc']
+
+#files = ['GN_01.1.OC_01.012.nc']
 
 saving_path = '../data/'+run_name+'/'+run_name+saving_name
 n_snap = 1  # number of snapshots starting from the last
@@ -188,11 +197,11 @@ def merger(variable_group, exclude_TOT=False):
 #files = [os.path.basename(f) for f in sorted(glob.glob(path + 'GN*.nc'))][1:]
 #files = [files[i] for i in range(len(files) - n_snap, len(files) - 1)] + [files[-1]]
 
+# files = ['GN_01.1.OC_01.036.nc']
+# # files = ['GN_01.1.OC_01.022.nc']
+# # files = ['GN_01.1.OC_01.023.nc']
 
-# files = ['GN_01.1.OC_01.022.nc']
-files = ['GN_01.1.OC_01.023.nc']
-
-#files = ['GN_01.1.OC_01.012.nc']
+# #files = ['GN_01.1.OC_01.012.nc']
 
 dsout = xr.Dataset({'initialize': 0})
 
@@ -279,6 +288,21 @@ for file in files:
         # Compute sampling masks FROM W: Couvreux 2010, Pergaud 2009, Berg,Stull 2002 on SV
 
         m = m
+        masks['DW'] = (((variables['WT'] - MEAN_VARS['TOT']['WT']) < 0) & ((variables['WT'] - MEAN_VARS['TOT']
+                                                                            ['WT']) < - m*np.maximum(sigmaWmin, np.sqrt(intra_cov['TOT']['W2']))))  # for down drafts
+        masks['UP'] = ~masks['DW']
+
+    if sampling == 'Cw_m2':
+        # computation of minimum stdev from Couvreux, obtained as 5% (10%) of vertical mean stdev
+        sigmaWmin = np.abs(intra_cov['TOT']['W2'])
+        for k in range(z_r.size):
+            # sigmaWmin[:, k] = 0.05/(- z_r[k]) * (np.sqrt(intra_cov['TOT']['W2'].isel(
+            sigmaWmin[:, k] = percent/(- z_r[k]) * (np.sqrt(intra_cov['TOT']['W2'].isel(
+                level=[i for i in range(k, z_r.size)]))).integrate('level')
+
+        # Compute sampling masks FROM W: Couvreux 2010, Pergaud 2009, Berg,Stull 2002 on SV
+
+        m = 2
         masks['DW'] = (((variables['WT'] - MEAN_VARS['TOT']['WT']) < 0) & ((variables['WT'] - MEAN_VARS['TOT']
                                                                             ['WT']) < - m*np.maximum(sigmaWmin, np.sqrt(intra_cov['TOT']['W2']))))  # for down drafts
         masks['UP'] = ~masks['DW']

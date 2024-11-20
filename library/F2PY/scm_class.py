@@ -373,6 +373,10 @@ class SCM:
                                         self.u_n, self.v_n, self.ustr_sfc, self.vstr_sfc,
                                         self.ustr_bot, self.vstr_bot,
                                         self.Hz , self.akv, self.z_r, self.fcor, self.dt, self.nz  )
+            # # # surface penalization
+            # delta = 0.01*(abs(self.zinv)+10.)
+            # self.u_np1_star[:] = np.exp(self.z_r/delta)*self.u_np1_star[:]
+            # self.v_np1_star[:] = np.exp(self.z_r/delta)*self.v_np1_star[:]
             #===================
             # Compute mass flux
             #===================
@@ -407,6 +411,7 @@ class SCM:
             else:
                 self.u_np1[:] = self.u_np1_star[:]
                 self.v_np1[:] = self.v_np1_star[:]
+
             #==========================================================
             # Compute eddy-viscosity / eddy-diffusivity  (TKE scheme)
             #==========================================================

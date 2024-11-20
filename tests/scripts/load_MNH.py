@@ -55,8 +55,8 @@ def load_MNH(cases):
         WV    [case] = (LG_RES[case].RES_WV  + LG_SBG[case].SBG_WV)
         # WV    [case] = (LG_RES[case].RES_WU  + LG_SBG[case].SBG_WU)
         # WU    [case] = (LG_RES[case].RES_WV  + LG_SBG[case].SBG_WV)
-        TKE   [case] = (LG_RES[case].RES_KE  + LG_SBG[case].SBG_TKE).data 
-        WTKE  [case] = (LG_RES[case].RES_WKE + LG_SBG[case].SBG_WTKE).data
+        TKE   [case] = (LG_RES[case].RES_KE  + LG_SBG[case].SBG_TKE)
+        WTKE  [case] = (LG_RES[case].RES_WKE + LG_SBG[case].SBG_WTKE)
         # remap level_les on negative depth values
         z_r_les[case] = (les[case].level_les - (les[case].level_les[0] + les[case].level_les[-1])).data
         dz_WU_les[case] = (WU[case][:].mean(dim='time_les').data[1:]-WU[case][:].mean(dim='time_les').data[:-1])/(z_r_les[case][1:]-z_r_les[case][:-1])

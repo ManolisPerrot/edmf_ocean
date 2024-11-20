@@ -179,47 +179,67 @@ for case in cases:
 #     ax.plot(scm[cases[1]]['vort_p'][instant] , scm[case]['z_w']/mld, color[mask], linewidth=linewidth[mask], linestyle=linestyle_scm[case],alpha=alpha[case],label=case+mask)
 # #-----------------------------------------------------------------------
 # #-----------------------------------------------------------------------
-i_ax+=1
-ax=axs.flat[i_ax]
-ax.set_title(r'$E$')
-ax.set_xlabel(r'$\mathrm{s^{-1}}$')
+# i_ax+=1
+# ax=axs.flat[i_ax]
+# ax.set_title(r'$E-D$')
+# ax.set_xlabel(r'$\mathrm{s^{-1}}$')
 
-for case in cases:
-    mask='DW'
-    # ax.plot(E_les[case][instant]-D_les[case][instant] , zadim[1:], color[mask], linewidth=linewidth[mask], linestyle='-',alpha=alpha[case])
-    # ax.plot(scm[case]['Ent'][instant]-scm[case]['Det'][instant] , scm[case]['z_r']/mld, color[mask], linewidth=linewidth[mask], linestyle=linestyle_scm[case],alpha=alpha[case],label=case+mask)
-    ax.plot(E_les[case][instant] , zadim[1:], color[mask], linewidth=linewidth[mask], linestyle=linestyle[case],alpha=alpha[case])
-    ax.plot(scm[case]['Ent'][instant] , scm[case]['z_r']/mld, color[mask], linewidth=linewidth[mask], linestyle=linestyle_scm[case],alpha=alpha[case],label=case+mask)
-# ax.set_xlim(-1e-5,1e-4)
-ax.set_xscale('log')
+# for case in cases:
+#     mask='DW'
+#     ax.plot(E_les[case][instant]-D_les[case][instant] , zadim[1:], color[mask], linewidth=linewidth[mask], linestyle=linestyle[case],alpha=alpha[case])
+#     ax.plot(scm[case]['Ent'][instant]-scm[case]['Det'][instant] , scm[case]['z_r']/mld, color[mask], linewidth=linewidth[mask], linestyle=linestyle_scm[case],alpha=alpha[case],label=case+mask)
+#     # ax.plot(E_les[case][instant] , zadim[1:], color[mask], linewidth=linewidth[mask], linestyle=linestyle[case],alpha=alpha[case])
+#     # ax.plot(scm[case]['Ent'][instant] , scm[case]['z_r']/mld, color[mask], linewidth=linewidth[mask], linestyle=linestyle_scm[case],alpha=alpha[case],label=case+mask)
+# # ax.set_xlim(-1e-5,1e-4)
+# ax.set_xscale('symlog',linthresh=1e-8)
+# ax.set_xticklabels(ax.get_xticks(), rotation=90)
+# # plt.ticklabel_format(style='sci', axis='x', scilimits=(0,0))
+# ax.yaxis.set_major_formatter(ticker.ScalarFormatter())
+# ax.yaxis.get_major_formatter().set_scientific(True)
+# ax.yaxis.get_major_formatter().set_useOffset(False)
+# ax.yaxis.get_major_formatter().set_powerlimits((0, 0))
+# ax.set_xscale('log')
 # #-----------------------------------------------------------------------
-# #-----------------------------------------------------------------------
-i_ax+=1
-ax=axs.flat[i_ax]
-ax.set_title(r'$D$')
-ax.set_xlabel(r'$\mathrm{s^{-1}}$')
-
-for case in cases:
-    mask='DW'
-    ax.plot(D_les[case][instant] , zadim[1:], color[mask], linewidth=linewidth[mask], linestyle=linestyle[case],alpha=alpha[case])
-    ax.plot(scm[case]['Det'][instant] , scm[case]['z_r']/mld, color[mask], linewidth=linewidth[mask], linestyle=linestyle_scm[case],alpha=alpha[case],label=case+mask)
-# ax.set_xlim(-1e-5,1e-4)
-ax.set_xscale('log')
 # # #-----------------------------------------------------------------------
 # i_ax+=1
 # ax=axs.flat[i_ax]
-# ax.remove()
+# ax.set_title(r'$D$')
+# ax.set_xlabel(r'$\mathrm{s^{-1}}$')
+
+# for case in cases:
+#     mask='DW'
+#     ax.plot(D_les[case][instant] , zadim[1:], color[mask], linewidth=linewidth[mask], linestyle=linestyle[case],alpha=alpha[case])
+#     ax.plot(scm[case]['Det'][instant] , scm[case]['z_r']/mld, color[mask], linewidth=linewidth[mask], linestyle=linestyle_scm[case],alpha=alpha[case],label=case+mask)
+# # ax.set_xlim(-1e-5,1e-4)
+# ax.set_xscale('log')
 # # # #-----------------------------------------------------------------------
+# i_ax+=1
+# ax=axs.flat[i_ax]
+# ax.remove()
+# # # # #-----------------------------------------------------------------------
 # #-----------------------------------------------------------------------
 #-----------------------------------------------------------------------
 i_ax+=1
 ax=axs.flat[i_ax]
 ax.set_title(r'$u_p$')
+ax.set_xlabel(r'$\mathrm{m s^{-1}}$')
+ax.set_ylabel(r'$z/h$')
 
 for case in cases:
     mask='DW'
     ax.plot(les[case][mask+'_UT'][instant] , zadim, color[mask], linewidth=linewidth[mask], linestyle=linestyle[case],alpha=alpha[case])
     ax.plot(scm[case]['u_p'][instant] , scm[case]['z_w']/mld, color[mask], linewidth=linewidth[mask], linestyle=linestyle_scm[case],alpha=alpha[case],label=case+mask)
+
+# # #-----------------------------------------------------------------------
+#-----------------------------------------------------------------------
+i_ax+=1
+ax=axs.flat[i_ax]
+ax.set_title(r'$k_p$')
+ax.set_xlabel(r'$\mathrm{m^2 s^{-2}}$')
+for case in cases:
+    mask='DW'
+    ax.plot(les[case][mask+'_intra_TKE'][instant] , zadim, color[mask], linewidth=linewidth[mask], linestyle=linestyle[case],alpha=alpha[case])
+    ax.plot(scm[case]['a_p'][instant]*scm[case]['tke_p'][instant] , scm[case]['z_w']/mld, color[mask], linewidth=linewidth[mask], linestyle=linestyle_scm[case],alpha=alpha[case],label=case+mask)
 
 # # #-----------------------------------------------------------------------
 # i_ax+=1
@@ -231,6 +251,12 @@ for case in cases:
 #     mask='DW'
 #     ax.plot(D_les[case][instant] , zadim[1:], color[mask], linewidth=linewidth[mask], linestyle='--',alpha=alpha[case])
 # ax.set_xlim(-3e-6,5e-5)
+
+# # #-----------------------------------------------------------------------
+i_ax+=1
+ax=axs.flat[i_ax]
+ax.remove()
+# # # #----------------
 
 subplot_label = [r'\rm{(a)}', r'\rm{(b)}', r'\rm{(c)}',
                     r'\rm{(d)}', r'\rm{(e)}', r'\rm{(f)}',r'\rm{(g)}',r'\rm{(h)}',r'\rm{(i)}',r'\rm{(j)}',r'\rm{(k)}',r'\rm{(l)}']
@@ -254,5 +280,5 @@ for i,ax in enumerate(axs.flat):
 fig.suptitle(r'Plume variables, '+case[:-7])
 # fig.legend()
 plt.savefig('../figures/W005_C500_les_scm_condsamp.pdf', bbox_inches='tight', dpi=600)
-# plt.show()
+plt.show()
 
