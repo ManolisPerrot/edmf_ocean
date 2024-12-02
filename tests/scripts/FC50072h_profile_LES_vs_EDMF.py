@@ -108,27 +108,27 @@ scm_params = {
     'entr_scheme': 'R10',
     'output_filename': 'run',
     'write_netcdf': True,
-    # 'Cent': 0.99,
-    # 'Cdet': 1.99,       # 'Cdet': 2.5,
-    # 'wp_a': 0.8,
-    # 'wp_b': 0.8,      # 'wp_b': 1.
-    # 'wp_bp': 0.003*250,     #      0.002,
-    # 'up_c': 0.5,
-    # 'vp_c': 0.5,
-    # 'bc_ap': 0.2,    #0.3,
-    # 'delta_bkg': 0.0045*250,   # 0.006,
-    # 'wp0' : -1e-02*0.,
-# }
-     'Cent'      : 0.8985,
-     'Cdet'      :  1.827,
-     'wp_a'      : 0.9458,
-     'wp_b'      : 0.9488,
-     'wp_bp'     : 1.951,
-     'up_c'      : 0.2711, #we take up_c=vp_c
-     'bc_ap'     : 0.3673,
-     'delta_bkg' : 2.253,
-     'wp0'       : -7.874e-08,
+    'Cent': 0.99,
+    'Cdet': 1.99,       # 'Cdet': 2.5,
+    'wp_a': 1.,
+    'wp_b': 1.,      # 'wp_b': 1.
+    'wp_bp': 0.003*250,     #      0.002,
+    'up_c': 0.5,
+    'vp_c': 0.5,
+    'bc_ap': 0.2,    #0.3,
+    'delta_bkg': 0.007*250,   # 0.006,
+    'wp0' : -1e-02,
 }
+#      'Cent'      : 0.8985,
+#      'Cdet'      :  1.827,
+#      'wp_a'      : 0.9458,
+#      'wp_b'      : 0.9488,
+#      'wp_bp'     : 1.951,
+#      'up_c'      : 0.2711, #we take up_c=vp_c
+#      'bc_ap'     : 0.3673,
+#      'delta_bkg' : 2.253,
+#      'wp0'       : -7.874e-08,
+# }
 
 
 # Define parameters specific to each run (overwrite common parameters):

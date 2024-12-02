@@ -168,7 +168,8 @@ case_settings={
     'mld_ini_temp': -0., #initial MLD in temperature                
     'N0': 1.9620001275490499e-6,
     'SaltCst': 32.6,      # constant initial profile of Salt
-    'cpoce': 3985.,
+    # 'cpoce': 3985.,
+    'cpoce':3800,
     'lin_eos': True,
     'rho0': 1027.,
     'alpha': 2e-4,      
