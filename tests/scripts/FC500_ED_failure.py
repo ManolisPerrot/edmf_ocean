@@ -116,48 +116,21 @@ marker_les=''
 width_les = {case:2 for case in cases}
 linestyle_les=':'
 ################################ Ploting ##################################
-fig, axes = plt.subplots(nrows=2, ncols=3, sharex=False,
+fig, axes = plt.subplots(nrows=1, ncols=2, sharex=False,
                         sharey=True, constrained_layout=True)
 
 ax_index=-1
 
-
-# ===============================================================
+#===============================================================
 ax_index+=1
 ax = axes.flat[ax_index]
 ax.set_ylabel(r'$z / h $')
-ax.tick_params(axis='x', which='both', bottom=False, top=False, labelbottom=False)
-
-# ===============================================================
-ax_index+=1
-ax = axes.flat[ax_index]
-ax.set_xlabel(r'$ (\overline{b}-\overline{b}_{\mathrm{min}}) / b_*$')
-ax.set_ylabel(r'$z / h $')
-
-for case in cases:  
-    ax.plot(-(B_les[case][instant,:] - B_les[case][instant,:].max())/bstar ,z_r_les[case]/mld[case][instant])
-    ax.plot(-(B_les[case][0,:] - B_les[case][instant,:].max())/bstar ,z_r_les[case]/mld[case][instant],'k--', alpha=0.5)   
-
-
-ax.set_xlim((-5,50))
-# ===============================================================
-ax_index+=1
-ax = axes.flat[ax_index]
 
 ax.set_xlabel(r'$\overline{w^\prime b^\prime}/B_0$')
 
 for case in cases:
     ax.plot(WB[case][instant,:]/B0, z_r_les[case]/mld[case][instant])
     
-# ===============================================================
-# ===============================================================
-ax_index+=1
-ax = axes.flat[ax_index]
-ax.set_xlabel(r'$\overline{b^{\prime 2}}/b_*^2$')
-
-for case in cases:
-    ax.plot(B2_les[case][instant,:]/bstar**2, z_r_les[case]/mld[case][instant])
-
 # ===============================================================
 # ===============================================================
 ax_index+=1
@@ -172,24 +145,10 @@ for case in cases:
     ax.plot(50*dzB/N2, z_r_les[case][1:]/mld[case][instant],color='tab:blue',alpha=0.5,label=r'$50\times \partial_z \overline{b}/N_0^2$')
 ax.set_xlim((-2,2))
 ax.legend()
-# ===============================================================
-ax_index+=1
-ax = axes.flat[ax_index]
-ax.set_xlabel(r'$\overline{w^{\prime 2}}/w_*^2$')
-
-for case in cases:
-    ax.plot(W2_les[case][instant,:]/wstar**2, z_r_les[case]/mld[case][instant])
-
-# ===============================================================
-# ===============================================================
-# ax_index+=1
-# ax = axes.flat[ax_index]
-# ax.remove()
-# ===============================================================
-# ===============================================================
+#===============================================================
 
 # adding subplot labels
-subplot_label = ['',r'\rm{(a)}', r'\rm{(b)}', r'\rm{(c)}',
+subplot_label = [r'\rm{(a)}', r'\rm{(b)}', r'\rm{(c)}',
                 r'\rm{(d)}', r'\rm{(e)}', r'\rm{(f)}',r'\rm{(g)}',r'\rm{(h)}',r'\rm{(i)}',r'\rm{(j)}',r'\rm{(k)}',r'\rm{(l)}']
 
 for i,ax in enumerate(axes.flat):
@@ -198,12 +157,12 @@ for i,ax in enumerate(axes.flat):
     ax.text(0.96, 0.12, subplot_label[i], transform=ax.transAxes, bbox=dict(facecolor='1.', edgecolor='none'), fontweight='bold', va='top', ha='right')
     # ax.grid()
     ax.axvline(0,   color='tab:grey', lw=0.5)
-    ax.axhline(0.82, color='tab:grey', lw=0.5)
+    ax.axhline(0.82, color='tab:grey', linestyle='--',lw=0.5)
     # ax.axhline(1,   color='tab:grey', lw=0.5)
-    ax.axhline(1.15,color='tab:grey', lw=0.5)
-    ax.axhline(0.1, color='tab:grey', lw=0.5)
-    ax.axhline(0.37, color='tab:grey', lw=0.5)
+    # ax.axhline(1.15,color='tab:grey', lw=0.5)
+    # ax.axhline(0.1, color='tab:grey', lw=0.5)
+    ax.axhline(0.37, color='tab:grey', linestyle='--',lw=0.5)
     ax.set_ylim((0,1.3))
-plt.savefig('../figures/FC500_buoyancy.png', dpi=600, bbox_inches='tight')
+plt.savefig('../figures/FC500_ED_failure.png', dpi=600, bbox_inches='tight')
 
 # plt.show()
