@@ -45,11 +45,9 @@ L0 = (B0/N0**3)**(1/2)
 saving_path = '../figures/'
 
 
-# path = '../data/'+case+'/'
-# file = 'W005_C500_NO_COR_object_diags_Cw_m1_all.nc'
+path = '../data/'+case+'/'
+file = 'W005_C500_NO_COR_object_diags_Cw_m1_all.nc'
 
-path = '/home/manolis/eftp.ifremer.fr/scratch/W005_C500_NO_COR/'
-file='W005_C500_NO_COR_object_diags_Csv_m1_72h.nc'
 ds = xr.open_dataset(path+file)
 
 time = ds.time

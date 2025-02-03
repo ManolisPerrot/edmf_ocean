@@ -21,7 +21,7 @@ mpl.rcParams['axes.prop_cycle'] = mpl.cycler(
 
 # CHOOSE CASE NAME
 
-case = 'W005_C500_NO_COR'
+case = 'FC500'
 
 
 # Parameters of the case for w scaling, ATTENTION if you change the case
@@ -42,6 +42,7 @@ WT0 = Q0/(rho0 * cp)
 
 saving_path = '../figures/'
 
+#saving_name = case+'_object_diags_Cw_m1_72h_copy'
 saving_name = case+'_object_diags_Cw_m1_all'
 
 path = '../data/'+case+'/'
@@ -49,8 +50,6 @@ path = '../data/'+case+'/'
 
 file = saving_name+'.nc'
 
-path = '/home/manolis/eftp.ifremer.fr/scratch/W005_C500_NO_COR/'
-file='W005_C500_NO_COR_object_diags_Cw_m2_72h.nc'
 
 ds = xr.open_dataset(path+file)
 
@@ -110,11 +109,12 @@ for i in range(len(var_names)-1):
 # ----------------------
 i = 2  # 'FRAC'
 mask = 'DW'
-axs.flat[i].plot(variables[mask][i][instant, :], zadim,
+axs.flat[i].plot(variables[mask][i][instant, 70:], zadim[70:],
                  linestyle='-', linewidth=linewidth[mask], color='#0db4c3')
 axs.flat[i].set_title(var_titles[i])
 axs.flat[i].grid(False)
 axs.flat[i].set_xlabel(units[i])
+
 
 # -----------------------
 i=1 # 'WT'
@@ -217,7 +217,7 @@ for ax in axs.flat:
   
 
 
-plt.savefig(saving_path+'LES_diags_W005_C500'+'_Cwm2', bbox_inches='tight', dpi=600)
-print('fig saved at '+saving_path+'LES_diags_W005_C500')
+plt.savefig(saving_path+'LES_diags_FC500', bbox_inches='tight', dpi=600)
+print('fig saved at'+saving_path+'LES_diags_FC500')
 
 #plt.show()

@@ -1,0 +1,1350 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+      <meta name="description" content="Documentation for SCM-EDMF ocean">
+    <meta name="author" content="M. Perrot / F. Lemarié" >
+    <link rel="icon" href="../favicon.png">
+
+    <title>scm_tke &ndash; SCM-EDMF ocean</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+    <link href="../css/pygments.css" rel="stylesheet">
+    <link href="../css/font-awesome.min.css" rel="stylesheet">
+    <link href="../css/local.css" rel="stylesheet">
+      <link  href="../tipuesearch/tipuesearch.css" rel="stylesheet">
+
+    <script src="https://code.jquery.com/jquery-3.7.0.slim.min.js" integrity="sha256-tG5mcZUtJsZvyKAxYLVXrmjKBVLd6VpVccqz/r4ypFE=" crossorigin="anonymous"></script>
+  </head>
+
+  <body>
+
+    <!-- Fixed navbar -->
+    <div class="container-fluid mb-sm-4 mb-xl-2">
+      <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+        <div class="container">
+          <a class="navbar-brand" href="../index.html">SCM-EDMF ocean </a>
+          <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbar"
+                  aria-expanded="false" aria-controls="navbar" aria-label="Toggle navigation">
+                  <span class="navbar-toggler-icon">
+          </button>
+
+          <div id="navbar" class="navbar-collapse collapse">
+            <ul class="navbar-nav">
+                  <li class="nav-item">
+                    <a class="nav-link" href="../lists/files.html">Source Files</a>
+                  </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="../lists/modules.html">Modules</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="../lists/procedures.html">Procedures</a>
+                </li>
+            </ul>
+              <div class="d-flex align-items-end flex-grow-1">
+                <form action="../search.html" role="search" class="ms-auto">
+                  <input type="text" class="form-control" aria-label="Search" placeholder="Search" name="q" id="tipue_search_input" autocomplete="off" required>
+                </form>
+              </div>
+          </div><!--/.nav-collapse -->
+        </div>
+      </nav>
+    </div>
+
+    <div class="container">
+  <div class="row">
+    <h1>scm_tke
+      <small>Module</small>
+      
+    </h1>
+      <div class="container p-2 mb-4 bg-light border rounded-3">
+    <div class="row align-items-center justify-content-between" id="info-bar">
+      <div class="col">
+        <ul class="list-inline" style="margin-bottom:0px;display:inline">
+
+            <li class="list-inline-item" id="statements"><i class="fa fa-list-ol"></i>
+              <a data-bs-toggle="tooltip"
+                 data-bs-placement="bottom" data-html="true"
+                 title="19.3% of total for modules and submodules.">250 statements</a>
+            </li>
+
+            <li class="list-inline-item" id="source-file">
+              <i class="fa fa-code"></i>
+              <a href="../src/scm_tke.f90"> Source File</a>
+            </li>
+        </ul>
+      </div>
+      <div class="col">
+        <nav aria-label="breadcrumb">
+          <ol class="breadcrumb justify-content-end mb-0">
+                <li class="breadcrumb-item"><a href='../sourcefile/scm_tke.f90.html'>scm_tke.f90</a></li>
+            <li class="breadcrumb-item active" aria-current="page">scm_tke</li>
+          </ol>
+        </nav>
+      </div>
+    </div>
+  </div>
+  <script>
+    $(function () {
+    $('[data-bs-toggle="tooltip"]').tooltip()
+    })
+  </script>
+
+  </div>
+
+  <div class="row">
+    <div class="col-md-3">
+        <div id="sidebar">
+      <h3>Contents</h3>
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+      <div class="card mb-4">
+      <a data-bs-toggle="collapse" href="#subs-0"
+         aria-expanded="false" aria-controls="subs-0">
+         <h4 class="card-header bg-primary text-white">Subroutines</h4>
+      </a>
+      <div id="subs-0" class="collapse">
+        <div class="list-group list-group-flush">
+            <a class="list-group-item" href="../module/scm_tke.html#proc-compute_tke_bdy">compute_tke_bdy</a>
+            <a class="list-group-item" href="../module/scm_tke.html#proc-compute_shear">compute_shear</a>
+            <a class="list-group-item" href="../module/scm_tke.html#proc-advance_tke">advance_tke</a>
+            <a class="list-group-item" href="../module/scm_tke.html#proc-compute_mxl~2">compute_mxl</a>
+            <a class="list-group-item" href="../module/scm_tke.html#proc-compute_ed">compute_ED</a>
+            <a class="list-group-item" href="../module/scm_tke.html#proc-tridiag_solve_tke">tridiag_solve_tke</a>
+        </div>
+      </div>
+    </div>
+
+  
+  
+  
+  
+  
+  
+  
+
+
+  </div>
+
+    </div>
+
+    <div class="col-md-9" id='text'>
+      <p>============================================================================<br />
+                       ***  MODULE  scm_tke  ***                            <br />
+ Eddy-diffusion closure: TKE scheme with diagnostic mixing lengths
+                         adapted from NEMO TKE turbulent closure model      <br />
+============================================================================<br />
+----------------------------------------------------------------------------<br />
+   compute_tke_bdy   : top and bottom boundary conditions for TKE           <br />
+   compute_shear     : compute shear production term                        <br />
+   advance_tke       : tke time stepping: advance tke at next time step     <br />
+   compute_mxl       : compute mixing length scale                          <br />
+   compute_ED        : compute avm and avt                                  <br />
+   tridiag_solve_tke : tridiagonal solver for TKE equation                  <br />
+----------------------------------------------------------------------------<br /></p>
+      
+      
+      <br>
+
+
+
+
+
+
+
+
+        <section>
+          <h2>Subroutines</h2>
+              <div class="card">
+    <div class="card-header codesum"><span class="anchor" id="proc-compute_tke_bdy"></span><h3>public  subroutine <a href='../proc/compute_tke_bdy.html'>compute_tke_bdy</a>(taux, tauy, tke_const, tke_sfc, tke_bot, flux_sfc)  
+</h3></div>
+    <div class="card-body">
+          
+  <p>==========================================================================<br />
+                  ***  ROUTINE compute_tke_bdy  ***                       <br />
+ ** Purposes : compute top and bottom boundary conditions for TKE equation<br />
+==========================================================================<br />
+ free convection case ( <script type="math/tex"> {\rm tke\_sfc\_dirichlet = True}  </script> ) :
+ <script type="math/tex"> k_{\rm sfc} = 1.5 \times 10^{-3}\;{\rm m}^2\;{\rm s}^{-2} </script><br />
+ wind_cooling case ( <script type="math/tex"> {\rm tke\_sfc\_dirichlet = False}  </script> ) : <script type="math/tex">  F_{\rm sfc}^k = \left.  K_e \partial_z k \right|_{\rm sfc} = 0\;{\rm m}^3\;{\rm s}^{-3}    </script> <br />
+ bottom boundary condition : <script type="math/tex"> k_{\rm bot} = k_{\rm min}  </script>
+</p>
+
+  <h4>Arguments</h4>
+      <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-taux"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>taux</strong></td>
+            <td>
+<p>zonal surface stress      [m2/s2]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-tauy"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>tauy</strong></td>
+            <td>
+<p>meridional surface stress [m2/s2]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-tke_const"></span>
+              integer,
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>tke_const</strong></td>
+            <td>
+<p>choice of TKE constants</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-tke_sfc"></span>
+              real(kind=8),
+            </td>
+<td>intent(out)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>tke_sfc</strong></td>
+            <td>
+<p>surface value for Dirichlet condition [m2/s2]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-tke_bot"></span>
+              real(kind=8),
+            </td>
+<td>intent(out)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>tke_bot</strong></td>
+            <td>
+<p>bottom value for Dirichlet condition [m2/s2]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-flux_sfc"></span>
+              real(kind=8),
+            </td>
+<td>intent(out)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>flux_sfc</strong></td>
+            <td>
+<p>surface TKE flux for Neumann condition [m3/s3]</p>
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+    </div>
+  </div>
+
+              <div class="card">
+    <div class="card-header codesum"><span class="anchor" id="proc-compute_shear"></span><h3>public  subroutine <a href='../proc/compute_shear.html'>compute_shear</a>(u_n, v_n, u_np1, v_np1, Akv, zr, N, shear2)  
+</h3></div>
+    <div class="card-body">
+          
+  <p>==========================================================================<br />
+                  ***  ROUTINE compute_shear  ***                         <br />
+ ** Purposes : compute shear production term for TKE equation             <br />
+==========================================================================<br />
+ Shear production term using discretization from Burchard (2002) <br />
+ <script type="math/tex"> {\rm Sh}_{k+1/2} = \frac{ (K_m)_{k+1/2} }{ \Delta z_{k+1/2}^2 } ( u_{k+1}^n - u_{k}^n ) ( u_{k+1}^{n+1/2} - u_{k}^{n+1/2} )  </script>
+</p>
+
+  <h4>Arguments</h4>
+      <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-u_n~3"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>u_n</strong>(1:N)</td>
+            <td>
+<p>velocity components at time n    [m/s]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-v_n~3"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>v_n</strong>(1:N)</td>
+            <td>
+<p>velocity components at time n    [m/s]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-u_np1~5"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>u_np1</strong>(1:N)</td>
+            <td>
+<p>velocity components at time n+1  [m/s]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-v_np1~5"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>v_np1</strong>(1:N)</td>
+            <td>
+<p>velocity components at time n+1  [m/s]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-akv~3"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>Akv</strong>(0:N)</td>
+            <td>
+<p>eddy-viscosity [m2/s]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-zr~8"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>zr</strong>(1:N)</td>
+            <td>
+<p>depth at cell centers [m]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-n~17"></span>
+              integer,
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>N</strong></td>
+            <td>
+<p>number of vertical levels</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-shear2"></span>
+              real(kind=8),
+            </td>
+<td>intent(out)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>shear2</strong>(0:N)</td>
+            <td>
+<p>shear production term [m2/s3]</p>
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+    </div>
+  </div>
+
+              <div class="card">
+    <div class="card-header codesum"><span class="anchor" id="proc-advance_tke"></span><h3>public  subroutine <a href='../proc/advance_tke.html'>advance_tke</a>(tke_n, lup, ldwn, Akv, Akt, Hz, zr, bvf, buoyMF, shear2, shear2MF, trpl_corrMF, wtke, dt, tke_sfc, tke_bot, flux_sfc, dirichlet_bdy_sfc, tke_const, N, tke_np1, pdlr, eps, residual)  
+</h3></div>
+    <div class="card-body">
+          
+  <p>==========================================================================<br />
+                  ***  ROUTINE advance_tke  ***                           <br />
+ ** Purposes : tke time stepping, advance tke from time step n to n+1     <br />
+==========================================================================<br />
+ Dissipative mixing length : <script type="math/tex"> (l_\epsilon)_{k+1/2} = \sqrt{ l_{\rm up} l_{\rm dwn} }   </script>  <br />
+ Inverse Prandtl number function of Richardson number <br /></p><a href="../proc/advance_tke.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+
+  <h4>Arguments</h4>
+      <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-tke_n"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>tke_n</strong>(0:N)</td>
+            <td>
+<p>TKE at time n    [m2/s2]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-lup"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>lup</strong>(0:N)</td>
+            <td>
+<p>upward mixing length [m]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-ldwn"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>ldwn</strong>(0:N)</td>
+            <td>
+<p>downward mixing length [m]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-akv~4"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>Akv</strong>(0:N)</td>
+            <td>
+<p>eddy-viscosity [m2/s]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-akt~3"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>Akt</strong>(0:N)</td>
+            <td>
+<p>eddy-diffusion [m2/s]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-hz~15"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>Hz</strong>(1:N)</td>
+            <td>
+<p>layer thickness [m]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-zr~9"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>zr</strong>(1:N)</td>
+            <td>
+<p>depth at cell centers [m]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-bvf~6"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>bvf</strong>(0:N)</td>
+            <td>
+<p>Brunt Vaisala frequency [s-2]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-buoymf"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>buoyMF</strong>(0:N)</td>
+            <td>
+<p>TKE buoyancy forcing term associated with mass flux [m2/s3]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-shear2~2"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>shear2</strong>(0:N)</td>
+            <td>
+<p>shear tke production term [m2/s3]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-shear2mf"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>shear2MF</strong>(0:N)</td>
+            <td>
+<p>TKE shear forcing term associated with mass flux [m2/s3]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-trpl_corrmf"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>trpl_corrMF</strong>(0:N)</td>
+            <td>
+<p>Contribution of mass flux to d(w'e)/dz term [m2/s3]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-wtke~2"></span>
+              real(kind=8),
+            </td>
+<td>intent(inout)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>wtke</strong>(1:N)</td>
+            <td>
+<p>Diagnostics : w'e term  [m3/s3]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-dt~6"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>dt</strong></td>
+            <td>
+<p>time-step [s]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-tke_sfc~2"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>tke_sfc</strong></td>
+            <td>
+<p>surface boundary condition for TKE [m2/s2]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-tke_bot~2"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>tke_bot</strong></td>
+            <td>
+<p>bottom boundary condition for TKE [m2/s2]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-flux_sfc~2"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>flux_sfc</strong></td>
+            <td>
+<p>surface TKE flux [m3/s3]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-dirichlet_bdy_sfc"></span>
+              logical,
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>dirichlet_bdy_sfc</strong></td>
+            <td>
+<p>Nature of the TKE surface boundary condition (T:dirichlet,F:Neumann)</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-tke_const~2"></span>
+              integer,
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>tke_const</strong></td>
+            <td>
+<p>choice of TKE constants</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-n~18"></span>
+              integer,
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>N</strong></td>
+            <td>
+<p>number of vertical levels</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-tke_np1"></span>
+              real(kind=8),
+            </td>
+<td>intent(out)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>tke_np1</strong>(0:N)</td>
+            <td>
+<p>TKE at time n+1    [m2/s2]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-pdlr"></span>
+              real(kind=8),
+            </td>
+<td>intent(out)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>pdlr</strong>(0:N)</td>
+            <td>
+<p>inverse of turbulent Prandtl number</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-eps~3"></span>
+              real(kind=8),
+            </td>
+<td>intent(out)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>eps</strong>(0:N)</td>
+            <td>
+<p>TKE dissipation term [m2/s3]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-residual"></span>
+              real(kind=8),
+            </td>
+<td>intent(out)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>residual</strong></td>
+            <td>
+<p>Diagnostics : TKE spuriously added to guarantee that tke &gt;= tke_min [m3/s3]</p>
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+    </div>
+  </div>
+
+              <div class="card">
+    <div class="card-header codesum"><span class="anchor" id="proc-compute_mxl~2"></span><h3>public  subroutine <a href='../proc/compute_mxl~2.html'>compute_mxl</a>(tke, bvf, Hz, taux, tauy, N, lup, ldwn)  
+</h3></div>
+    <div class="card-body">
+          
+  <p>============================================================================<br />
+                  ***  ROUTINE compute_mxl  ***                             <br />
+ ** Purposes : compute mixing length scales                                 <br />
+============================================================================<br />
+ <script type="math/tex"> u_{\star}^2 = \sqrt{\tau_x^2 + \tau_y^2} </script><br /></p><a href="../proc/compute_mxl~2.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+
+  <h4>Arguments</h4>
+      <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-tke~4"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>tke</strong>(0:N)</td>
+            <td>
+<p>turbulent kinetic energy [m2/s2]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-bvf~7"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>bvf</strong>(0:N)</td>
+            <td>
+<p>Brunt Vaisala frequency [s-2]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-hz~16"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>Hz</strong>(1:N)</td>
+            <td>
+<p>layer thickness [m]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-taux~2"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>taux</strong></td>
+            <td>
+<p>surface stress [m2/s2]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-tauy~2"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>tauy</strong></td>
+            <td>
+<p>surface stress [m2/s2]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-n~19"></span>
+              integer,
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>N</strong></td>
+            <td>
+<p>number of vertical levels</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-lup~2"></span>
+              real(kind=8),
+            </td>
+<td>intent(out)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>lup</strong>(0:N)</td>
+            <td>
+<p>upward mixing length [m]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-ldwn~2"></span>
+              real(kind=8),
+            </td>
+<td>intent(out)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>ldwn</strong>(0:N)</td>
+            <td>
+<p>downward mixing length [m]</p>
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+    </div>
+  </div>
+
+              <div class="card">
+    <div class="card-header codesum"><span class="anchor" id="proc-compute_ed"></span><h3>public  subroutine <a href='../proc/compute_ed.html'>compute_ED</a>(tke, lup, ldwn, pdlr, extrap_sfc, tke_const, N, Akv, Akt)  
+</h3></div>
+    <div class="card-body">
+          
+  <p>============================================================================<br />
+                  ***  ROUTINE compute_ED  ***                              <br />
+ ** Purposes : compute the vertical eddy viscosity and diffusivity          <br />
+============================================================================<br />
+ Compute "master" mixing length <script type="math/tex"> (l_m)_{k+1/2} = \min( (l_{\rm up})_{k+1/2}, (l_{\rm dwn})_{k+1/2} ) </script><br />
+ Compute eddy-viscosity <script type="math/tex"> (K_m)_{k+1/2} = C_m l_m \sqrt{k_{k+1/2}^{n+1}}  </script><br />
+ Compute eddy-diffusivity <script type="math/tex"> (K_s)_{k+1/2} = ({\rm Pr}_t)^{-1}_{k+1/2}   (K_m)_{k+1/2} </script><br />
+ if <script type="math/tex"> {\rm extrap\_sfc = True} \qquad \rightarrow \qquad (K_m)_{N+1/2} = \frac{3}{2} (K_m)_{N-1/2} - \frac{1}{2} (K_m)_{N-3/2} </script>
+</p>
+
+  <h4>Arguments</h4>
+      <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-tke~5"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>tke</strong>(0:N)</td>
+            <td>
+<p>turbulent kinetic energy [m2/s2]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-lup~3"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>lup</strong>(0:N)</td>
+            <td>
+<p>upward mixing length [m]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-ldwn~3"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>ldwn</strong>(0:N)</td>
+            <td>
+<p>downward mixing length [m]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-pdlr~2"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>pdlr</strong>(0:N)</td>
+            <td>
+<p>inverse turbulent Prandtl number</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-extrap_sfc"></span>
+              logical,
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>extrap_sfc</strong></td>
+            <td>
+<p>(T) extrapolate eddy coefficients to the surface</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-tke_const~3"></span>
+              integer,
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>tke_const</strong></td>
+            <td>
+<p>choice of TKE constants</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-n~20"></span>
+              integer,
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>N</strong></td>
+            <td>
+<p>number of vertical levels</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-akv~5"></span>
+              real(kind=8),
+            </td>
+<td>intent(out)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>Akv</strong>(0:N)</td>
+            <td>
+<p>eddy-viscosity [m2/s]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-akt~4"></span>
+              real(kind=8),
+            </td>
+<td>intent(out)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>Akt</strong>(0:N)</td>
+            <td>
+<p>eddy-diffusivity [m2/s]</p>
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+    </div>
+  </div>
+
+              <div class="card">
+    <div class="card-header codesum"><span class="anchor" id="proc-tridiag_solve_tke"></span><h3>public  subroutine <a href='../proc/tridiag_solve_tke.html'>tridiag_solve_tke</a>(N, Hz, Ak, zr, eps, f, dt, dirichlet_bdy_sfc)  
+</h3></div>
+    <div class="card-body">
+          
+  <p>============================================================================<br />
+                  ***  ROUTINE tridiag_solve_tke  ***                       <br />
+ ** Purposes : solve the tridiagonal problem associated with the implicit
+                                         in time treatment of TKE equation  <br />
+============================================================================<br /></p>
+
+  <h4>Arguments</h4>
+      <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-n~21"></span>
+              integer,
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>N</strong></td>
+            <td>
+<p>number of vertical levels</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-hz~17"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>Hz</strong>(1:N)</td>
+            <td>
+<p>layer thickness [m]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-ak~2"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>Ak</strong>(0:N)</td>
+            <td>
+<p>eddy-diffusivity for TKE [m2/s]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-zr~10"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>zr</strong>(1:N)</td>
+            <td>
+<p>depth at cell centers [m]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-eps~4"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>eps</strong>(0:N)</td>
+            <td>
+<p>TKE dissipation term divided by TKE [s-1]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-f~2"></span>
+              real(kind=8),
+            </td>
+<td>intent(inout)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>f</strong>(0:N)</td>
+            <td>
+<p>(in) rhs for tridiagonal problem (out) solution of the tridiagonal problem</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-dt~7"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>dt</strong></td>
+            <td>
+<p>time step [s]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-dirichlet_bdy_sfc~2"></span>
+              logical,
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>dirichlet_bdy_sfc</strong></td>
+            <td>
+<p>nature of the TKE boundary condition</p>
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+    </div>
+  </div>
+
+        </section>
+        <br>
+
+
+
+    </div>
+  </div>
+
+      <hr>
+    </div> <!-- /container -->
+    <footer>
+      <div class="container">
+        <div class="row justify-content-between">
+          <div class="col"><p>SCM-EDMF ocean was developed by M. Perrot / F. Lemarié<br>&copy; 2024 
+</p>
+          </div>
+          <div class="col">
+            <p class="text-end">
+              Documentation generated by
+              <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
+            </p>
+          </div>
+        </div>
+        <br>
+      </div> <!-- /container -->
+    </footer>
+
+    <!-- Bootstrap core JavaScript -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>    
+
+    <!-- MathJax JavaScript
+             ================================================== -->
+             <!-- Placed at the end of the document so the pages load faster -->
+        <script type="text/x-mathjax-config">
+          MathJax.Hub.Config({
+          TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } },
+          jax: ['input/TeX','input/MathML','output/HTML-CSS'],
+          extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']
+          });
+        </script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+          <script src="../tipuesearch/tipuesearch_content.js"></script>
+          <script src="../tipuesearch/tipuesearch_set.js"></script>
+          <script src="../tipuesearch/tipuesearch.js"></script>
+
+  </body>
+</html>

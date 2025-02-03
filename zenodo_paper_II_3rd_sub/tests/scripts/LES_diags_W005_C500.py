@@ -42,15 +42,15 @@ WT0 = Q0/(rho0 * cp)
 
 saving_path = '../figures/'
 
-saving_name = case+'_object_diags_Cw_m1_all'
+# saving_name = case+'_object_diags_Cw_m1_all'
+saving_name = case+'_object_diags_Cw_m1_72h'
+# saving_name = case+'_object_diags_Cw_m2_72h'
 
 path = '../data/'+case+'/'
 
 
 file = saving_name+'.nc'
 
-path = '/home/manolis/eftp.ifremer.fr/scratch/W005_C500_NO_COR/'
-file='W005_C500_NO_COR_object_diags_Cw_m2_72h.nc'
 
 ds = xr.open_dataset(path+file)
 
@@ -166,10 +166,29 @@ kp_conv = ds['DW_inter_TKE']/ap
 k = ds['TOT_intra_TKE']
 mf = ds['DW_FRAC'] * ds['DW_WT']
 factor2 = (1-ds['DW_FRAC']**2+ds['DW_FRAC'])/(1-ds['DW_FRAC'])**2
+up = ds['DW_UT']
+ubar = ds['TOT_UT']
+wu_p = ds['DW_intra_WU']
+ww_p = ds['DW_intra_WW']
 
-
+ue = ds['UP_UT']
+we = ds['UP_WT']
+ubar = ds['TOT_UT']
+wu_e = ds['UP_intra_WU']
+ww_e = ds['UP_intra_WW']
+ae = ds['UP_FRAC']
 
 # Negkected terms:
+ax.plot( (ap*(up-ubar)*wu_p)[instant], zadim, color='r',
+        linestyle='--', linewidth=2.5, alpha=0.5, label=r'ap (up - u) wup')
+ax.plot( (ap*(wp)*ww_p)[instant], zadim, color='blue',
+        linestyle='--', linewidth=2.5, alpha=0.5, label=r'ap (wp - w) wwp')
+
+ax.plot( (ae*(ue-ubar)*wu_e)[instant], zadim, color='r',
+        linestyle='-', linewidth=2.5, alpha=0.5, label=r'ae (ue - u) wue')
+ax.plot( (ae*(we)*ww_e)[instant], zadim, color='blue',
+        linestyle='--', linewidth=2.5, alpha=0.5, label=r'ae (we - w) wwe')
+
 ax.plot((ds['DW_WKE2'] + ds['UP_WKE2'])[instant], zadim, color='k',
         linestyle='--', linewidth=2.5, alpha=0.5, label=r'${\rm II}_e + {\rm II}_p $')
 ax.plot((ds['DW_WKE1'])[instant], zadim, color='k',
@@ -217,7 +236,7 @@ for ax in axs.flat:
   
 
 
-plt.savefig(saving_path+'LES_diags_W005_C500'+'_Cwm2', bbox_inches='tight', dpi=600)
-print('fig saved at '+saving_path+'LES_diags_W005_C500')
+# plt.savefig(saving_path+'LES_diags_W005_C500', bbox_inches='tight', dpi=600)
+# print('fig saved at'+saving_path+'LES_diags_W005_C500')
 
-#plt.show()
+plt.show()

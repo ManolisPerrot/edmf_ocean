@@ -11,9 +11,7 @@ import xarray as xr
 # run_name = 'W05_C500_NO_COR'
 # run_name = 'test'
 run_name = 'W005_C500_NO_COR'
-# sampling = 'Csv_m1'
-# sampling = 'Csv_m2'
-# sampling = 'Csv_m05'
+#sampling = 'Csv_m1'
 # sampling = 'w_sieb_p01'
 # sampling = 'Cw_m1'
 sampling = 'Cw_m2'
@@ -275,34 +273,6 @@ for file in files:
         # Compute sampling masks FROM TRACER: Couvreux 2010, Pergaud 2009, Berg,Stull 2002 on SV
 
         m = m
-        masks['DW'] = (((variables['WT'] - MEAN_VARS['TOT']['WT']) < 0) & ((variables['SVT001'] - MEAN_VARS['TOT']
-                       ['SVT001']) > m*np.maximum(sigmaSVmin, np.sqrt(intra_cov['TOT']['SV2']))))  # for down drafts
-        masks['UP'] = ~masks['DW']
-    
-    if sampling == 'Csv_m2':
-        # computation of minimum stdev from Couvreux, obtained as 5% of vertical mean stdev
-        sigmaSVmin = np.abs(intra_cov['TOT']['SV2'])
-        for k in range(z_r.size):
-            sigmaSVmin[:, k] = percent/(- z_r[k]) * (np.sqrt(intra_cov['TOT']['SV2'].isel(
-                level=[i for i in range(k, z_r.size)]))).integrate('level')
-
-        # Compute sampling masks FROM TRACER: Couvreux 2010, Pergaud 2009, Berg,Stull 2002 on SV
-
-        m = 2
-        masks['DW'] = (((variables['WT'] - MEAN_VARS['TOT']['WT']) < 0) & ((variables['SVT001'] - MEAN_VARS['TOT']
-                       ['SVT001']) > m*np.maximum(sigmaSVmin, np.sqrt(intra_cov['TOT']['SV2']))))  # for down drafts
-        masks['UP'] = ~masks['DW']
-
-    if sampling == 'Csv_m05':
-        # computation of minimum stdev from Couvreux, obtained as 5% of vertical mean stdev
-        sigmaSVmin = np.abs(intra_cov['TOT']['SV2'])
-        for k in range(z_r.size):
-            sigmaSVmin[:, k] = percent/(- z_r[k]) * (np.sqrt(intra_cov['TOT']['SV2'].isel(
-                level=[i for i in range(k, z_r.size)]))).integrate('level')
-
-        # Compute sampling masks FROM TRACER: Couvreux 2010, Pergaud 2009, Berg,Stull 2002 on SV
-
-        m = 0.5
         masks['DW'] = (((variables['WT'] - MEAN_VARS['TOT']['WT']) < 0) & ((variables['SVT001'] - MEAN_VARS['TOT']
                        ['SVT001']) > m*np.maximum(sigmaSVmin, np.sqrt(intra_cov['TOT']['SV2']))))  # for down drafts
         masks['UP'] = ~masks['DW']

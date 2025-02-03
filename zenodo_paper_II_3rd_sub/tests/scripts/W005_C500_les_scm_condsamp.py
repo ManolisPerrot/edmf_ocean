@@ -1,0 +1,309 @@
+import xarray as xr
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import netCDF4 as nc
+import matplotlib as mpl
+import matplotlib.ticker as ticker
+from matplotlib.ticker import AutoLocator
+from scipy.signal import savgol_filter
+import subprocess
+
+# plt.rcParams['font.family'] = 'serif'
+plt.rcParams['text.usetex'] = True
+# plt.rcParams.update({'font.size': 18})
+plt.rcParams.update({'figure.facecolor': 'white'})
+plt.rcParams.update({'savefig.facecolor': 'white'})
+plt.rcParams["axes.formatter.limits"] = [-3,3]
+# colors
+blue, orange, magenta, grey, green = '#0db4c3', '#eea021', '#ff0364', '#606172', '#3fb532'
+mpl.rcParams['axes.prop_cycle'] = mpl.cycler(
+    color=['#0db4c3', '#eea021', '#ff0364', '#606172', '#3fb532'])
+
+# rerun_scm=True
+rerun_scm=False
+if rerun_scm:
+    subprocess.run(["python", "W005_C500_NO_COR72h_profile_LES_vs_EDMF.py"])
+
+
+# CHOOSE CASE NAME
+
+# Parameters of the case for w scaling, ATTENTION if you change the case
+
+Q0 = 500
+alpha = 2.0 * 10 ** (-4)
+g = 9.81
+rho0 = 1024.
+cp = 3900.
+
+deltaT0 = 1/1000
+T0 = 2 + 273.16  # surface init temp
+f0 = 2*(1/(24*3600))*np.sin(2*np.pi/360 * 45)
+
+B0 = g * alpha * Q0 / (rho0 * cp)
+WT0 = Q0/(rho0 * cp)
+
+cases = ['W005_C500_NO_COR']
+# models = [r'EDMF-TKE-inconsistent',  r'EDMF-Energy', r'EDMF-P09-consistent',r'EDMF-P09-inconsistent']
+models = [r'EDMF-TKE-inconsistent',r'EDMF-Energy',r'HanBretherton',r'no_up']
+# cases = ['WANG1_FR_lat60']
+rerun_scm = False
+if rerun_scm:
+    subprocess.run(["python", "W005_C500_NO_COR72h_profile_LES_vs_EDMF.py"])
+
+#== Opening LES and SCM
+les,scm = {},{}
+for case in cases:
+    # file = case+'_object_diags_Cw_m1_all.nc'
+    file = case+'_Cw_m1_72h.nc'
+    path = '../data/'+case+'/'
+    les[case] = xr.open_dataset(path+file)
+    scm[case]={}
+    for model in models:
+        scm[case][model] = xr.open_dataset(case+'_'+model+'.nc')
+#----------------------------------------
+
+
+time = les[cases[0]].time
+wstar = (-B0 * les[cases[0]].MLD_FLUX)**(1/3)
+instant = -1
+
+MF_div = {}
+for case in cases:
+    MF_div[case] = (les[case]['DW_FRAC']*les[case]['DW_WT']*les[case]['DW_THT']).diff('level')
+
+def E_D_LES(les):
+# ------------------------------------------------------------
+# Computing E,D on LES from passive tracer SVT001
+# ------------------------------------------------------------
+# $$ E\_ m\_ D = \partial_z (a_p w_p)$$
+# $$\tilde{E} = \frac{a_p w_p}{\phi_e - \phi_p} \partial_z \phi_p
+# $$
+
+    dz = les['level'].data[1] - les['level'].data[0]
+    regul = -0
+    # interpolate on the level_w grid
+    UP_SVT_interp = les['UP_SVT001'].interp(level=les.level_w).data
+    DW_SVT_interp = les['DW_SVT001'].interp(level=les.level_w).data
+    DW_FRAC_interp = les['DW_FRAC'].interp(level=les.level_w).data
+    DW_WT_interp = les['DW_WT'].interp(level=les.level_w).data
+
+    E_minus_D = 1/dz * (les['DW_FRAC'][:, 1:].data * les['DW_WT'][:, 1:].data -
+                        les['DW_FRAC'][:, :-1].data * les['DW_WT'][:, :-1].data)
+
+    Etilde = (DW_FRAC_interp[:, 1:-1] * DW_WT_interp[:, 1:-1]) / (UP_SVT_interp[:, 1:-1] -
+                                                                DW_SVT_interp[:, 1:-1]) * 1/dz * (les['DW_SVT001'][:, 1:].data - les['DW_SVT001'][:, :-1].data)
+
+    # Etilde est le proxy pour E calculer avec traceur ou température
+    # Astuce pour éviter d'avoir D < 0:
+    # D = max (Etilde - (E-D), 0)  
+    # Ce qui imlique que E = max(Etilde, E-D) (car quand E-D > Etilde, on impose D=0 donc ça implique que E = E-D)
+
+    D = np.maximum(Etilde - E_minus_D, np.zeros_like(Etilde))
+    E = np.maximum(Etilde, E_minus_D)
+
+    return E,D
+
+E_les = { case:E_D_LES(les[case])[0] for case in cases }
+D_les = { case:E_D_LES(les[case])[1] for case in cases }
+
+zlim = les[cases[0]].MLD_FLUX - 50
+
+zadim = les[cases[0]].level/(-les[cases[0]].MLD_FLUX[instant])
+mld = (-les[cases[0]].MLD_FLUX[instant])
+
+masks = ['TOT', 'DW']
+color =     {'TOT': 'k','DW': 'k','UP': orange}
+linewidth = {'TOT': 2,  'DW': 2, 'UP': 2}
+linestyle = {cases[0]: ':'}
+# linestyle_scm = {cases[0]: '-'}
+ccolors = ['tab:red','tab:green','tab:orange','tab:purple']
+color_scm = {cases[0]:{ model: ccolors[i] for i,model in enumerate(models)}}
+
+# sstyles = ['-', '-','--',':']
+sstyles = ['-']*4
+linestyle_scm = {cases[0]:{ model: sstyles[i] for i,model in enumerate(models)}}
+
+alpha = {cases[0]: 1}
+
+
+subplot_label = [r'\rm{(a)}', r'\rm{(b)}', r'\rm{(c)}',
+                 r'\rm{(d)}', r'\rm{(e)}', r'\rm{(f)}', r'\rm{(g)}',r'\rm{(h)}',r'\rm{(i)}']
+
+
+fig, axs = plt.subplots(nrows=2, ncols=3, sharey=True,constrained_layout=True)
+i_ax = -1
+#-----------------------------------------------------------------------
+i_ax+=1
+ax=axs.flat[i_ax]
+ax.set_title(r'$\theta_p$')
+ax.set_xlabel(r'$\mathrm{^oC}$')
+ax.set_ylabel(r'$z/h$')
+
+for case in cases:
+    mask='DW'
+    ax.plot(les[case][mask+'_THT'][instant]-273.15 , zadim, color[mask], linewidth=linewidth[mask], linestyle=linestyle[case],alpha=alpha[case],label=r'LES')
+    #
+    for model in models:
+        ax.plot(scm[case][model]['temp_p'][instant] , scm[case][model]['z_w']/mld, color_scm[case][model], linewidth=linewidth[mask], linestyle=linestyle_scm[case][model],alpha=alpha[case],label=model)
+# handles, labels = ax.get_legend_handles_labels()
+ax.set_xlim(1.60,1.75)
+# labels=[r'$\overline{\theta}$ (NR)',r'$\theta_p$ (NR)', r'$\overline{\theta}$ (FR)',r'$\theta_p$ (NR)']
+# ax.legend(handles,labels,fancybox=False)
+# ax.legend(loc='lower left')
+# #-----------------------------------------------------------------------
+i_ax+=1
+ax=axs.flat[i_ax]
+ax.set_title(r'$w_p$')
+ax.set_xlabel(r'$\mathrm{m s^{-1}}$')
+
+for case in cases:
+    mask='DW'
+    ax.plot(les[case][mask+'_WT'][instant] , zadim, color[mask], linewidth=linewidth[mask], linestyle=linestyle[case],alpha=alpha[case],label=case)
+    for model in models:
+        ax.plot(scm[case][model]['w_p'][instant] , scm[case][model]['z_w']/mld, color_scm[case][model], linewidth=linewidth[mask], linestyle=linestyle_scm[case][model],alpha=alpha[case],label=case+mask)
+#-----------------------------------------------------------------------
+i_ax+=1
+ax=axs.flat[i_ax]
+ax.set_title(r'$a_p$')
+
+for case in cases:
+    mask='DW'
+    ax.plot(les[case][mask+'_FRAC'][instant] , zadim, color[mask], linewidth=linewidth[mask], linestyle=linestyle[case],alpha=alpha[case])
+    for model in models:
+        ax.plot(scm[case][model]['a_p'][instant] , scm[case][model]['z_w']/mld, color_scm[case][model], linewidth=linewidth[mask], linestyle=linestyle_scm[case][model],alpha=alpha[case],label=case+mask)
+# # #-----------------------------------------------------------------------
+# i_ax+=1
+# ax=axs.flat[i_ax]
+# ax.set_title(r'$\partial_z(a_p w_p \theta_p)$')
+# ax.set_xlabel(r'$\mathrm{K s^{-1}}$')
+
+# for case in cases:
+#     mask='DW'
+#     ax.plot(MF_div[case][instant] , zadim[1:], color[mask], linewidth=linewidth[mask], linestyle=linestyle[case],alpha=alpha[case])
+
+# ax.set_xlim(-0.06,0.2)
+# # #-----------------------------------------------------------------------
+
+# # #-----------------------------------------------------------------------
+# i_ax+=1
+# ax=axs.flat[i_ax]
+# ax.set_title(r'$\omega_p$')
+# ax.set_xlabel(r'$\mathrm{s^{-1}}$')
+# ax.set_ylabel(r'$z/h$')
+
+# for case in cases:
+#     mask='DW'
+#     ax.plot(les[case][mask+'_VORT_z'][instant] , zadim, color[mask], linewidth=linewidth[mask], linestyle=linestyle[case],alpha=alpha[case])
+#     ax.plot(scm[cases[1]]['vort_p'][instant] , scm[case][model]['z_w']/mld, color_scm[case][model], linewidth=linewidth[mask], linestyle=linestyle_scm[case][model],alpha=alpha[case],label=case+mask)
+# #-----------------------------------------------------------------------
+# #-----------------------------------------------------------------------
+# i_ax+=1
+# ax=axs.flat[i_ax]
+# ax.set_title(r'$E-D$')
+# ax.set_xlabel(r'$\mathrm{s^{-1}}$')
+
+# for case in cases:
+#     mask='DW'
+#     ax.plot(E_les[case][instant]-D_les[case][instant] , zadim[1:], color[mask], linewidth=linewidth[mask], linestyle=linestyle[case],alpha=alpha[case])
+#     ax.plot(scm[case]['Ent'][instant]-scm[case]['Det'][instant] , scm[case][model]['z_r']/mld, color[mask], linewidth=linewidth[mask], linestyle=linestyle_scm[case][model],alpha=alpha[case],label=case+mask)
+#     # ax.plot(E_les[case][instant] , zadim[1:], color[mask], linewidth=linewidth[mask], linestyle=linestyle[case],alpha=alpha[case])
+#     # ax.plot(scm[case]['Ent'][instant] , scm[case][model]['z_r']/mld, color[mask], linewidth=linewidth[mask], linestyle=linestyle_scm[case][model],alpha=alpha[case],label=case+mask)
+# # ax.set_xlim(-1e-5,1e-4)
+# ax.set_xscale('symlog',linthresh=1e-8)
+# ax.set_xticklabels(ax.get_xticks(), rotation=90)
+# # plt.ticklabel_format(style='sci', axis='x', scilimits=(0,0))
+# ax.yaxis.set_major_formatter(ticker.ScalarFormatter())
+# ax.yaxis.get_major_formatter().set_scientific(True)
+# ax.yaxis.get_major_formatter().set_useOffset(False)
+# ax.yaxis.get_major_formatter().set_powerlimits((0, 0))
+# ax.set_xscale('log')
+# #-----------------------------------------------------------------------
+# # #-----------------------------------------------------------------------
+# i_ax+=1
+# ax=axs.flat[i_ax]
+# ax.set_title(r'$D$')
+# ax.set_xlabel(r'$\mathrm{s^{-1}}$')
+
+# for case in cases:
+#     mask='DW'
+#     ax.plot(D_les[case][instant] , zadim[1:], color[mask], linewidth=linewidth[mask], linestyle=linestyle[case],alpha=alpha[case])
+#     ax.plot(scm[case]['Det'][instant] , scm[case][model]['z_r']/mld, color[mask], linewidth=linewidth[mask], linestyle=linestyle_scm[case][model],alpha=alpha[case],label=case+mask)
+# # ax.set_xlim(-1e-5,1e-4)
+# ax.set_xscale('log')
+# # # #-----------------------------------------------------------------------
+# i_ax+=1
+# ax=axs.flat[i_ax]
+# ax.remove()
+# # # # #-----------------------------------------------------------------------
+# #-----------------------------------------------------------------------
+#-----------------------------------------------------------------------
+i_ax+=1
+ax=axs.flat[i_ax]
+ax.set_title(r'$u_p$')
+ax.set_xlabel(r'$\mathrm{m s^{-1}}$')
+ax.set_ylabel(r'$z/h$')
+
+for case in cases:
+    mask='DW'
+    ax.plot(les[case][mask+'_UT'][instant] , zadim, color[mask], linewidth=linewidth[mask], linestyle=linestyle[case],alpha=alpha[case])
+    for model in models:
+        ax.plot(scm[case][model]['u_p'][instant] , scm[case][model]['z_w']/mld, color_scm[case][model], linewidth=linewidth[mask], linestyle=linestyle_scm[case][model],alpha=alpha[case],label=case+mask)
+
+# # #-----------------------------------------------------------------------
+#-----------------------------------------------------------------------
+i_ax+=1
+ax=axs.flat[i_ax]
+ax.set_title(r'$k_p$')
+ax.set_xlabel(r'$\mathrm{m^2 s^{-2}}$')
+for case in cases:
+    mask='DW'
+    ax.plot(les[case][mask+'_intra_TKE'][instant], zadim, color[mask], linewidth=linewidth[mask], linestyle=linestyle[case],alpha=alpha[case])
+    for model in models:
+        if model != 'EDMF-TKE-inconsistent':
+            ax.plot(scm[case][model]['a_p'][instant]*scm[case][model]['tke_p'][instant] , scm[case][model]['z_w']/mld, color_scm[case][model], 
+            # ax.plot(scm[case][model]['tke_p'][instant] , scm[case][model]['z_w']/mld, color_scm[case][model], 
+            linewidth=linewidth[mask], linestyle=linestyle_scm[case][model],alpha=alpha[case],label=case+mask)
+
+# # #-----------------------------------------------------------------------
+# i_ax+=1
+# ax=axs.flat[i_ax]
+# ax.set_title(r'$D$')
+# ax.set_xlabel(r'$\mathrm{s^{-1}}$')
+
+# for case in cases:
+#     mask='DW'
+#     ax.plot(D_les[case][instant] , zadim[1:], color[mask], linewidth=linewidth[mask], linestyle='--',alpha=alpha[case])
+# ax.set_xlim(-3e-6,5e-5)
+
+# # #-----------------------------------------------------------------------
+i_ax+=1
+ax=axs.flat[i_ax]
+ax.remove()
+# # # #----------------
+
+subplot_label = [r'\rm{(a)}', r'\rm{(b)}', r'\rm{(c)}',
+                    r'\rm{(d)}', r'\rm{(e)}', r'\rm{(f)}',r'\rm{(g)}',r'\rm{(h)}',r'\rm{(i)}',r'\rm{(j)}',r'\rm{(k)}',r'\rm{(l)}']
+
+for i,ax in enumerate(axs.flat):
+    # ax.set_box_aspect(1)
+    ax.grid(alpha=0.5)
+    ax.set_ylim(-1.2,0)
+    # adding subplot labels
+    ax.text(0.15, 0.97, subplot_label[i], transform=ax.transAxes, bbox=dict(facecolor='1.', edgecolor='none',alpha=0.5), fontweight='bold', va='top', ha='right')
+
+
+
+
+handles, labels = axs.flat[0].get_legend_handles_labels()
+
+labels = [r'LES',r'EDMF-TKE-inconsistent',r'EDMF-Energy',r'Han \& Bretherton',r'$u_p = \overline{u}$']
+
+fig.legend(handles, labels, loc='upper center', bbox_to_anchor=(0.85, 0.3),
+           fancybox=False, shadow=False, ncols=1, fontsize=8)
+# axs.flat[0].legend(handles, labels,fancybox=False)
+fig.suptitle(r'Plume variables, '+case[:-7])
+# fig.legend()
+plt.savefig('../figures/W005_C500_les_scm_condsamp.pdf', bbox_inches='tight', dpi=600)
+plt.show()
+

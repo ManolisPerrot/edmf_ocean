@@ -1,0 +1,3559 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+      <meta name="description" content="Documentation for SCM-EDMF ocean">
+    <meta name="author" content="M. Perrot / F. Lemarié" >
+    <link rel="icon" href="../favicon.png">
+
+    <title>scm_mfc &ndash; SCM-EDMF ocean</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+    <link href="../css/pygments.css" rel="stylesheet">
+    <link href="../css/font-awesome.min.css" rel="stylesheet">
+    <link href="../css/local.css" rel="stylesheet">
+      <link  href="../tipuesearch/tipuesearch.css" rel="stylesheet">
+
+    <script src="https://code.jquery.com/jquery-3.7.0.slim.min.js" integrity="sha256-tG5mcZUtJsZvyKAxYLVXrmjKBVLd6VpVccqz/r4ypFE=" crossorigin="anonymous"></script>
+  </head>
+
+  <body>
+
+    <!-- Fixed navbar -->
+    <div class="container-fluid mb-sm-4 mb-xl-2">
+      <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+        <div class="container">
+          <a class="navbar-brand" href="../index.html">SCM-EDMF ocean </a>
+          <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbar"
+                  aria-expanded="false" aria-controls="navbar" aria-label="Toggle navigation">
+                  <span class="navbar-toggler-icon">
+          </button>
+
+          <div id="navbar" class="navbar-collapse collapse">
+            <ul class="navbar-nav">
+                  <li class="nav-item">
+                    <a class="nav-link" href="../lists/files.html">Source Files</a>
+                  </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="../lists/modules.html">Modules</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="../lists/procedures.html">Procedures</a>
+                </li>
+            </ul>
+              <div class="d-flex align-items-end flex-grow-1">
+                <form action="../search.html" role="search" class="ms-auto">
+                  <input type="text" class="form-control" aria-label="Search" placeholder="Search" name="q" id="tipue_search_input" autocomplete="off" required>
+                </form>
+              </div>
+          </div><!--/.nav-collapse -->
+        </div>
+      </nav>
+    </div>
+
+    <div class="container">
+  <div class="row">
+    <h1>scm_mfc
+      <small>Module</small>
+      
+    </h1>
+      <div class="container p-2 mb-4 bg-light border rounded-3">
+    <div class="row align-items-center justify-content-between" id="info-bar">
+      <div class="col">
+        <ul class="list-inline" style="margin-bottom:0px;display:inline">
+
+            <li class="list-inline-item" id="statements"><i class="fa fa-list-ol"></i>
+              <a data-bs-toggle="tooltip"
+                 data-bs-placement="bottom" data-html="true"
+                 title="45.3% of total for modules and submodules.">586 statements</a>
+            </li>
+
+            <li class="list-inline-item" id="source-file">
+              <i class="fa fa-code"></i>
+              <a href="../src/scm_mfc.f90"> Source File</a>
+            </li>
+        </ul>
+      </div>
+      <div class="col">
+        <nav aria-label="breadcrumb">
+          <ol class="breadcrumb justify-content-end mb-0">
+                <li class="breadcrumb-item"><a href='../sourcefile/scm_mfc.f90.html'>scm_mfc.f90</a></li>
+            <li class="breadcrumb-item active" aria-current="page">scm_mfc</li>
+          </ol>
+        </nav>
+      </div>
+    </div>
+  </div>
+  <script>
+    $(function () {
+    $('[data-bs-toggle="tooltip"]').tooltip()
+    })
+  </script>
+
+  </div>
+
+  <div class="row">
+    <div class="col-md-3">
+        <div id="sidebar">
+      <h3>Contents</h3>
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+      <div class="card mb-4">
+      <a data-bs-toggle="collapse" href="#funcs-0"
+         aria-expanded="false" aria-controls="funcs-0">
+         <h4 class="card-header bg-primary text-white">Functions</h4>
+      </a>
+      <div id="funcs-0" class="collapse">
+        <div class="list-group list-group-flush">
+            <a class="list-group-item" href="../module/scm_mfc.html#proc-ent_r10">Ent_R10</a>
+            <a class="list-group-item" href="../module/scm_mfc.html#proc-det_r10">Det_R10</a>
+            <a class="list-group-item" href="../module/scm_mfc.html#proc-ent_p09">Ent_P09</a>
+            <a class="list-group-item" href="../module/scm_mfc.html#proc-det_p09">Det_P09</a>
+        </div>
+      </div>
+    </div>
+
+      <div class="card mb-4">
+      <a data-bs-toggle="collapse" href="#subs-0"
+         aria-expanded="false" aria-controls="subs-0">
+         <h4 class="card-header bg-primary text-white">Subroutines</h4>
+      </a>
+      <div id="subs-0" class="collapse">
+        <div class="list-group list-group-flush">
+            <a class="list-group-item" href="../module/scm_mfc.html#proc-compute_mf_bdy">compute_MF_bdy</a>
+            <a class="list-group-item" href="../module/scm_mfc.html#proc-compute_mf_forcing">compute_MF_forcing</a>
+            <a class="list-group-item" href="../module/scm_mfc.html#proc-compute_triplecorr">compute_tripleCorr</a>
+            <a class="list-group-item" href="../module/scm_mfc.html#proc-eos_val_lin">eos_val_lin</a>
+            <a class="list-group-item" href="../module/scm_mfc.html#proc-eos_val">eos_val</a>
+            <a class="list-group-item" href="../module/scm_mfc.html#proc-get_w_p_r10">get_w_p_R10</a>
+            <a class="list-group-item" href="../module/scm_mfc.html#proc-get_a_p_r10">get_a_p_R10</a>
+            <a class="list-group-item" href="../module/scm_mfc.html#proc-get_t_p_r10">get_t_p_R10</a>
+            <a class="list-group-item" href="../module/scm_mfc.html#proc-get_dtke_p_r10">get_dtke_p_R10</a>
+            <a class="list-group-item" href="../module/scm_mfc.html#proc-get_a_p_p09">get_a_p_P09</a>
+            <a class="list-group-item" href="../module/scm_mfc.html#proc-get_t_p_p09">get_t_p_P09</a>
+            <a class="list-group-item" href="../module/scm_mfc.html#proc-get_w_p_p09">get_w_p_P09</a>
+            <a class="list-group-item" href="../module/scm_mfc.html#proc-mass_flux_p09">mass_flux_P09</a>
+            <a class="list-group-item" href="../module/scm_mfc.html#proc-mass_flux_r10">mass_flux_R10</a>
+        </div>
+      </div>
+    </div>
+
+  
+  
+  
+  
+  
+  
+  
+
+
+  </div>
+
+    </div>
+
+    <div class="col-md-9" id='text'>
+      <p>============================================================================<br />
+                       ***  MODULE  scm_mfc  ***                            <br />
+        Mass-flux (MF) convection scheme for oceanic deep convection        <br />
+============================================================================<br />
+--------------------------------------------------------------------------<br />
+   compute_MF_bdy    : top boundary conditions for plume properties       <br />
+   compute_MF_forcing: compute mean quantities used to force the MF equations <br />
+   compute_tripleCorr: compute contribution of MF terms to turbulent flux w'e <br />
+   eos_val_lin   : linear equation of state                           <br />
+   get_w_p_R10   : compute plume vertical velocity for Rio et al. 2010 closure <br />
+   get_a_p_R10   : compute plume fractional area for Rio et al. 2010 closure   <br />
+   get_t_p_R10   : compute plume tracer properties for Rio et al. 2010 closure <br />
+   get_w_p_P09   : compute plume vertical velocity for Pergaud et al. 2009 closure <br />
+   get_a_p_P09   : compute plume fractional area for Pergaud et al. 2009 closure   <br />
+   get_t_p_P09   : compute plume tracer properties for Pergaud et al. 2009 closure <br />
+   mass_flux_R10 : computation of mass-flux and plume properties for Rio et al. 2010 closure<br />
+   mass_flux_P09 : computation of mass-flux and plume properties for Pergaud et al. 2009 closure<br />
+----------------------------------------------------------------------------<br /></p>
+      
+      
+      <br>
+
+
+
+
+
+
+
+        <section>
+          <h2>Functions</h2>
+              <div class="card">
+    <div class="card-header codesum"><span class="anchor" id="proc-ent_r10"></span><h3>public  function <a href='../proc/ent_r10.html'>Ent_R10</a>(beta1, wpp, wpm)  
+</h3></div>
+    <div class="card-body">
+          
+  <p>Entrainment <script type="math/tex"> {\rm Ent\_R10} = \frac{E_k h_k}{a^p} = \max\left( \beta_1(w_{k+1/2}^p-w_{k-1/2}^p), 0 \right)  </script>
+</p>
+
+  <h4>Arguments</h4>
+      <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-beta1~3"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>beta1</strong></td>
+            <td>
+<p>parameter of the MF scheme for the entrainment zone</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-wpp~3"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>wpp</strong></td>
+            <td>
+<p>
+<script type="math/tex"> w^{\rm p}_{k+1/2} </script>
+</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-wpm~3"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>wpm</strong></td>
+            <td>
+<p>
+<script type="math/tex"> w^{\rm p}_{k-1/2} </script>
+</p>
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+    <h4>
+    Return Value
+    <small>real(kind=8)</small>
+    </h4>
+    
+
+    </div>
+  </div>
+
+              <div class="card">
+    <div class="card-header codesum"><span class="anchor" id="proc-det_r10"></span><h3>public  function <a href='../proc/det_r10.html'>Det_R10</a>(beta1, beta2, wpp, wpm, delta0, hk)  
+</h3></div>
+    <div class="card-body">
+          
+  <p>Detrainment <script type="math/tex"> {\rm Det\_R10} = -\frac{D_k h_k}{a^p} = \min\left( \beta_2(w_{k+1/2}^p-w_{k-1/2}^p), 0 \right) + \min\left(-2 w^{\rm p}_{\min}, h_k \delta_0 \frac{w_{k+1/2}^p+w_{k-1/2}^p}{2} \right) </script>  <br />
+The minimum detrainment <script type="math/tex"> -2 w^{\rm p}_{\min} </script> ensures that <script type="math/tex"> a^{\rm p}_{k-1/2} = 0 </script> as soon as <script type="math/tex"> w^{\rm p}_{k+1/2} = w^{\rm p}_{k-1/2} = -w^{\rm p}_{\min} </script>
+</p>
+
+  <h4>Arguments</h4>
+      <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-beta1~4"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>beta1</strong></td>
+            <td>
+<p>parameter of the MF scheme for the entrainment zone</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-beta2~2"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>beta2</strong></td>
+            <td>
+<p>parameter of the MF scheme for the detrainment zone</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-wpp~4"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>wpp</strong></td>
+            <td>
+<p>
+<script type="math/tex"> w^{\rm p}_{k+1/2} </script>
+</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-wpm~4"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>wpm</strong></td>
+            <td>
+<p>
+<script type="math/tex"> w^{\rm p}_{k-1/2} </script>
+</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-delta0~2"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>delta0</strong></td>
+            <td>
+<p>background detrainment [m-1]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-hk~2"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>hk</strong></td>
+            <td>
+<p>Thickness ( h_k /) of layer k</p>
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+    <h4>
+    Return Value
+    <small>real(kind=8)</small>
+    </h4>
+    
+
+    </div>
+  </div>
+
+              <div class="card">
+    <div class="card-header codesum"><span class="anchor" id="proc-ent_p09"></span><h3>public  function <a href='../proc/ent_p09.html'>Ent_P09</a>(cent, Bp)  
+</h3></div>
+    <div class="card-body">
+          
+  <p>Entrainment <script type="math/tex"> {\rm Ent\_P09} = \frac{E_k w^{\rm p}}{a^{\rm p}} = C_\epsilon \max\left( B^{\rm p}, 0 \right)  </script>
+</p>
+
+  <h4>Arguments</h4>
+      <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-cent"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>cent</strong></td>
+            <td>
+<p>parameter <script type="math/tex"> C_\epsilon </script> of the MF scheme for the entrainment zone</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-bp~2"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>Bp</strong></td>
+            <td>
+<p>plume buoyancy forcing term <script type="math/tex"> B^{\rm p} </script> [m/s2]</p>
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+    <h4>
+    Return Value
+    <small>real(kind=8)</small>
+    </h4>
+    
+
+    </div>
+  </div>
+
+              <div class="card">
+    <div class="card-header codesum"><span class="anchor" id="proc-det_p09"></span><h3>public  function <a href='../proc/det_p09.html'>Det_P09</a>(cdel, wpp, wpm, delta0, Bp)  
+</h3></div>
+    <div class="card-body">
+          
+  <p>Detrainment <script type="math/tex"> {\rm Det\_P09} = -\frac{D_k w^{\rm p}}{a^{\rm p}} = (- C_\delta)\min\left( B^{\rm p}, 0 \right) + \delta_0 (w^{\rm p})^2 </script>
+</p>
+
+  <h4>Arguments</h4>
+      <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-cdel"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>cdel</strong></td>
+            <td>
+<p>parameter <script type="math/tex"> C_\delta </script> of the MF scheme in the detrainment zone</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-wpp~5"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>wpp</strong></td>
+            <td>
+<p>
+<script type="math/tex"> w^{\rm p}_{k+1/2} </script> [m/s]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-wpm~5"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>wpm</strong></td>
+            <td>
+<p>
+<script type="math/tex"> w^{\rm p}_{k-1/2} </script> [m/s]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-delta0~3"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>delta0</strong></td>
+            <td>
+<p>background detrainment [m-1]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-bp~3"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>Bp</strong></td>
+            <td>
+<p>plume buoyancy forcing term <script type="math/tex"> B^{\rm p} </script> [m/s2]</p>
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+    <h4>
+    Return Value
+    <small>real(kind=8)</small>
+    </h4>
+    
+
+    </div>
+  </div>
+
+        </section>
+        <br>
+
+        <section>
+          <h2>Subroutines</h2>
+              <div class="card">
+    <div class="card-header codesum"><span class="anchor" id="proc-compute_mf_bdy"></span><h3>public  subroutine <a href='../proc/compute_mf_bdy.html'>compute_MF_bdy</a>(u_m, v_m, t_m, tke, Hz, ntra, npts, wp0, up0, vp0, tp0)  
+</h3></div>
+    <div class="card-body">
+          
+  <p>==========================================================================<br />
+                  ***  ROUTINE compute_MF_bdy  ***                        <br />
+ ** Purposes : compute top initial condition for mass flux equation       <br />
+==========================================================================<br />
+ <script type="math/tex"> w^{\rm p}_{\rm sfc} = - w^{\rm p}_{\min} </script><br /></p><a href="../proc/compute_mf_bdy.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+
+  <h4>Arguments</h4>
+      <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-u_m"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>u_m</strong>(1:npts)</td>
+            <td>
+<p>mean zonal velocity [m/s]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-v_m"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>v_m</strong>(1:npts)</td>
+            <td>
+<p>mean meridional velocity [m/s]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-t_m"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>t_m</strong>(1:npts,1:ntra)</td>
+            <td>
+<p>mean tracers</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-tke"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>tke</strong>(1:npts)</td>
+            <td>
+<p>turbulent kinetic energy [m2/s2]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-hz"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>Hz</strong>(1:npts)</td>
+            <td>
+<p>layer thickness [m]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-ntra"></span>
+              integer,
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>ntra</strong></td>
+            <td>
+<p>number of tracers</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-npts"></span>
+              integer,
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>npts</strong></td>
+            <td>
+<p>number of points used for extrapolation</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-wp0"></span>
+              real(kind=8),
+            </td>
+<td>intent(out)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>wp0</strong></td>
+            <td>
+<p>vertical plume velocity at the surface [m/s]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-up0"></span>
+              real(kind=8),
+            </td>
+<td>intent(out)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>up0</strong></td>
+            <td>
+<p>zonal plume velocity at the surface [m/s]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-vp0"></span>
+              real(kind=8),
+            </td>
+<td>intent(out)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>vp0</strong></td>
+            <td>
+<p>meridional plume velocity at the surface [m/s]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-tp0"></span>
+              real(kind=8),
+            </td>
+<td>intent(out)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>tp0</strong>(1:ntra+1)</td>
+            <td>
+<p>tracer plume properties</p>
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+    </div>
+  </div>
+
+              <div class="card">
+    <div class="card-header codesum"><span class="anchor" id="proc-compute_mf_forcing"></span><h3>public  subroutine <a href='../proc/compute_mf_forcing.html'>compute_MF_forcing</a>(u_np1, v_np1, t_np1, tke, N, ntra, u_m, v_m, t_m, dtke_m)  
+</h3></div>
+    <div class="card-body">
+          
+  <p>==========================================================================<br />
+                  ***  ROUTINE compute_MF_forcing  ***                    <br />
+ ** Purposes : compute mean quantities used to force the MF equations     <br />
+==========================================================================<br />
+ <script type="math/tex"> \overline{\phi}_{k} = \phi^{\rm scm}_k </script>  <br />
+ <script type="math/tex"> k_{k+1/2} = \frac{1}{2} (k^{\rm scm}_{k+1/2}+k^{\rm scm}_{k-1/2}) </script>  <br />
+ <script type="math/tex"> \overline{u}_{k} = u^{\rm scm}_k </script>  <br />
+ <script type="math/tex"> \overline{v}_{k} = v^{\rm scm}_k </script>  <br /></p>
+
+  <h4>Arguments</h4>
+      <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-u_np1"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>u_np1</strong>(1:N)</td>
+            <td>
+<p>zonal velocity [m/s]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-v_np1"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>v_np1</strong>(1:N)</td>
+            <td>
+<p>meridional velocity [m/s]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-t_np1"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>t_np1</strong>(1:N,ntra)</td>
+            <td>
+<p>tracers</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-tke~2"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>tke</strong>(0:N)</td>
+            <td>
+<p>turbulent kinetic energy [m/s]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-n"></span>
+              integer,
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>N</strong></td>
+            <td>
+<p>number of vertical levels</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-ntra~2"></span>
+              integer,
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>ntra</strong></td>
+            <td>
+<p>number of tracers</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-u_m~2"></span>
+              real(kind=8),
+            </td>
+<td>intent(out)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>u_m</strong>(1:N)</td>
+            <td>
+<p>mean zonal velocity for mass-flux equations [m/s]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-v_m~2"></span>
+              real(kind=8),
+            </td>
+<td>intent(out)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>v_m</strong>(1:N)</td>
+            <td>
+<p>mean meridional velocity for mass-flux equations [m/s]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-t_m~2"></span>
+              real(kind=8),
+            </td>
+<td>intent(out)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>t_m</strong>(1:N,ntra+1)</td>
+            <td>
+<p>mean tracer for mass-flux equations [m/s]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-dtke_m"></span>
+              real(kind=8),
+            </td>
+<td>intent(out)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>dtke_m</strong>(1:N)</td>
+            <td>
+<p>mean tracer for mass-flux equations [m/s]</p>
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+    </div>
+  </div>
+
+              <div class="card">
+    <div class="card-header codesum"><span class="anchor" id="proc-compute_triplecorr"></span><h3>public  subroutine <a href='../proc/compute_triplecorr.html'>compute_tripleCorr</a>(tke, tke_p, Fmass, u_p, v_p, w_p, u_np1, v_np1, Hz, zr, wtke, N, trplCorr, tke_env)  
+</h3></div>
+    <div class="card-body">
+          
+  <p>==========================================================================<br />
+                  ***  ROUTINE compute_tripleCorr  ***                    <br />
+ ** Purposes : compute contribution of MF terms to turbulent flux w'e     <br />
+   <script type="math/tex; mode=display"> \overline{w'e}_{\rm MF} = a^{\rm p} w^{\rm p} \underbrace{\left[ \frac{1}{1-a^{\rm p}} \right]}_{\rm small\_ap = False} \left\{ \left(  k^{\rm p} - k^n \right)
+    + \frac{1}{2} \| \mathbf{v}^p - \mathbf{v}^{n+1} \|^2 \right\}  </script>     <br />
+==========================================================================<br />
+ <script type="math/tex"> F_{k} = (a^{\rm p} w^{\rm p})_{k+1/2} ( k^{\rm p}_{k+1/2} - k_{k-1/2}^n ) </script><br />
+ <script type="math/tex"> F_{k} = F_{k} + \frac{(a^{\rm p} w^{\rm p})_{k+1/2}}{2}\left(  \mathbf{v}^{\rm p}_{k+1/2} - \mathbf{v}^{n+1}_{k} \right)^2  </script> <br />
+ <script type="math/tex"> {\rm TOM}_{k+1/2} = \frac{ F_{k+1}-F_{k} }{ \Delta z_{k+1/2} }   </script> <br /></p><a href="../proc/compute_triplecorr.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+
+  <h4>Arguments</h4>
+      <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-tke~3"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>tke</strong>(0:N)</td>
+            <td>
+<p>mean turbulent kinetic energy [m/s]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-tke_p"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>tke_p</strong>(0:N)</td>
+            <td>
+<p>plume turbulent kinetic energy [m/s]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-fmass"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>Fmass</strong>(0:N)</td>
+            <td>
+<p>mass flux [m/s]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-u_p"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>u_p</strong>(0:N)</td>
+            <td>
+<p>plume zonal velocity [m/s]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-v_p"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>v_p</strong>(0:N)</td>
+            <td>
+<p>plume meridional velocity [m/s]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-w_p"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>w_p</strong>(0:N)</td>
+            <td>
+<p>plume vertical velocity [m/s]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-u_np1~2"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>u_np1</strong>(1:N)</td>
+            <td>
+<p>mean zonal velocity [m/s]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-v_np1~2"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>v_np1</strong>(1:N)</td>
+            <td>
+<p>mean meridional velocity [m/s]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-hz~2"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>Hz</strong>(1:N)</td>
+            <td>
+<p>layer thickness [m]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-zr"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>zr</strong>(1:N)</td>
+            <td>
+<p>depth of cell centers [m]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-wtke"></span>
+              real(kind=8),
+            </td>
+<td>intent(inout)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>wtke</strong>(1:N)</td>
+            <td>
+<p>turbulent w'e flux [m3/s3]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-n~2"></span>
+              integer,
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>N</strong></td>
+            <td>
+<p>number of vertical levels</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-trplcorr"></span>
+              real(kind=8),
+            </td>
+<td>intent(out)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>trplCorr</strong>(0:N)</td>
+            <td>
+<p>contribution of mass flux to divergence of w'e flux [m2/s3]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-tke_env"></span>
+              real(kind=8),
+            </td>
+<td>intent(out)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>tke_env</strong>(0:N)</td>
+            <td>
+<p>diagnostics : environmental TKE [m2/s2]</p>
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+    </div>
+  </div>
+
+              <div class="card">
+    <div class="card-header codesum"><span class="anchor" id="proc-eos_val_lin"></span><h3>public  subroutine <a href='../proc/eos_val_lin.html'>eos_val_lin</a>(temp, salt, alpha, beta, rho)  
+</h3></div>
+    <div class="card-body">
+          
+  <p>==========================================================================<br />
+                  ***  ROUTINE eos_val_lin  ***                           <br />
+ ** Purposes : compute density anomaly from linear equation of state      <br />
+==========================================================================<br />
+ <script type="math/tex">   \rho_{k} = \rho_0 \left( 1 - \alpha (\theta - 2) + \beta (S - 35)   \right)  </script>  <br /></p><a href="../proc/eos_val_lin.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+
+  <h4>Arguments</h4>
+      <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-temp"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>temp</strong></td>
+            <td>
+<p>temperature [C]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-salt"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>salt</strong></td>
+            <td>
+<p>salinity [psu]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-alpha"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>alpha</strong></td>
+            <td>
+<p>thermal expension coefficient [C-1]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-beta"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>beta</strong></td>
+            <td>
+<p>haline expension coefficient [psu-1]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-rho"></span>
+              real(kind=8),
+            </td>
+<td>intent(inout)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>rho</strong></td>
+            <td>
+<p>density anomaly</p>
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+    </div>
+  </div>
+
+              <div class="card">
+    <div class="card-header codesum"><span class="anchor" id="proc-eos_val"></span><h3>public  subroutine <a href='../proc/eos_val.html'>eos_val</a>(temp, salt, zr, rho)  
+</h3></div>
+    <div class="card-body">
+          
+  <p>==========================================================================<br />
+                  ***  ROUTINE rho_eos  ***                           <br />
+ ** Purposes : Compute density anomaly and Brunt Vaisala frequency via nonlinear
+                                                  Equation Of State (EOS) <br />
+==========================================================================<br /></p>
+
+  <h4>Arguments</h4>
+      <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-temp~2"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>temp</strong></td>
+            <td>
+<p>temperature [C]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-salt~2"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>salt</strong></td>
+            <td>
+<p>salinity [psu]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-zr~2"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>zr</strong></td>
+            <td>
+<p>depth [m]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-rho~2"></span>
+              real(kind=8),
+            </td>
+<td>intent(inout)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>rho</strong></td>
+            <td>
+<p>density anomaly [kg/m3]</p>
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+    </div>
+  </div>
+
+              <div class="card">
+    <div class="card-header codesum"><span class="anchor" id="proc-get_w_p_r10"></span><h3>public  subroutine <a href='../proc/get_w_p_r10.html'>get_w_p_R10</a>(wpm, wpp, aa, bb, bpr, beta1, Hz, Bp, h, found)  
+</h3></div>
+    <div class="card-body">
+          
+  <p>==========================================================================<br />
+                  ***  ROUTINE get_w_p_R10  ***                           <br />
+ ** Purposes : compute plume vertical velocity for Rio et al. (2010)
+                        entrainment/detrainement closure                  <br />
+==========================================================================<br />
+ <script type="math/tex">   {\rm rhs}_{k}^{\star} = 2 b'( w^{\rm p}_{k+1/2} )^2 + 2 a B_{k}^{\rm p}  </script>  <br />
+ if <script type="math/tex"> {\rm rhs}_{k}^{\star} < 0 \Rightarrow \alpha_w = 1 + b \beta_1 </script>, <script type="math/tex"> \alpha_w = 1 </script> otherwise <br />
+ <script type="math/tex">  ( w^{\rm p}_{k-1/2} )^2 = \frac{ (\alpha_w - h_k b') ( w^{\rm p}_{k+1/2} )^2 - 2 a h_k B_{k}^{\rm p} }{\alpha_w + h_k b'}</script> <br /></p><a href="../proc/get_w_p_r10.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+
+  <h4>Arguments</h4>
+      <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-wpm"></span>
+              real(kind=8),
+            </td>
+<td>intent(inout)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>wpm</strong></td>
+            <td>
+<p>vertical velocity at the bottom of the grid cell [m/s]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-wpp"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>wpp</strong></td>
+            <td>
+<p>vertical velocity at the top of the grid cell [m/s]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-aa"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>aa</strong></td>
+            <td>
+<p>parameter of the MF scheme</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-bb"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>bb</strong></td>
+            <td>
+<p>parameter of the MF scheme</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-bpr"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>bpr</strong></td>
+            <td>
+<p>parameter of the MF scheme</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-beta1"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>beta1</strong></td>
+            <td>
+<p>parameter of the MF scheme</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-hz~3"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>Hz</strong></td>
+            <td>
+<p>thickness of the grid cell [m]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-bp"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>Bp</strong></td>
+            <td>
+<p>plume buoyancy forcing term [m/s2]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-h"></span>
+              real(kind=8),
+            </td>
+<td>intent(inout)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>h</strong></td>
+            <td>
+<p>distance from the top of the grid cell where w_p = w_p_min [m]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-found"></span>
+              logical,
+            </td>
+<td>intent(inout)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>found</strong></td>
+            <td>
+<p>(=T) the bottom of the plume is reached</p>
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+    </div>
+  </div>
+
+              <div class="card">
+    <div class="card-header codesum"><span class="anchor" id="proc-get_a_p_r10"></span><h3>public  subroutine <a href='../proc/get_a_p_r10.html'>get_a_p_R10</a>(apm, app, wpm, wpp, beta1, beta2, hk, delta0)  
+</h3></div>
+    <div class="card-body">
+          
+  <p>==========================================================================<br />
+                  ***  ROUTINE get_a_p_R10  ***                           <br />
+ ** Purposes : compute plume fractional area for Rio et al. (2010)
+                        entrainment/detrainement closure                  <br />
+==========================================================================<br />
+ <script type="math/tex">   {\rm EmD}_k = \frac{h_k}{a^{\rm p}} \left( E_k - D_k \right) = {\rm Ent\_R10} + {\rm Det\_R10}  </script>  <br />
+ <script type="math/tex">  a^{\rm p}_{k-1/2} = a^{\rm p}_{k+1/2} \left(  \frac{2 w^{\rm p}_{k+1/2} - {\rm EmD}_k}{2 w^{\rm p}_{k-1/2} + {\rm EmD}_k}   \right)   </script> <br /></p>
+
+  <h4>Arguments</h4>
+      <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-apm"></span>
+              real(kind=8),
+            </td>
+<td>intent(inout)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>apm</strong></td>
+            <td>
+<p>fractional area at the bottom of the grid cell</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-app"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>app</strong></td>
+            <td>
+<p>fractional area at the top   of the grid cell</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-wpm~2"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>wpm</strong></td>
+            <td>
+<p>vertical velocity at the bottom of the grid cell [m/s]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-wpp~2"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>wpp</strong></td>
+            <td>
+<p>vertical velocity at the top of the grid cell [m/s]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-beta1~2"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>beta1</strong></td>
+            <td>
+<p>parameter of the MF scheme for the entrainment zone</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-beta2"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>beta2</strong></td>
+            <td>
+<p>parameter of the MF scheme for the detrainment zone</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-hk"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>hk</strong></td>
+            <td>
+<p>thickness of the grid cell [m]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-delta0"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>delta0</strong></td>
+            <td>
+<p>background detrainement in the entrainment zone [m-1]</p>
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+    </div>
+  </div>
+
+              <div class="card">
+    <div class="card-header codesum"><span class="anchor" id="proc-get_t_p_r10"></span><h3>public  subroutine <a href='../proc/get_t_p_r10.html'>get_t_p_R10</a>(tpm, tpp, te, apm, app, wpm, wpp, beta1, beta2, hk, delta0)  
+</h3></div>
+    <div class="card-body">
+          
+  <p>==========================================================================<br />
+                  ***  ROUTINE get_t_p_R10  ***                           <br />
+ ** Purposes : compute plume tracer properties for Rio et al. (2010)
+                        entrainment/detrainement closure                  <br />
+==========================================================================<br />
+ <script type="math/tex">  \Phi^{\rm p}_{k+1/2} = a^{\rm p}_{k+1/2} w^{\rm p}_{k+1/2} \phi^{\rm p}_{k+1/2}  </script>  <br />
+ <script type="math/tex">  a^{\rm p}_{k} = \frac{a^{\rm p}_{k+1/2}+a^{\rm p}_{k-1/2}}{2}  </script>  <br />
+ <script type="math/tex"> \Phi^{\rm p}_{k-1/2} = \Phi^{\rm p}_{k+1/2} - a^{\rm p}_{k} \left( \underbrace{\frac{E_k h_k}{a^p}}_{\rm Ent\_R10} \phi_{k}^{\rm e} \underbrace{- \frac{D_k h_k}{a^p}}_{\rm Det\_R10} \phi_{k+1/2}^{\rm p}     \right)    </script> <br />
+ <script type="math/tex"> \phi^{\rm p}_{k-1/2} = \frac{\Phi^{\rm p}_{k-1/2}}{( a^{\rm p} w^{\rm p} )_{k-1/2}} </script>  <br /></p>
+
+  <h4>Arguments</h4>
+      <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-tpm"></span>
+              real(kind=8),
+            </td>
+<td>intent(inout)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>tpm</strong></td>
+            <td>
+<p>tracer value at the bottom of the grid cell</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-tpp"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>tpp</strong></td>
+            <td>
+<p>tracer value at the top   of the grid cell</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-te"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>te</strong></td>
+            <td>
+<p>environmental value for tracer in the grid cell</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-apm~2"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>apm</strong></td>
+            <td>
+<p>fractional area at the bottom of the grid cell</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-app~2"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>app</strong></td>
+            <td>
+<p>fractional area at the top   of the grid cell</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-wpm~6"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>wpm</strong></td>
+            <td>
+<p>vertical velocity at the bottom of the grid cell [m/s]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-wpp~6"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>wpp</strong></td>
+            <td>
+<p>vertical velocity at the top of the grid cell [m/s]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-beta1~5"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>beta1</strong></td>
+            <td>
+<p>parameter of the MF scheme</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-beta2~3"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>beta2</strong></td>
+            <td>
+<p>increase the detrainement coefficient beta1 [m-1]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-hk~3"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>hk</strong></td>
+            <td>
+<p>thickness of the grid cell [m]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-delta0~4"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>delta0</strong></td>
+            <td>
+<p>background detrainement in the entrainment zone [m-1]</p>
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+    </div>
+  </div>
+
+              <div class="card">
+    <div class="card-header codesum"><span class="anchor" id="proc-get_dtke_p_r10"></span><h3>public  subroutine <a href='../proc/get_dtke_p_r10.html'>get_dtke_p_R10</a>(tkep_m, tkep_p, dtke_m, normvel, wpm, wpp, hk, epsilon, beta1)  
+</h3></div>
+    <div class="card-body">
+          
+  <p>==========================================================================<br />
+                  ***  ROUTINE get_dtke_p_R10  ***                           <br />
+ ** Purposes : compute plume TKE for Rio et al. (2010)
+                        entrainment/detrainement closure                  <br />
+==========================================================================<br />
+ <script type="math/tex">  (\delta w^{\rm p})_{k}^{+} = \max( w^{\rm p}_{k+1/2}-w^{\rm p}_{k-1/2}  ,0) </script>  <br />
+ <script type="math/tex">  \chi_k = \frac{\beta_1}{w^{\rm p}_{k+1/2}+w^{\rm p}_{k-1/2}} (\delta w^{\rm p})_{k}^{+} \equiv \frac{E_k h_k}{2 a^{\rm p} w^{\rm p}}     </script> <br />
+ <script type="math/tex"> (e^{\rm p}-e)_{k-1/2} = \frac{(1+\chi_k)(e^{\rm p}-e)_{k+1/2} - \chi_k \| \mathbf{u}^{\rm p} - \mathbf{u} \|_k^2 + (e_{k+1/2}-e_{k-1/2}) + \frac{2 h_k}{w^{\rm p}_{k+1/2}+w^{\rm p}_{k-1/2}} \epsilon_{k+1/2}^{\rm p}   }{1-\chi_k}    </script>
+</p>
+
+  <h4>Arguments</h4>
+      <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-tkep_m"></span>
+              real(kind=8),
+            </td>
+<td>intent(inout)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>tkep_m</strong></td>
+            <td>
+<p>plume TKE value at the bottom of the grid cell</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-tkep_p"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>tkep_p</strong></td>
+            <td>
+<p>plume TKE value at the top   of the grid cell</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-dtke_m~2"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>dtke_m</strong></td>
+            <td>
+<p>external forcing for the plume TKE</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-normvel"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>normvel</strong></td>
+            <td>
+<p>
+<script type="math/tex"> \| \mathbf{u}^{\rm p} - \mathbf{u} \|^2  </script> [m2/s-2]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-wpm~7"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>wpm</strong></td>
+            <td>
+<p>vertical velocity at the bottom of the grid cell [m/s]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-wpp~7"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>wpp</strong></td>
+            <td>
+<p>vertical velocity at the top of the grid cell [m/s]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-hk~4"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>hk</strong></td>
+            <td>
+<p>thickness of the grid cell [m]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-epsilon"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>epsilon</strong></td>
+            <td>
+<p>plume TKE dissipation term [m2/s-3]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-beta1~6"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>beta1</strong></td>
+            <td>
+<p>parameter of the MF scheme</p>
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+    </div>
+  </div>
+
+              <div class="card">
+    <div class="card-header codesum"><span class="anchor" id="proc-get_a_p_p09"></span><h3>public  subroutine <a href='../proc/get_a_p_p09.html'>get_a_p_P09</a>(apm, app, wpm, wpp, Hz, Bp, delta0, cent, cdel)  
+</h3></div>
+    <div class="card-body">
+          
+  <p>==========================================================================<br />
+                  ***  ROUTINE get_w_p_P09  ***                           <br />
+ ** Purposes : compute plume vertical velocity for Pergaud et al. (2009)
+                        entrainment/detrainement closure                  <br />
+==========================================================================<br /></p>
+
+  <h4>Arguments</h4>
+      <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-apm~3"></span>
+              real(kind=8),
+            </td>
+<td>intent(inout)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>apm</strong></td>
+            <td>
+<p>fractional area at the bottom of the grid cell</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-app~3"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>app</strong></td>
+            <td>
+<p>fractional area at the top   of the grid cell</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-wpm~8"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>wpm</strong></td>
+            <td>
+<p>vertical velocity at the bottom of the grid cell [m/s]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-wpp~8"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>wpp</strong></td>
+            <td>
+<p>vertical velocity at the top of the grid cell [m/s]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-hz~4"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>Hz</strong></td>
+            <td>
+<p>thickness of the grid cell [m]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-bp~4"></span>
+              real(kind=8),
+            </td>
+<td>intent(inout)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>Bp</strong></td>
+            <td>
+<p>plume buoyancy forcing term [m/s2]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-delta0~5"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>delta0</strong></td>
+            <td>
+<p>background detrainement in the entrainment zone [m-1]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-cent~2"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>cent</strong></td>
+            <td>
+<p>parameter of the MF scheme</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-cdel~2"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>cdel</strong></td>
+            <td>
+<p>parameter of the MF scheme</p>
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+    </div>
+  </div>
+
+              <div class="card">
+    <div class="card-header codesum"><span class="anchor" id="proc-get_t_p_p09"></span><h3>public  subroutine <a href='../proc/get_t_p_p09.html'>get_t_p_P09</a>(tpm, tpp, te, apm, app, wpm, wpp, Hz, Bp, delta0, cent, cdel)  
+</h3></div>
+    <div class="card-body">
+          
+  <p>==========================================================================<br />
+                  ***  ROUTINE get_t_p_P09  ***                           <br />
+ ** Purposes : compute plume tracer properties for Pergaud et al. (2009)
+                        entrainment/detrainement closure                  <br />
+==========================================================================<br /></p>
+
+  <h4>Arguments</h4>
+      <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-tpm~2"></span>
+              real(kind=8),
+            </td>
+<td>intent(inout)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>tpm</strong></td>
+            <td>
+<p>tracer value at the bottom of the grid cell</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-tpp~2"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>tpp</strong></td>
+            <td>
+<p>tracer value at the top   of the grid cell</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-te~2"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>te</strong></td>
+            <td>
+<p>environmental value for tracer in the grid cell</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-apm~4"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>apm</strong></td>
+            <td>
+<p>fractional area at the bottom of the grid cell</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-app~4"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>app</strong></td>
+            <td>
+<p>fractional area at the top   of the grid cell</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-wpm~9"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>wpm</strong></td>
+            <td>
+<p>vertical velocity at the bottom of the grid cell [m/s]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-wpp~9"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>wpp</strong></td>
+            <td>
+<p>vertical velocity at the top of the grid cell [m/s]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-hz~5"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>Hz</strong></td>
+            <td>
+<p>thickness of the grid cell [m]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-bp~5"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>Bp</strong></td>
+            <td>
+<p>plume buoyancy forcing term [m/s2]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-delta0~6"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>delta0</strong></td>
+            <td>
+<p>background detrainement in the entrainment zone [m-1]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-cent~3"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>cent</strong></td>
+            <td>
+<p>parameter of the MF scheme</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-cdel~3"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>cdel</strong></td>
+            <td>
+<p>parameter of the MF scheme</p>
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+    </div>
+  </div>
+
+              <div class="card">
+    <div class="card-header codesum"><span class="anchor" id="proc-get_w_p_p09"></span><h3>public  subroutine <a href='../proc/get_w_p_p09.html'>get_w_p_P09</a>(wpm, wpp, aa, bb, bpr, cent, Hz, Bp, h, found)  
+</h3></div>
+    <div class="card-body">
+          
+  <p>==========================================================================<br />
+                  ***  ROUTINE get_w_p_P09  ***                           <br />
+ ** Purposes : compute plume vertical velocity for Pergaud et al. (2009)
+                        entrainment/detrainement closure                  <br />
+==========================================================================<br /></p>
+
+  <h4>Arguments</h4>
+      <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-wpm~10"></span>
+              real(kind=8),
+            </td>
+<td>intent(inout)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>wpm</strong></td>
+            <td>
+<p>vertical velocity at the bottom of the grid cell [m/s]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-wpp~10"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>wpp</strong></td>
+            <td>
+<p>vertical velocity at the top of the grid cell [m/s]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-aa~2"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>aa</strong></td>
+            <td>
+<p>parameter of the MF scheme</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-bb~2"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>bb</strong></td>
+            <td>
+<p>parameter of the MF scheme</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-bpr~2"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>bpr</strong></td>
+            <td>
+<p>parameter of the MF scheme</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-cent~4"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>cent</strong></td>
+            <td>
+<p>parameter of the MF scheme</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-hz~6"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>Hz</strong></td>
+            <td>
+<p>thickness of the grid cell [m]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-bp~6"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>Bp</strong></td>
+            <td>
+<p>plume buoyancy forcing term [m/s2]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-h~2"></span>
+              real(kind=8),
+            </td>
+<td>intent(inout)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>h</strong></td>
+            <td>
+<p>distance from the top of the grid cell where w_p = w_p_min [m]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-found~2"></span>
+              logical,
+            </td>
+<td>intent(inout)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>found</strong></td>
+            <td>
+<p>(=T) the bottom of the plume is reached</p>
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+    </div>
+  </div>
+
+              <div class="card">
+    <div class="card-header codesum"><span class="anchor" id="proc-mass_flux_p09"></span><h3>public  subroutine <a href='../proc/mass_flux_p09.html'>mass_flux_P09</a>(u_m, v_m, t_m, z_w, Hz, tp0, up0, vp0, wp0, mf_params, alpha, beta, small_ap, zinv, N, ntra, nparams, a_p, u_p, v_p, w_p, t_p, B_p, ent, det)  
+</h3></div>
+    <div class="card-body">
+          
+  <p>==========================================================================<br />
+                  ***  ROUTINE mass_flux_P09  ***                           <br />
+ ** Purposes : solve mass-flux equations for Pergaud et al. (2009)
+                        entrainment/detrainement closure                  <br />
+ <script type="math/tex; mode=display">\begin{align*} E &= \frac{C_\epsilon a^{\rm p}}{w^{\rm p}}  \min(0, B^{\rm p}) \\
+                D &= \frac{C_\delta a^{\rm p}}{w^{\rm p}} \max( 0, B^{\rm p}) - a^{\rm p}w^{\rm p}\delta_0  \end{align*}</script>
+==========================================================================<br />
+ Compute <script type="math/tex"> B^{\rm p}_{k} </script>
+<script type="math/tex; mode=display"> B^{\rm p}_{k} = - \frac{g}{\rho_0} \left( \rho^{\rm p}_{k+1/2} - \overline{\rho}_k \right) </script>
+ Compute <script type="math/tex"> w^{\rm p}_{k-1/2} </script>
+<script type="math/tex; mode=display"> (w^{\rm p})^{2}_{k+1/2} - (w^{\rm p})^{2}_{k-1/2} =
+  h_k b' \left((w^{\rm p})^{2}_{k+1/2} + (w^{\rm p})^{2}_{k-1/2}\right)
+ + 2 h_k \left( a \max(B^{\rm p}_{k},0) + (a-b C_\epsilon) \min(B^{\rm p}_{k},0)  \right)</script>
+ Compute <script type="math/tex"> a^{\rm p}_{k-1/2} </script>
+<script type="math/tex; mode=display"> (a^{\rm p}w^{\rm p})_{k+1/2} -(a^{\rm p}w^{\rm p})_{k-1/2} =
+ \frac{a^{\rm p}_{k+1/2}+a^{\rm p}_{k-1/2}}{w^{\rm p}_{k+1/2}+w^{\rm p}_{k-1/2}}
+ \left( C_\epsilon h_k \min(B^{\rm p}_{k},0) - C_\delta h_k \max(B^{\rm p}_{k},
+ - \frac{\delta_0}{2 C_\delta} \left((w^{\rm p})^{2}_{k+1/2} + (w^{\rm p})^{2}_{k-1/2}\right) )   \right)  </script>
+ Compute environment <script type="math/tex"> \phi^{\rm e}_k </script>
+</p>
+
+  <h4>Arguments</h4>
+      <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-u_m~3"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>u_m</strong>(1:N)</td>
+            <td>
+<p>mean zonal velocity [m/s]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-v_m~3"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>v_m</strong>(1:N)</td>
+            <td>
+<p>mean meridional velocity [m/s]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-t_m~3"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>t_m</strong>(1:N,ntra)</td>
+            <td>
+<p>mean tracer</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-z_w"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>z_w</strong>(0:N)</td>
+            <td>
+<p>depth at cell interfaces [m]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-hz~7"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>Hz</strong>(1:N)</td>
+            <td>
+<p>layer thickness [m]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-tp0~2"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>tp0</strong>(1:ntra)</td>
+            <td>
+<p>surface value for plume tracers</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-up0~2"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>up0</strong></td>
+            <td>
+<p>surface value for plume zonal velocity [m/s]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-vp0~2"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>vp0</strong></td>
+            <td>
+<p>surface value for plume meridional velocity [m/s]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-wp0~2"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>wp0</strong></td>
+            <td>
+<p>surface value for plume vertical velocity [m/s]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-mf_params"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>mf_params</strong>(1:nparams)</td>
+            <td>
+<p>parameters in the ODEs</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-alpha~2"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>alpha</strong></td>
+            <td>
+<p>thermal expension coefficient [C-1]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-beta~2"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>beta</strong></td>
+            <td>
+<p>haline expension coefficient [psu-1]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-small_ap"></span>
+              logical,
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>small_ap</strong></td>
+            <td>
+<p>(T) small area approximation (F) no approximation</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-zinv"></span>
+              real(kind=8),
+            </td>
+<td>intent(inout)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>zinv</strong></td>
+            <td>
+<p>depth at which w_p = wmin  [m]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-n~3"></span>
+              integer,
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>N</strong></td>
+            <td>
+<p>number of vertical levels</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-ntra~3"></span>
+              integer,
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>ntra</strong></td>
+            <td>
+<p>number of tracers</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-nparams"></span>
+              integer,
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>nparams</strong></td>
+            <td>
+<p>number of parameters in the EDOs</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-a_p"></span>
+              real(kind=8),
+            </td>
+<td>intent(out)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>a_p</strong>(0:N)</td>
+            <td>
+<p>fractional area occupied by the plume</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-u_p~2"></span>
+              real(kind=8),
+            </td>
+<td>intent(out)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>u_p</strong>(0:N)</td>
+            <td>
+<p>zonal velocity in the plume [m/s]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-v_p~2"></span>
+              real(kind=8),
+            </td>
+<td>intent(out)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>v_p</strong>(0:N)</td>
+            <td>
+<p>meridional velocity in the plume [m/s]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-w_p~2"></span>
+              real(kind=8),
+            </td>
+<td>intent(out)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>w_p</strong>(0:N)</td>
+            <td>
+<p>vertical velocity in the plume [m/s]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-t_p"></span>
+              real(kind=8),
+            </td>
+<td>intent(out)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>t_p</strong>(0:N,ntra)</td>
+            <td>
+<p>tracer values in the plume</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-b_p"></span>
+              real(kind=8),
+            </td>
+<td>intent(out)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>B_p</strong>(0:N)</td>
+            <td>
+<p>buoyancy forcing  [m/s2]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-ent"></span>
+              real(kind=8),
+            </td>
+<td>intent(out)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>ent</strong>(1:N)</td>
+            <td>
+<p>diagnostics : entrainment [m-1]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-det"></span>
+              real(kind=8),
+            </td>
+<td>intent(out)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>det</strong>(1:N)</td>
+            <td>
+<p>diagnostics : detrainment [m-1]</p>
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+    </div>
+  </div>
+
+              <div class="card">
+    <div class="card-header codesum"><span class="anchor" id="proc-mass_flux_r10"></span><h3>public  subroutine <a href='../proc/mass_flux_r10.html'>mass_flux_R10</a>(u_m, v_m, t_m, tke_m, z_w, Hz, tp0, up0, vp0, wp0, mf_params, alpha, beta, small_ap, lin_eos, zinv, N, ntra, nparams, a_p, u_p, v_p, w_p, t_p, B_p, ent, det, eps)  
+</h3></div>
+    <div class="card-body">
+          
+  <p>==========================================================================<br />
+                  ***  ROUTINE mass_flux_R10  ***                         <br />
+ ** Purposes : solve mass-flux equations for Rio et al. (2010)
+                        entrainment/detrainement closure                  <br />
+ <script type="math/tex; mode=display">\begin{align*} E &= a^{\rm p} \beta_1 \max(0, \partial_z w^{\rm p}) \\
+                D &= - a^{\rm p} \beta_2 \min\left( 0 , \partial_z w^{\rm p} \right) -  a^{\rm p} w^{\rm p} \delta_0  \end{align*}</script> <br /></p><a href="../proc/mass_flux_r10.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+
+  <h4>Arguments</h4>
+      <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-u_m~4"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>u_m</strong>(1:N)</td>
+            <td>
+<p>mean zonal velocity [m/s]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-v_m~4"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>v_m</strong>(1:N)</td>
+            <td>
+<p>mean meridional velocity [m/s]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-t_m~4"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>t_m</strong>(1:N,ntra)</td>
+            <td>
+<p>mean tracer</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-tke_m"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>tke_m</strong>(0:N)</td>
+            <td>
+<p>mean TKE [m2/s2]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-z_w~2"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>z_w</strong>(0:N)</td>
+            <td>
+<p>depth at cell interfaces [m]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-hz~8"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>Hz</strong>(1:N)</td>
+            <td>
+<p>layer thickness [m]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-tp0~3"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>tp0</strong>(1:ntra)</td>
+            <td>
+<p>surface value for plume tracers</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-up0~3"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>up0</strong></td>
+            <td>
+<p>surface value for plume zonal velocity [m/s]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-vp0~3"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>vp0</strong></td>
+            <td>
+<p>surface value for plume meridional velocity [m/s]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-wp0~3"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>wp0</strong></td>
+            <td>
+<p>surface value for plume vertical velocity [m/s]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-mf_params~2"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>mf_params</strong>(1:nparams)</td>
+            <td>
+<p>parameters in the ODEs</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-alpha~3"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>alpha</strong></td>
+            <td>
+<p>thermal expension coefficient [C-1]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-beta~3"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>beta</strong></td>
+            <td>
+<p>haline expension coefficient [psu-1]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-small_ap~2"></span>
+              logical,
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>small_ap</strong></td>
+            <td>
+<p>(T) small area approximation (F) no approximation</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-lin_eos"></span>
+              logical,
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>lin_eos</strong></td>
+            <td>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-zinv~2"></span>
+              real(kind=8),
+            </td>
+<td>intent(inout)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>zinv</strong></td>
+            <td>
+<p>depth at which w_p = wmin  [m]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-n~4"></span>
+              integer,
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>N</strong></td>
+            <td>
+<p>number of vertical levels</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-ntra~4"></span>
+              integer,
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>ntra</strong></td>
+            <td>
+<p>number of tracers</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-nparams~2"></span>
+              integer,
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>nparams</strong></td>
+            <td>
+<p>number of parameters in the EDOs</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-a_p~2"></span>
+              real(kind=8),
+            </td>
+<td>intent(out)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>a_p</strong>(0:N)</td>
+            <td>
+<p>fractional area occupied by the plume</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-u_p~3"></span>
+              real(kind=8),
+            </td>
+<td>intent(out)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>u_p</strong>(0:N)</td>
+            <td>
+<p>zonal velocity in the plume [m/s]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-v_p~3"></span>
+              real(kind=8),
+            </td>
+<td>intent(out)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>v_p</strong>(0:N)</td>
+            <td>
+<p>meridional velocity in the plume [m/s]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-w_p~3"></span>
+              real(kind=8),
+            </td>
+<td>intent(out)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>w_p</strong>(0:N)</td>
+            <td>
+<p>vertical velocity in the plume [m/s]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-t_p~2"></span>
+              real(kind=8),
+            </td>
+<td>intent(out)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>t_p</strong>(0:N,ntra)</td>
+            <td>
+<p>tracer values in the plume</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-b_p~2"></span>
+              real(kind=8),
+            </td>
+<td>intent(out)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>B_p</strong>(0:N)</td>
+            <td>
+<p>buoyancy forcing  [m/s2]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-ent~2"></span>
+              real(kind=8),
+            </td>
+<td>intent(out)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>ent</strong>(1:N)</td>
+            <td>
+<p>diagnostics : entrainment [m-1]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-det~2"></span>
+              real(kind=8),
+            </td>
+<td>intent(out)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>det</strong>(1:N)</td>
+            <td>
+<p>diagnostics : detrainment [m-1]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-eps"></span>
+              real(kind=8),
+            </td>
+<td>intent(out)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>eps</strong>(1:N)</td>
+            <td>
+<p>diagnostics : TKE dissipation [m2 s-3]</p>
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+    </div>
+  </div>
+
+        </section>
+        <br>
+
+
+
+    </div>
+  </div>
+
+      <hr>
+    </div> <!-- /container -->
+    <footer>
+      <div class="container">
+        <div class="row justify-content-between">
+          <div class="col"><p>SCM-EDMF ocean was developed by M. Perrot / F. Lemarié<br>&copy; 2024 
+</p>
+          </div>
+          <div class="col">
+            <p class="text-end">
+              Documentation generated by
+              <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
+            </p>
+          </div>
+        </div>
+        <br>
+      </div> <!-- /container -->
+    </footer>
+
+    <!-- Bootstrap core JavaScript -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>    
+
+    <!-- MathJax JavaScript
+             ================================================== -->
+             <!-- Placed at the end of the document so the pages load faster -->
+        <script type="text/x-mathjax-config">
+          MathJax.Hub.Config({
+          TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } },
+          jax: ['input/TeX','input/MathML','output/HTML-CSS'],
+          extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']
+          });
+        </script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+          <script src="../tipuesearch/tipuesearch_content.js"></script>
+          <script src="../tipuesearch/tipuesearch_set.js"></script>
+          <script src="../tipuesearch/tipuesearch.js"></script>
+
+  </body>
+</html>
