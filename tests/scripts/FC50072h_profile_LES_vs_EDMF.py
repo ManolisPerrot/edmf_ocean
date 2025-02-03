@@ -100,7 +100,7 @@ scm_params = {
     'mass_flux_dyn': True,
     'mass_flux_tke': True,
     'mass_flux_tke_trplCorr': True,
-    'mass_flux_small_ap': True,
+    'mass_flux_small_ap': False,
     'lin_eos': True,
     'extrap_ak_surf': True,
     'tke_sfc_dirichlet': False,

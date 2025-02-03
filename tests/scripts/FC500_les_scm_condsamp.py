@@ -115,7 +115,7 @@ subplot_label = [r'\rm{(a)}', r'\rm{(b)}', r'\rm{(c)}',
                  r'\rm{(d)}', r'\rm{(e)}', r'\rm{(f)}', r'\rm{(g)}',r'\rm{(h)}',r'\rm{(i)}']
 
 
-fig, axs = plt.subplots(nrows=2, ncols=3, sharey=True,constrained_layout=True)
+fig, axs = plt.subplots(nrows=1, ncols=3, sharey=True,constrained_layout=True)
 i_ax = -1
 #-----------------------------------------------------------------------
 i_ax+=1
@@ -178,38 +178,38 @@ for case in cases:
 #     ax.plot(les[case][mask+'_VORT_z'][instant] , zadim, color[mask], linewidth=linewidth[mask], linestyle=linestyle[case],alpha=alpha[case])
 #     ax.plot(scm[cases[1]]['vort_p'][instant] , scm[case]['z_w']/mld, color[mask], linewidth=linewidth[mask], linestyle=linestyle_scm[case],alpha=alpha[case],label=case+mask)
 # #-----------------------------------------------------------------------
-# #-----------------------------------------------------------------------
-i_ax+=1
-ax=axs.flat[i_ax]
-ax.set_title(r'$E$')
-ax.set_xlabel(r'$\mathrm{s^{-1}}$')
-
-for case in cases:
-    mask='DW'
-    # ax.plot(E_les[case][instant]-D_les[case][instant] , zadim[1:], color[mask], linewidth=linewidth[mask], linestyle='-',alpha=alpha[case])
-    # ax.plot(scm[case]['Ent'][instant]-scm[case]['Det'][instant] , scm[case]['z_r']/mld, color[mask], linewidth=linewidth[mask], linestyle=linestyle_scm[case],alpha=alpha[case],label=case+mask)
-    ax.plot(E_les[case][instant] , zadim[1:], color[mask], linewidth=linewidth[mask], linestyle=linestyle[case],alpha=alpha[case])
-    ax.plot(scm[case]['Ent'][instant] , scm[case]['z_r']/mld, color[mask], linewidth=linewidth[mask], linestyle=linestyle_scm[case],alpha=alpha[case],label=case+mask)
-# ax.set_xlim(-1e-5,1e-4)
-ax.set_xscale('log')
-# #-----------------------------------------------------------------------
-# #-----------------------------------------------------------------------
-i_ax+=1
-ax=axs.flat[i_ax]
-ax.set_title(r'$D$')
-ax.set_xlabel(r'$\mathrm{s^{-1}}$')
-
-for case in cases:
-    mask='DW'
-    ax.plot(D_les[case][instant] , zadim[1:], color[mask], linewidth=linewidth[mask], linestyle=linestyle[case],alpha=alpha[case])
-    ax.plot(scm[case]['Det'][instant] , scm[case]['z_r']/mld, color[mask], linewidth=linewidth[mask], linestyle=linestyle_scm[case],alpha=alpha[case],label=case+mask)
-# ax.set_xlim(-1e-5,1e-4)
-ax.set_xscale('log')
 # # #-----------------------------------------------------------------------
-i_ax+=1
-ax=axs.flat[i_ax]
-ax.remove()
+# i_ax+=1
+# ax=axs.flat[i_ax]
+# ax.set_title(r'$E$')
+# ax.set_xlabel(r'$\mathrm{s^{-1}}$')
+
+# for case in cases:
+#     mask='DW'
+#     # ax.plot(E_les[case][instant]-D_les[case][instant] , zadim[1:], color[mask], linewidth=linewidth[mask], linestyle='-',alpha=alpha[case])
+#     # ax.plot(scm[case]['Ent'][instant]-scm[case]['Det'][instant] , scm[case]['z_r']/mld, color[mask], linewidth=linewidth[mask], linestyle=linestyle_scm[case],alpha=alpha[case],label=case+mask)
+#     ax.plot(E_les[case][instant] , zadim[1:], color[mask], linewidth=linewidth[mask], linestyle=linestyle[case],alpha=alpha[case])
+#     ax.plot(scm[case]['Ent'][instant] , scm[case]['z_r']/mld, color[mask], linewidth=linewidth[mask], linestyle=linestyle_scm[case],alpha=alpha[case],label=case+mask)
+# # ax.set_xlim(-1e-5,1e-4)
+# ax.set_xscale('log')
+# # #-----------------------------------------------------------------------
+# # #-----------------------------------------------------------------------
+# i_ax+=1
+# ax=axs.flat[i_ax]
+# ax.set_title(r'$D$')
+# ax.set_xlabel(r'$\mathrm{s^{-1}}$')
+
+# for case in cases:
+#     mask='DW'
+#     ax.plot(D_les[case][instant] , zadim[1:], color[mask], linewidth=linewidth[mask], linestyle=linestyle[case],alpha=alpha[case])
+#     ax.plot(scm[case]['Det'][instant] , scm[case]['z_r']/mld, color[mask], linewidth=linewidth[mask], linestyle=linestyle_scm[case],alpha=alpha[case],label=case+mask)
+# # ax.set_xlim(-1e-5,1e-4)
+# ax.set_xscale('log')
 # # # #-----------------------------------------------------------------------
+# i_ax+=1
+# ax=axs.flat[i_ax]
+# ax.remove()
+# # # # #-----------------------------------------------------------------------
 # #-----------------------------------------------------------------------
 #-----------------------------------------------------------------------
 # i_ax+=1
@@ -236,7 +236,7 @@ subplot_label = [r'\rm{(a)}', r'\rm{(b)}', r'\rm{(c)}',
                     r'\rm{(d)}', r'\rm{(e)}', r'\rm{(f)}',r'\rm{(g)}',r'\rm{(h)}',r'\rm{(i)}',r'\rm{(j)}',r'\rm{(k)}',r'\rm{(l)}']
 
 for i,ax in enumerate(axs.flat):
-    # ax.set_box_aspect(1)
+    ax.set_box_aspect(1)
     ax.grid(alpha=0.5)
     ax.set_ylim(-1.2,0)
     # adding subplot labels
@@ -253,7 +253,7 @@ for i,ax in enumerate(axs.flat):
 # axs.flat[0].legend(handles, labels,fancybox=False)
 fig.suptitle(r'Plume variables, '+case)
 # fig.legend()
-plt.savefig('../figures/FC500_les_scm_condsamp.pdf', bbox_inches='tight', dpi=600)
-print('Figure saved at ../figures/FC500_les_scm_condsamp.pdf')
-# plt.show()
+# plt.savefig('../figures/FC500_les_scm_condsamp.pdf', bbox_inches='tight', dpi=600)
+# print('Figure saved at ../figures/FC500_les_scm_condsamp.pdf')
+plt.show()
 

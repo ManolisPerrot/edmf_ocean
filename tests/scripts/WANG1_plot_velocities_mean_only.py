@@ -75,9 +75,10 @@ def plot_mean_velocities(cases=['WANG1_FR_lat60'], savefig=False):
 
     styles_les = {case: '-' for case in cases}
     colors_les = colors
-    alpha_les  = {case:0.3 for case in cases}
+    alpha_les  = {case:1 for case in cases}
     marker_les='o'
-    width_les = {case:3 for case in cases}
+    linestyle_les=':'
+    # width_les = {case:3 for case in cases}
     #============================================ WC ===============================================
     fig, axes = plt.subplots(nrows=1, ncols=2, sharex=False,
                             sharey=True, constrained_layout=True)
@@ -97,9 +98,9 @@ def plot_mean_velocities(cases=['WANG1_FR_lat60'], savefig=False):
         # ax.plot(-1/fcor[case]*dz_WV_scm[case]/wstar, out_dic[case].z_w[1:]/mld, linestyle=':', color = colors[case], alpha=alpha[case], label=r'$-\frac{1}{f} \partial_z \frac{\langle \overline{w^\prime v^\prime} \rangle_t}{w_*}$, SCM '+case)
         
         ax.plot(U_les[case][:].mean(dim='time_les')/wstar, z_r_les[case]/mld, colors_les[case], 
-            alpha=alpha_les[case],linewidth=width_les[case], label=r'$\frac{ \langle \overline{u} \rangle_{t} }{w_*}$, LES '+case)
+            alpha=alpha_les[case],linestyle=linestyle_les, label=r'$\frac{ \langle \overline{u} \rangle_{t} }{w_*}$, LES '+case)
         # ax.plot(1/fcor[case]*dz_WV_les[case]/wstar, z_r_les[case][1:]/mld, colors_les[case], 
-        #     alpha=alpha_les[case],linewidth=width_les[case],linestyle=':',label=r'$-\frac{1}{f} \partial_z \frac{\langle \overline{w^\prime v^\prime} \rangle_t}{w_*}$, LES '+case)
+        #     alpha=alpha_les[case],linestyle=linestyle_les,linestyle=':',label=r'$-\frac{1}{f} \partial_z \frac{\langle \overline{w^\prime v^\prime} \rangle_t}{w_*}$, LES '+case)
 
         # var = -( 1/(fcor[case]*wstar)*out_dic[case].a_p*(out_dic[case].w_p)**2 ).diff(dim='z_w')[:].mean(dim='time')
         # ax.plot(var, out_dic[case].z_r/mld)
@@ -124,10 +125,10 @@ def plot_mean_velocities(cases=['WANG1_FR_lat60'], savefig=False):
 
         
         ax.plot(V_les[case][:].mean(dim='time_les')/wstar, z_r_les[case]/mld, colors_les[case], 
-            alpha=alpha_les[case],linewidth=width_les[case],label=r'$\frac{\langle \overline{v} \rangle_{t}}{w_*}$, LES')
+            alpha=alpha_les[case],linestyle=linestyle_les,label=r'$\frac{\langle \overline{v} \rangle_{t}}{w_*}$, LES')
 
         # ax.plot(-1/fcor[case]*dz_WU_les[case]/wstar, z_r_les[case][1:]/mld, colors_les[case], 
-        #     alpha=alpha_les[case],linewidth=width_les[case],linestyle=':',label=r'$\frac{1}{f} \partial_z \frac{ \langle \overline{w^\prime u^\prime} \rangle_t}{w_*} $, LES')
+        #     alpha=alpha_les[case],linestyle=linestyle_les,linestyle=':',label=r'$\frac{1}{f} \partial_z \frac{ \langle \overline{w^\prime u^\prime} \rangle_t}{w_*} $, LES')
     # ax.set_xlim((2.93, 2.98))
     ax.set_ylim((-1.3, 0))
     handles, labels = ax.get_legend_handles_labels()
@@ -142,7 +143,7 @@ def plot_mean_velocities(cases=['WANG1_FR_lat60'], savefig=False):
 
     for i,ax in enumerate(axes.flat):
         ax.text(0.1, 0.97, subplot_label[i], transform=ax.transAxes, bbox=dict(facecolor='1.', edgecolor='none'), fontweight='bold', va='top', ha='right')
-
+        ax.set_box_aspect(1)
     if savefig:
         saving_path = '../figures/'
         saving_name = cases[0]+'_mean_velocities.png'    
@@ -152,5 +153,6 @@ def plot_mean_velocities(cases=['WANG1_FR_lat60'], savefig=False):
 
 
 if __name__ == '__main__':
-    plot_mean_velocities()
+    cases=['WANG1_FR_lat30','WANG1_FR_lat60']
+    plot_mean_velocities(cases=cases,savefig=True,)
 

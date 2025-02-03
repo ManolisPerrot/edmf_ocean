@@ -125,7 +125,7 @@ def plot_instant_panel(avg_start=-2,avg_stop=-1,cases=['WANG1_FR_lat60'],savefig
         # ax.set_ylim((-2, 0))
         ax.set_box_aspect(1)
         ax.text(0.15, 0.95, subplot_label[i], transform=ax.transAxes, bbox=dict(facecolor='1.', edgecolor='none'), fontweight='bold', va='top', ha='right')
-
+        
 
     #     # ax.text(0.15, 0.95, subplot_label[i], transform=ax.transAxes, bbox=dict(facecolor='1.', edgecolor='none', pad=3.0), fontweight='bold', va='top', ha='right')
 
