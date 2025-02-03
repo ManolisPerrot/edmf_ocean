@@ -130,7 +130,7 @@ levels = np.logspace(np.log10(1e-5), np.log10(1e-0), 16)
 cmap = 'Greys'
 norm = colors.LogNorm()
 # contour_colors=[blue,'silver',orange,magenta]
-contour_colors=['tab:green','silver','tab:pink','tab:orange']
+contour_colors=['white','tab:blue','tab:pink','tab:orange','tab:green']
 ax = axs.flat[0]
 
 #------------------------------------------------------------
@@ -199,7 +199,8 @@ for i in range(axs.size):
       fontsize=16, bbox=dict(facecolor='1.', edgecolor='none', pad=3.0, alpha=0.5), fontweight='bold', va='top', ha='right')
 
 
-plt.savefig(saving_path+'W005_C500_steady_plume.png',dpi=300)
+plt.savefig(saving_path+'W005_C500_steady_plume.pdf',bbox_inches='tight')
+print('figure saved at '+saving_path+'W005_C500_steady_plume.pdf')
 
 
 #plt.show()

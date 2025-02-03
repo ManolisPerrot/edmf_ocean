@@ -130,7 +130,7 @@ levels = np.logspace(np.log10(1e-5), np.log10(1e-0), 16)
 cmap = 'Greys'
 norm = colors.LogNorm()
 # contour_colors=[blue,'silver',orange,magenta]
-contour_colors=['tab:green','silver','tab:pink','tab:orange']
+contour_colors=['white','tab:blue','tab:pink','tab:orange','tab:green']
 
 
 ax = axs.flat[0]
