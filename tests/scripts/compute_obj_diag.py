@@ -10,13 +10,16 @@ import xarray as xr
 #run_name = 'W05_C500'
 # run_name = 'W05_C500_NO_COR'
 # run_name = 'test'
-run_name = 'W005_C500_NO_COR'
-# sampling = 'Csv_m1'
+# run_name = 'W005_C500_NO_COR'
+run_name = 'FC500'
+sampling = 'Csv_m1'
 # sampling = 'Csv_m2'
 # sampling = 'Csv_m05'
 # sampling = 'w_sieb_p01'
 # sampling = 'Cw_m1'
-sampling = 'Cw_m2'
+# sampling = 'Cw_m2'
+# sampling = 'Cw_m05'
+
 path = '../data/'+run_name+'/'
 # saving_name = '_object_diags_'+sampling+'_276h.nc'
 # saving_name = '_object_diags_'+sampling+'_264h.nc'
@@ -333,6 +336,21 @@ for file in files:
         # Compute sampling masks FROM W: Couvreux 2010, Pergaud 2009, Berg,Stull 2002 on SV
 
         m = 2
+        masks['DW'] = (((variables['WT'] - MEAN_VARS['TOT']['WT']) < 0) & ((variables['WT'] - MEAN_VARS['TOT']
+                                                                            ['WT']) < - m*np.maximum(sigmaWmin, np.sqrt(intra_cov['TOT']['W2']))))  # for down drafts
+        masks['UP'] = ~masks['DW']
+
+    if sampling == 'Cw_m05':
+        # computation of minimum stdev from Couvreux, obtained as 5% (10%) of vertical mean stdev
+        sigmaWmin = np.abs(intra_cov['TOT']['W2'])
+        for k in range(z_r.size):
+            # sigmaWmin[:, k] = 0.05/(- z_r[k]) * (np.sqrt(intra_cov['TOT']['W2'].isel(
+            sigmaWmin[:, k] = percent/(- z_r[k]) * (np.sqrt(intra_cov['TOT']['W2'].isel(
+                level=[i for i in range(k, z_r.size)]))).integrate('level')
+
+        # Compute sampling masks FROM W: Couvreux 2010, Pergaud 2009, Berg,Stull 2002 on SV
+
+        m = 0.5
         masks['DW'] = (((variables['WT'] - MEAN_VARS['TOT']['WT']) < 0) & ((variables['WT'] - MEAN_VARS['TOT']
                                                                             ['WT']) < - m*np.maximum(sigmaWmin, np.sqrt(intra_cov['TOT']['W2']))))  # for down drafts
         masks['UP'] = ~masks['DW']

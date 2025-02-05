@@ -202,7 +202,7 @@ for i in range(axs.size):
       fontsize=16, bbox=dict(facecolor='1.', edgecolor='none', pad=3.0, alpha=0.5), fontweight='bold', va='top', ha='right')
 
 
-plt.savefig(saving_path+'FC500_steady_plume.png',dpi=300)
+plt.savefig(saving_path+'FC500_steady_plume.pdf')
 
 
 # plt.show()

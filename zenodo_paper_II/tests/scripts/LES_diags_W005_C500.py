@@ -42,7 +42,7 @@ WT0 = Q0/(rho0 * cp)
 
 saving_path = '../figures/'
 
-saving_name = case+'_object_diags_Cw_m1_all'
+saving_name = case+'_object_diags_Cw_m05_all'
 
 path = '../data/'+case+'/'
 
@@ -50,7 +50,7 @@ path = '../data/'+case+'/'
 file = saving_name+'.nc'
 
 path = '/home/manolis/eftp.ifremer.fr/scratch/W005_C500_NO_COR/'
-file='W005_C500_NO_COR_object_diags_Cw_m2_72h.nc'
+file='W005_C500_NO_COR_object_diags_Cw_m05_72h.nc'
 
 ds = xr.open_dataset(path+file)
 
@@ -217,7 +217,7 @@ for ax in axs.flat:
   
 
 
-plt.savefig(saving_path+'LES_diags_W005_C500'+'_Cwm2', bbox_inches='tight', dpi=600)
+plt.savefig(saving_path+'LES_diags_W005_C500'+'_Cwm05', bbox_inches='tight', dpi=600)
 print('fig saved at '+saving_path+'LES_diags_W005_C500')
 
 #plt.show()

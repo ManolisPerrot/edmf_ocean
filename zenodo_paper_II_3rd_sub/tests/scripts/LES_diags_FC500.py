@@ -44,6 +44,7 @@ saving_path = '../figures/'
 
 #saving_name = case+'_object_diags_Cw_m1_72h_copy'
 saving_name = case+'_object_diags_Cw_m1_all'
+# saving_name=case+'_object_diags_Csv_m1_72h'
 
 path = '../data/'+case+'/'
 
@@ -109,12 +110,14 @@ for i in range(len(var_names)-1):
 # ----------------------
 i = 2  # 'FRAC'
 mask = 'DW'
-axs.flat[i].plot(variables[mask][i][instant, 70:], zadim[70:],
+nz=70
+axs.flat[i].plot(variables[mask][i][instant, nz:], zadim[nz:],
+                 linestyle='-', linewidth=linewidth[mask], color='#0db4c3')
+axs.flat[i].plot(2*variables[mask][i][instant, nz]-variables[mask][i][instant, :nz+1], zadim[:nz+1],
                  linestyle='-', linewidth=linewidth[mask], color='#0db4c3')
 axs.flat[i].set_title(var_titles[i])
 axs.flat[i].grid(False)
 axs.flat[i].set_xlabel(units[i])
-
 
 # -----------------------
 i=1 # 'WT'
@@ -218,6 +221,6 @@ for ax in axs.flat:
 
 
 plt.savefig(saving_path+'LES_diags_FC500', bbox_inches='tight', dpi=600)
-print('fig saved at'+saving_path+'LES_diags_FC500')
+print('fig saved at '+saving_path+'LES_diags_FC500')
 
-#plt.show()
+# plt.show()

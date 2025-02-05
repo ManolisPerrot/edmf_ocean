@@ -43,7 +43,9 @@ WT0 = Q0/(rho0 * cp)
 saving_path = '../figures/'
 
 # saving_name = case+'_object_diags_Cw_m1_all'
-saving_name = case+'_object_diags_Cw_m1_72h'
+# saving_name = case+'_object_diags_Cw_m1_72h'
+saving_name = case+'_object_diags_Cw_m05_72h'
+
 # saving_name = case+'_object_diags_Cw_m2_72h'
 
 path = '../data/'+case+'/'
@@ -178,16 +180,16 @@ wu_e = ds['UP_intra_WU']
 ww_e = ds['UP_intra_WW']
 ae = ds['UP_FRAC']
 
-# Negkected terms:
-ax.plot( (ap*(up-ubar)*wu_p)[instant], zadim, color='r',
-        linestyle='--', linewidth=2.5, alpha=0.5, label=r'ap (up - u) wup')
-ax.plot( (ap*(wp)*ww_p)[instant], zadim, color='blue',
-        linestyle='--', linewidth=2.5, alpha=0.5, label=r'ap (wp - w) wwp')
+# # Negkected terms:
+# ax.plot( (ap*(up-ubar)*wu_p)[instant], zadim, color='r',
+#         linestyle='--', linewidth=2.5, alpha=0.5, label=r'ap (up - u) wup')
+# ax.plot( (ap*(wp)*ww_p)[instant], zadim, color='blue',
+#         linestyle='--', linewidth=2.5, alpha=0.5, label=r'ap (wp - w) wwp')
 
-ax.plot( (ae*(ue-ubar)*wu_e)[instant], zadim, color='r',
-        linestyle='-', linewidth=2.5, alpha=0.5, label=r'ae (ue - u) wue')
-ax.plot( (ae*(we)*ww_e)[instant], zadim, color='blue',
-        linestyle='--', linewidth=2.5, alpha=0.5, label=r'ae (we - w) wwe')
+# ax.plot( (ae*(ue-ubar)*wu_e)[instant], zadim, color='r',
+#         linestyle='-', linewidth=2.5, alpha=0.5, label=r'ae (ue - u) wue')
+# ax.plot( (ae*(we)*ww_e)[instant], zadim, color='blue',
+#         linestyle='--', linewidth=2.5, alpha=0.5, label=r'ae (we - w) wwe')
 
 ax.plot((ds['DW_WKE2'] + ds['UP_WKE2'])[instant], zadim, color='k',
         linestyle='--', linewidth=2.5, alpha=0.5, label=r'${\rm II}_e + {\rm II}_p $')
@@ -236,7 +238,7 @@ for ax in axs.flat:
   
 
 
-# plt.savefig(saving_path+'LES_diags_W005_C500', bbox_inches='tight', dpi=600)
-# print('fig saved at'+saving_path+'LES_diags_W005_C500')
+plt.savefig(saving_path+'LES_diags_W005_C500_Cwm05', bbox_inches='tight', dpi=600)
+print('fig saved at '+saving_path+'LES_diags_W005_C500')
 
 plt.show()
