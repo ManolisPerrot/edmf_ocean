@@ -149,7 +149,7 @@ scm_params = {
 
 # Define parameters specific to each run (overwrite common parameters):
 
-run_label = [ r'EDMF, $\beta_1 = 0.95$',r'EDMF, $\beta_1 = 0.1$',r'EDMF, $\beta_1 = 0.5$']
+run_label = [ r'EDMF, $C_{\mathrm{ent}} = 0.95$',r'EDMF, $C_{\mathrm{ent}} = 0.1$',r'EDMF, $C_{\mathrm{ent}} = 0.5$']
 runs = [
 
         {
@@ -245,7 +245,7 @@ colors = ['tab:blue','tab:green','tab:orange','tab:green','tab:green']
 alpha = [1]*3
 linewidth = [2]*(len(run_label))
 
-style_les = 'ko'
+style_les = 'k+'
 alpha_les = 1
 linewidth_les = 1
 
@@ -264,7 +264,7 @@ if case == 'FC500':
 
     # ===============================================================
     ax = axes.flat[0]
-    ax.set_xlabel(r'$ C$')
+    ax.set_xlabel(r'$^{\circ}C$')
     ax.set_ylabel(r'$z$')
     ax.set_title(r'$\overline{\theta}$')
 
@@ -373,6 +373,6 @@ for ax in axes.flat:
 plt.savefig(saving_path+saving_name, bbox_inches='tight', dpi=300)
 
 
-print('figure saved at'+saving_path+saving_name)
+print('figure saved at '+saving_path+saving_name)
 
 # plt.show()

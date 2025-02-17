@@ -16,7 +16,7 @@ import time as TIME
 import xarray as xr
 from scipy.interpolate import interp1d
 import scipy.signal
-from scm_class import SCM
+from scm_class_oce import SCM
 from netCDF4 import Dataset
 import matplotlib.pyplot as plt
 import numpy as np
@@ -224,7 +224,7 @@ scm = [0]*len(runs)
 for i, run_params in enumerate(runs):
     params = common_params.copy()  # Create a copy of common_params
     params.update(run_params)  # Update with run_params
-    scm[i] = SCM(**params)
+    scm[i] = SCM(params,cfg_params={}) #empty cfg_params because its is already contained in params...
     scm[i].run_direct()
 
     # test zinv
@@ -235,18 +235,10 @@ for i, run_params in enumerate(runs):
         is_in_range(value=scm[i].zinv, value_name='zinv', reference=reference,tolerance=10 )
 
 # LOAD outputs
+scm_out = [0]*len(runs)
+for i in range(len(runs)):
+    scm_out[i] = xr.open_dataset(runs[i]['output_filename'])
 
-# TH_scm = [0]*len(runs)
-# U_scm = [0]*len(runs)
-# V_scm = [0]*len(runs)
-
-# #interpolate scm output on LES #TODO do the converse to reduce computation cost?
-
-
-# for i, run_params in enumerate(runs):
-#     TH_scm = scm[i].t_history
-#     U_scm  = scm[i].u_history
-#     V_scm  = scm[i].v_history
 
 instant = 71
 
@@ -430,7 +422,7 @@ if case == 'W005_C500_NO_COR':
     wp = scm[i].wp
     up = scm[i].up 
     tke = scm[i].tke_n
-    tke_p = scm[i].tp[:,scm[i].isalt+1]
+    tke_p = scm_out[i].tke_p[-1,:]    
     akv = scm[i].akv
     dz = scm[i].Hz
     u = scm[i].u_n

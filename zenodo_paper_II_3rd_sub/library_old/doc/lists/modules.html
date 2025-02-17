@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+      <meta name="description" content="Documentation for SCM-EDMF ocean">
+    <meta name="author" content="M. Perrot / F. Lemarié" >
+    <link rel="icon" href="../favicon.png">
+
+    <title>All Modules &ndash; SCM-EDMF ocean
+</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+    <link href="../css/pygments.css" rel="stylesheet">
+    <link href="../css/font-awesome.min.css" rel="stylesheet">
+    <link href="../css/local.css" rel="stylesheet">
+      <link  href="../tipuesearch/tipuesearch.css" rel="stylesheet">
+
+    <script src="https://code.jquery.com/jquery-3.7.0.slim.min.js" integrity="sha256-tG5mcZUtJsZvyKAxYLVXrmjKBVLd6VpVccqz/r4ypFE=" crossorigin="anonymous"></script>
+  </head>
+
+  <body>
+
+    <!-- Fixed navbar -->
+    <div class="container-fluid mb-sm-4 mb-xl-2">
+      <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+        <div class="container">
+          <a class="navbar-brand" href="../index.html">SCM-EDMF ocean </a>
+          <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbar"
+                  aria-expanded="false" aria-controls="navbar" aria-label="Toggle navigation">
+                  <span class="navbar-toggler-icon">
+          </button>
+
+          <div id="navbar" class="navbar-collapse collapse">
+            <ul class="navbar-nav">
+                  <li class="nav-item">
+                    <a class="nav-link" href="../lists/files.html">Source Files</a>
+                  </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="../lists/modules.html">Modules</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="../lists/procedures.html">Procedures</a>
+                </li>
+            </ul>
+              <div class="d-flex align-items-end flex-grow-1">
+                <form action="../search.html" role="search" class="ms-auto">
+                  <input type="text" class="form-control" aria-label="Search" placeholder="Search" name="q" id="tipue_search_input" autocomplete="off" required>
+                </form>
+              </div>
+          </div><!--/.nav-collapse -->
+        </div>
+      </nav>
+    </div>
+
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-12" id='text'>
+			 <h1>Modules</h1>
+			 <table class="table">
+			 <thead><tr><th>Module</th><th>Source File</th><th>Description</th></tr></thead>
+			 <tbody>
+			   <tr class="active"><td><a href='../module/scm_mfc.html'>scm_mfc</a></td><td><a href='../sourcefile/scm_mfc.f90.html'>scm_mfc.f90</a></td><td><p>============================================================================<br />
+                       ***  MODULE  scm_mfc  ***                            <br />
+        Mass-flux (MF) convection scheme for oceanic deep convection        <br />
+============================================================================<br />
+--------------------------------------------------------------------------<br />
+   compute_MF_bdy    : top boundary conditions for plume properties       <br />
+   compute_MF_forcing: compute mean quantities used to force the MF equations <br />
+   compute_tripleCorr: compute contribution of MF terms to turbulent flux w'e <br />
+   eos_val_lin   : linear equation of state                           <br />
+   get_w_p_R10   : compute plume vertical velocity for Rio et al. 2010 closure <br />
+   get_a_p_R10   : compute plume fractional area for Rio et al. 2010 closure   <br />
+   get_t_p_R10   : compute plume tracer properties for Rio et al. 2010 closure <br />
+   get_w_p_P09   : compute plume vertical velocity for Pergaud et al. 2009 closure <br />
+   get_a_p_P09   : compute plume fractional area for Pergaud et al. 2009 closure   <br />
+   get_t_p_P09   : compute plume tracer properties for Pergaud et al. 2009 closure <br />
+   mass_flux_R10 : computation of mass-flux and plume properties for Rio et al. 2010 closure<br />
+   mass_flux_P09 : computation of mass-flux and plume properties for Pergaud et al. 2009 closure<br />
+----------------------------------------------------------------------------<br /></p></td></tr>
+<!--active-->			   <tr class=""><td><a href='../module/scm_oce.html'>scm_oce</a></td><td><a href='../sourcefile/scm_oce.f90.html'>scm_oce.f90</a></td><td><p>============================================================================<br />
+                       ***  MODULE  scm_oce  ***                            <br />
+ Single Column Model (SCM) time-stepping and oceanic equation of state      <br />
+============================================================================<br />
+----------------------------------------------------------------------------<br />
+   advance_tra_ED     : integrate eddy-diffusion term for tracers           <br />
+   advance_tra_MF     : integrate mass-flux term for tracers                <br />
+   advance_dyn_MF     : integrate mass-flux term for dynamics               <br />
+   advance_dyn_Cor_ED : integrate eddy-viscosity and Coriolis terms for dynamics <br />
+   compute_evd        : compute Enhanced Vertical Diffusion (EVD)           <br />
+   lmd_swfrac         : compute fraction of solar penetration               <br />
+   rho_eos_lin        : linear equation of state                            <br />
+   tridiag_solve      : tridiagonal solver                                  <br />
+----------------------------------------------------------------------------<br /></p></td></tr>
+<!---->			   <tr class="active"><td><a href='../module/scm_par.html'>scm_par</a></td><td><a href='../sourcefile/scm_par.f90.html'>scm_par.f90</a></td><td></td></tr>
+<!--active-->			   <tr class=""><td><a href='../module/scm_tke.html'>scm_tke</a></td><td><a href='../sourcefile/scm_tke.f90.html'>scm_tke.f90</a></td><td><p>============================================================================<br />
+                       ***  MODULE  scm_tke  ***                            <br />
+ Eddy-diffusion closure: TKE scheme with diagnostic mixing lengths
+                         adapted from NEMO TKE turbulent closure model      <br />
+============================================================================<br />
+----------------------------------------------------------------------------<br />
+   compute_tke_bdy   : top and bottom boundary conditions for TKE           <br />
+   compute_shear     : compute shear production term                        <br />
+   advance_tke       : tke time stepping: advance tke at next time step     <br />
+   compute_mxl       : compute mixing length scale                          <br />
+   compute_ED        : compute avm and avt                                  <br />
+   tridiag_solve_tke : tridiagonal solver for TKE equation                  <br />
+----------------------------------------------------------------------------<br /></p></td></tr>
+<!---->			 </tbody></table>
+             
+        </div>
+      </div>
+      <hr>
+    </div> <!-- /container -->
+    <footer>
+      <div class="container">
+        <div class="row justify-content-between">
+          <div class="col"><p>SCM-EDMF ocean was developed by M. Perrot / F. Lemarié<br>&copy; 2024 
+</p>
+          </div>
+          <div class="col">
+            <p class="text-end">
+              Documentation generated by
+              <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
+            </p>
+          </div>
+        </div>
+        <br>
+      </div> <!-- /container -->
+    </footer>
+
+    <!-- Bootstrap core JavaScript -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>    
+
+    <!-- MathJax JavaScript
+             ================================================== -->
+             <!-- Placed at the end of the document so the pages load faster -->
+        <script type="text/x-mathjax-config">
+          MathJax.Hub.Config({
+          TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } },
+          jax: ['input/TeX','input/MathML','output/HTML-CSS'],
+          extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']
+          });
+        </script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+          <script src="../tipuesearch/tipuesearch_content.js"></script>
+          <script src="../tipuesearch/tipuesearch_set.js"></script>
+          <script src="../tipuesearch/tipuesearch.js"></script>
+
+  </body>
+</html>

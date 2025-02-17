@@ -43,8 +43,8 @@ WT0 = Q0/(rho0 * cp)
 saving_path = '../figures/'
 
 # saving_name = case+'_object_diags_Cw_m1_all'
-# saving_name = case+'_object_diags_Cw_m1_72h'
-saving_name = case+'_object_diags_Cw_m05_72h'
+saving_name = case+'_object_diags_Cw_m1_72h'
+# saving_name = case+'_object_diags_Cw_m05_72h'
 
 # saving_name = case+'_object_diags_Cw_m2_72h'
 
@@ -238,7 +238,7 @@ for ax in axs.flat:
   
 
 
-plt.savefig(saving_path+'LES_diags_W005_C500_Cwm05', bbox_inches='tight', dpi=600)
+plt.savefig(saving_path+'LES_diags_W005_C500', bbox_inches='tight', dpi=600)
 print('fig saved at '+saving_path+'LES_diags_W005_C500')
 
-plt.show()
+# plt.show()

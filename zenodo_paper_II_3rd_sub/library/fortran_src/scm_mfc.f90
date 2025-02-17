@@ -584,8 +584,8 @@ CONTAINS
 
   !===================================================================================================
   SUBROUTINE mass_flux_R10(u_m,v_m,t_m,tke_m,z_w,Hz,tp0,up0,vp0,wp0,mf_params,eos_params,  &
-                           tkep_min,mxlp_min,small_ap,lin_eos,opt,zinv, N,ntra,nparams,neos,   &
-                           a_p,u_p,v_p,w_p,t_p,B_p,ent,det,eps)
+                           tkep_min,mxlp_min,small_ap,lin_eos,opt,fcor,zinv, N,ntra,nparams,neos,   &
+                            a_p,u_p,v_p,w_p,t_p,B_p,ent,det,eps,vort_p)
   !---------------------------------------------------------------------------------------------------
     !!==========================================================================<br />
     !!                  ***  ROUTINE mass_flux_R10  ***                         <br />
@@ -628,6 +628,7 @@ CONTAINS
     LOGICAL, INTENT(IN   )                 :: small_ap              !! (T) small area approximation (F) no approximation
     LOGICAL, INTENT(IN   )                 :: lin_eos               !!
     INTEGER, INTENT(IN   )                 ::  opt                 !! option for the computation of wtke (=0 PL24, =1 HB09, = 2 Wi11)
+    REAL(8), INTENT(IN   )                 :: fcor
     REAL(8), INTENT(  OUT)                 :: a_p(0:N)              !! fractional area occupied by the plume
     REAL(8), INTENT(  OUT)                 :: w_p(0:N)              !! vertical velocity in the plume [m/s]
     REAL(8), INTENT(  OUT)                 :: u_p(0:N)              !! zonal velocity in the plume [m/s]
@@ -637,6 +638,7 @@ CONTAINS
     REAL(8), INTENT(  OUT)                 :: ent(1:N)              !! diagnostics : entrainment [m-1]
     REAL(8), INTENT(  OUT)                 :: det(1:N)              !! diagnostics : detrainment [m-1]
     REAL(8), INTENT(  OUT)                 :: eps(1:N)          !! diagnostics : TKE dissipation [m2 s-3]
+    REAL(8), INTENT(  OUT)                 :: vort_p(0:N)
     REAL(8), INTENT(INOUT)                 :: zinv                  !! depth at which w_p = wmin  [m]
     ! local variables
     REAL(8)                                :: delta0
@@ -666,6 +668,9 @@ CONTAINS
     v_p(N) = (1.-Cv)*vp0          ; v_p(0:N-1       ) = 0.
     t_p(N,1:ntra) = tp0(1:ntra)   ; t_p(0:N-1,1:ntra) = 0.
     B_p(0:N) = 0.; ent(1:N) = 0.  ; det(1:N) = 0.  ; eps(1:N) = 0.
+    !! make a motivated CHOICE for the b.c. of vorticity... 
+    ! vort_p(N) = fcor
+    vort_p(N)=0.
     !
     IF(tke_comput == 0) THEN
         t_p(N,ntra) = 0.  ! in this case t_p(ntra) contains t_p - tke
@@ -786,6 +791,8 @@ CONTAINS
         eps(k)    = epsilon
       ENDIF
       !=====================================================================
+      CALL get_vort_p_R10(vort_p(k-1),vort_p(k),fcor,a_p(k-1),a_p(k),w_p(k-1),w_p(k), &
+      beta1,beta2,Hz(k),delta0,wpmin)
     ENDDO
     !=======================================================================
     ! At this point, up and vp contain up-Cu ue  and vp-Cv ve
@@ -884,6 +891,16 @@ CONTAINS
     !======================================================================
     !print*,'in mass_flux_R10_cor **',zinv
     ! unpack parameters (mf_params  = [Cent,Cdet,wp_a,wp_b,wp_bp,up_c,vp_c,bc_ap,delta0]
+    !!!!! TEST modulation of plume radius by Ro (not working)
+    ! REAL(8)                                :: B0, Ro
+    ! B0=7.302579717857959e-08
+    ! Ro = min((B0/fcor)**(1/2)/(fcor*abs(zinv)) , (B0/fcor)**(1/2)/(fcor*1000))
+    ! cff= tanh(Ro**2)
+    ! beta1 = mf_params(1); aa     = mf_params(3)
+    ! bb    = mf_params(4); bp     = mf_params(5)/ABS(zinv*cff) !bp     = mf_params(5)/(-zinv)
+    ! Cu    = mf_params(6); Cv     = mf_params(7)
+    ! beta2 = mf_params(2); delta0 = mf_params(9)/ABS(zinv*cff) !delta0 = mf_params(9)/(-zinv)
+    !!!!!!!!!
     beta1 = mf_params(1); aa     = mf_params(3)
     bb    = mf_params(4); bp     = mf_params(5)/ABS(zinv) !bp     = mf_params(5)/(-zinv)
     Cu    = mf_params(6); Cv     = mf_params(7)
@@ -898,7 +915,7 @@ CONTAINS
     t_p(N,1:ntra) = tp0(1:ntra)   ; t_p(0:N-1,1:ntra) = 0.
     B_p(0:N) = 0.; ent(1:N) = 0.  ; det(1:N) = 0.  ; eps(1:N) = 0.
     !
-    vort_p(0:N) = 0.
+    vort_p(N) = fcor
     !
     DO k = 2,N
       du_m(k) = u_m(k) - u_m(k-1)
@@ -933,6 +950,26 @@ CONTAINS
     N2sfc  = -(grav/eos_params(1))*(rho_m(N)-rho_m(N-1))/Hz(N)
     !=======================================================================
     DO k=N,1,-1
+
+      ! TESTS : Modulate ent/det by vorticity
+      ! fait pas grand chose...
+      !
+      ! cff=(1+EXP(-vort_p(k)/fcor))*0.5
+      ! if (fcor/vort_p(k)>0) then
+      !   cff = 1
+      ! else
+      !   cff=tanh((abs(fcor/vort_p(k)))**0.37)
+      ! endif 
+      ! cff=tanh(abs((1-abs(vort_p(k)/fcor)))**0.37+0.31)
+      ! !
+      ! beta1 = cff*mf_params(1)
+      ! beta2 = cff*mf_params(2)
+      ! ! bb    = cff*mf_params(4)
+      ! ! aa    = cff*mf_params(3)
+      ! delta0= (1/cff)*mf_params(9)/ABS(zinv)
+      ! bp    = (1/cff)*mf_params(5)/ABS(zinv)
+      !
+      !
       ! Compute B_p
       temp_p = t_p(k,1); salt_p = t_p(k,2)
       !
@@ -981,7 +1018,9 @@ CONTAINS
       u_env = u_m(k); v_env = v_m(k) ! m/s
       frc_u = Cu*du_m(k)-Hz(k)*ecor  ! m/s
       frc_v = Cv*dv_m(k)             ! m/s
-      !=======
+      ! frc_u = Cu*du_m(k)-Hz(k)*ecor + Cu*u_p(k) ! m/s, test
+      ! frc_v = Cv*dv_m(k)            + Cu*v_p(k) ! m/s, test
+      !==v====
       ! Compute up
       cor_u   =   fcor*Hz(k)*v_p(k) ! m2/s2
       CALL get_u_p_R10(u_p(k-1),u_p(k),u_env,a_p(k-1),a_p(k),w_p(k-1),w_p(k),   &

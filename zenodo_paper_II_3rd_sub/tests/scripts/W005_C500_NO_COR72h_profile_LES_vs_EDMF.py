@@ -16,7 +16,7 @@ import time as TIME
 import xarray as xr
 from scipy.interpolate import interp1d
 import scipy.signal
-from scm_class import SCM
+from scm_class_oce import SCM
 from netCDF4 import Dataset
 import matplotlib.pyplot as plt
 import numpy as np
@@ -188,7 +188,7 @@ for i, run_params in enumerate(runs):
     params = physical_params.copy()  # Create a copy of common_params
     params.update(scm_params)  # Update with run_params
     params.update(run_params)  # Update with run_params
-    scm[i] = SCM(**params)
+    scm[i] = SCM(params,cfg_params={}) #empty cfg_params because its is already contained in params...
     scm[i].run_direct()
 
     # test zinv

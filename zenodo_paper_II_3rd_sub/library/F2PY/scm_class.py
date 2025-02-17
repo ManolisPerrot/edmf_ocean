@@ -7,10 +7,10 @@ __docformat__ = 'reStructuredText'
 from sys import exit
 import numpy as np
 import matplotlib.pyplot as plt
-from scmoce import scm_oce
-from scmtke import scm_tke
-from scmmfc import scm_mfc
-from scmgls import scm_gls
+from scmoce  import scm_oce
+from scmtke  import scm_tke
+from scmmfc  import scm_mfc
+from scmkeps import scm_keps
 #from scipy.io import netcdf
 from netCDF4 import Dataset
 ###########################################
@@ -35,12 +35,12 @@ class SCM:
                         mass_flux_tra   = False  ,
                         mass_flux_dyn = False           , mass_flux_tke = False , mass_flux_tke_trplCorr = False,
                         mass_flux_small_ap     = True   , extrap_ak_surf = True , tke_sfc_dirichlet = False,
-                        eddy_diff_tke_const = 'NEMO'    , akvmin   = 1.e-4      , aktmin   = 1.e-5         ,
+                        eddy_diff_tke_const = 'NEMO'    , akvmin   = 1.3e-6      , aktmin   = 1.4e-7 ,
                         mxlmin  = 1.0,
                         Cent  = 0.55         , Cdet = -1         , wp_a =  1        , wp_b  = 1   ,
                         wp_bp = 0.0002       , up_c = 0.5        , vp_c = 0.5       , bc_ap = 0.1 ,
                         delta_bkg = 0.       , wp0=-1.e-08       ,
-                        entr_scheme = 'R10'  , write_netcdf=False, avg_last_hour=False, bc_P09='false', beta_bc_P09=0.3 ):
+                        entr_scheme = 'R10'  , write_netcdf=False, avg_last_hour=False, bc_P09='false', beta_bc_P09=0.3, trad_coriolis_mod=False ):
         """[summary]
         Args:
             nz: Number of grid points. Defaults to 100.
@@ -83,6 +83,7 @@ class SCM:
             eddy_diff_tke_const: constants to be used in the TKE scheme ('NEMO', 'MNH' or 'RS81').    Defaults to 'NEMO'
             write_netcdf (bool): Do we write a netcdf file (containing detailed energy diagnostics, but slower to run)? Default to False
             bc_P09 (str): Do you want to use Pergaud (2009) temperature boundary condition? Defaults to 'false'; options are 'inconsistent' (original version) or 'consistent' (fixed version)
+            trad_coriolis_mod (bool): activate modulation of ent/det, wp_bp and delta_bkg by traditional Coriolis. Defaults to False.
         """
 ################################################################################################################
         ## simulation parameters
@@ -135,38 +136,29 @@ class SCM:
           self.ED_scheme            = eddy_diff_scheme
           self.ED_tke_sfc_dirichlet = tke_sfc_dirichlet
           self.ED_extrap_sfc        = extrap_ak_surf
-          epsmin = 1.e-12
+          self.tkemin        = 1.e-08
+          self.epsmin        = 1.e-12
           if self.ED_scheme=='TKE':
             self.ED_tke_const         = 0  ; self.inv_schmidt     = 1.; cm = 0.1
             if eddy_diff_tke_const=='MNH':
               self.ED_tke_const    = 1; cm = 0.126; self.inv_schmidt = 0.34/cm
             if eddy_diff_tke_const=='RS81':
               self.ED_tke_const    = 2; cm = 0.0667; self.inv_schmidt= 0.4/cm
-            tkemin = np.power( akvmin/(cm*mxlmin), 2 )
-            self.min_Threshold   = np.array([tkemin,akvmin,aktmin,mxlmin])
+            self.tkemin = np.power( akvmin/(cm*mxlmin), 2 )
           elif self.ED_scheme=='Keps':
-            self.pnm    = np.zeros(3)
-            self.pnm[0] = 3.0; self.pnm[1] = -1.0; self.pnm[2] = 1.5
-            self.betaCoef   = np.zeros(4)
-            self.betaCoef[0] = 1.44 ; self.betaCoef[1] = 1.92
-            #self.betaCoef[2] = -0.4 ; self.betaCoef[3] = 1.00
-            self.betaCoef[2] = -1.83 ; self.betaCoef[3] = -1.83
             Sch_k = 1.; Sch_eps = 1.3  # Schmidt numbers
             self.OneOverSig_k   = 1./Sch_k; self.OneOverSig_psi = 1./Sch_eps
-            c1 = 5.; c2 = 0.8; c3 = 1.968; c4 = 1.136
-            a1  = 0.66666666667 - 0.5*c2; a2  = 1.            - 0.5*c3
-            a3  = 1.0           - 0.5*c4; nn  = 0.5*c1
-            self.cm0 =  np.power( (a2*a2 - 3.0*a3*a3 + 3.0*a1*nn)/(3.0*nn*nn), 0.25 )
-            tkemin = np.power(mxlmin*epsmin/(self.cm0*self.cm0*self.cm0),2./3.)
-            self.min_Threshold   = np.array([tkemin,akvmin,aktmin,mxlmin,epsmin])
-            self.bdy_tke_sfc = np.zeros(2); self.bdy_tke_bot = np.zeros(2)
-            self.bdy_eps_sfc = np.zeros(2); self.bdy_eps_bot = np.zeros(2)
-            if  not tke_sfc_dirichlet: self.bdy_tke_sfc[0] = 1.; self.bdy_eps_sfc[0] = 1.
-            # we assume Dirichlet condition at the bottom
-            #if  bdy_tke_bot == 'Neu': self.bdy_tke_bot[0] = 1.
-            #if  bdy_gls_bot == 'Neu': self.bdy_eps_bot[0] = 1.
+            # boundary conditions for k-eps scheme
+            self.bdy_tke_sfc = np.zeros(3)
+            self.bdy_tke_bot = np.zeros(3)
+            self.bdy_eps_sfc = np.zeros(3)
+            self.bdy_eps_bot = np.zeros(3)
+            # Neumann B.C. (default option in GOTM)
+            self.bdy_tke_sfc[0] = 1.;self.bdy_eps_sfc[0] = 1.
+            self.bdy_tke_bot[0] = 1.;self.bdy_eps_bot[0] = 1.
           else:
             exit("Wrong entry for parameter eddy_diff_scheme (should be TKE or Keps)")
+        self.min_Threshold   = np.array([self.tkemin,akvmin,aktmin,mxlmin])
         ####################################
         # Mass flux options and parameters
         #-----------------------------------
@@ -178,6 +170,10 @@ class SCM:
         if self.mass_flux_entr == 'R10_Wi11': self.triple_corr_opt = 2
         self.mf_params  = np.array([Cent,Cdet,wp_a,wp_b,wp_bp,up_c,vp_c,bc_ap,delta_bkg])
         self.wp0 = wp0                    ; self.bc_ap = bc_ap
+        self.delta_bkg = delta_bkg        ; self.wp_bp = wp_bp
+        self.Cent = Cent ; self.Cdet = Cdet
+        self.wp_a = wp_a ; self.wp_b = wp_b
+        self.trad_coriolis_mod = trad_coriolis_mod
         ####################################
         # define vertical grid
         #-----------------------------------
@@ -256,20 +252,17 @@ class SCM:
         self.bvf      = np.zeros(self.nz+1); self.eps_n      = np.zeros(self.nz+1)
         self.Bprod    = np.zeros(self.nz+1); self.eps_np1    = np.zeros(self.nz+1)
         if self.ED:
-          self.tke_n    = np.zeros(self.nz+1); self.tke_n[:]   = tkemin
-          self.tke_np1  = np.zeros(self.nz+1); self.tke_np1[:] = tkemin
+          self.tke_n    = np.zeros(self.nz+1); self.tke_n[:]   = self.tkemin
+          self.tke_np1  = np.zeros(self.nz+1); self.tke_np1[:] = self.tkemin
           self.lupw     = np.zeros(self.nz+1); self.lupw[:]    = mxlmin
           self.ldwn     = np.zeros(self.nz+1); self.ldwn[:]    = mxlmin
           self.Prdtl      = np.zeros(self.nz+1)
-          self.eps_n[:]   = epsmin  # TKE dissipation
-          self.eps_np1  = np.zeros(self.nz+1); self.eps_np1[:] = epsmin
+          self.eps_n[:]   = self.epsmin; self.eps_np1[:] = self.epsmin
           self.shear    = np.zeros(self.nz+1); self.residual   = np.array(0.)
           if self.ED_scheme=='Keps':
             self.cmu      = np.zeros(self.nz+1); self.cmu     [:] = 0.1
             self.cmu_prim = np.zeros(self.nz+1); self.cmu_prim[:] = 0.1
-            self.cmu_star = np.zeros(self.nz+1); self.cmu_star[:] = 0.1
-            self.varT_n   = np.zeros(self.nz+1); self.varT_n  [:] = 1.e-14
-            self.varT_np1 = np.zeros(self.nz+1); self.varT_np1[:] = 1.e-14
+            self.z0s      = 0.02
         else:
           self.ED_scheme = 'None'
         # MLD computation params
@@ -287,7 +280,7 @@ class SCM:
           self.ent    = np.zeros(self.nz  ); self.det    = np.zeros(self.nz  )
           self.up     = np.zeros(self.nz+1); self.vp     = np.zeros(self.nz+1)
           self.epsPlume = np.zeros(self.nz)  # TKE plume dissipation
-          if self.mass_flux_entr=='R10corNT': self.vortp  = np.zeros(self.nz+1)
+          self.vortp  = np.zeros(self.nz+1)
         ####################################
         # store MASS-FLUX solution (temperature, velocity)
         # in order to avoid writing a netcdf file
@@ -308,7 +301,8 @@ class SCM:
         #
         self.tFlx        = np.zeros(self.nz+1); self.uFlx        = np.zeros(self.nz+1); self.vFlx        = np.zeros(self.nz+1)
         self.buoyMF      = np.zeros(self.nz+1); self.shearMF     = np.zeros(self.nz+1)
-        self.wtke        = np.zeros(self.nz  ); self.triple_corr = np.zeros(self.nz+1)
+        self.wtke        = np.zeros(self.nz  ) #ED+MF wtke
+        self.triple_corr = np.zeros(self.nz+1) # MF contrib to d(wtke)/dz
         self.tFlx[-1]    = - self.stflx[self.itemp]
         ####################################
         # Energy diagnostics
@@ -348,7 +342,7 @@ class SCM:
         swr_frac = scm_oce.lmd_swfrac(self.Hz,self.nz)   ## Compute fraction of solar shortwave flux penetrating to specified depth
         if self.ED_scheme=='TKE': self.do_TKE( )                        ## Initialize eddy-diffusion scheme to compute eddy diffusivity/eddy viscosity for the first time-step
         if self.ED_scheme=='Keps': self.do_KEPS( )
-        # if self.bc_P09 == 'consistent': 
+        # if self.bc_P09 == 'consistent':
         MF_sfc_flux = 0.    #initialize ED sfc flux correction (since Fmass is not rigouroulsy zero at sfc)
         stflx0 = np.zeros(2)
         stflx0[self.isalt] = self.stflx[self.isalt]
@@ -371,7 +365,7 @@ class SCM:
                                         self.t_n, stflx0, self.srflx,
                                         swr_frac, self.btflx, self.Hz   , self.akt  ,
                                         self.z_r, self.eps_n, self.eos_params[1],
-                                        self.dt , self.nz   , self.ntra  )
+                                        self.dt , self.cp, self.nz   , self.ntra  )
             #==============================================================
             # advance dynamics to n+1 (Coriolis + vertical viscosity only)
             #==============================================================
@@ -379,6 +373,10 @@ class SCM:
                                         self.u_n, self.v_n, self.ustr_sfc, self.vstr_sfc,
                                         self.ustr_bot, self.vstr_bot,
                                         self.Hz , self.akv, self.z_r, self.fcor, self.dt, self.nz  )
+            # # # surface penalization
+            # delta = 0.01*(abs(self.zinv)+10.)
+            # self.u_np1_star[:] = np.exp(self.z_r/delta)*self.u_np1_star[:]
+            # self.v_np1_star[:] = np.exp(self.z_r/delta)*self.v_np1_star[:]
             #===================
             # Compute mass flux
             #===================
@@ -398,9 +396,9 @@ class SCM:
                     MF_sfc_flux=0
                 else:
                   # recompute MF at sfc
-                  # note that we don't use temp at N+1/2 but at N since it is 
+                  # note that we don't use temp at N+1/2 but at N since it is
                   # how the flux is computed in the fortran routine
-                  MF_sfc_flux = self.Fmass[-1]*(self.tp[-1,self.itemp]-self.t_np1_star[-1,self.itemp])                 
+                  MF_sfc_flux = self.Fmass[-1]*(self.tp[-1,self.itemp]-self.t_np1_star[-1,self.itemp])
             else:
                 self.t_np1[:,self.itemp] = self.t_np1_star[:,self.itemp]
                 self.t_np1[:,self.isalt] = self.t_np1_star[:,self.isalt]
@@ -413,6 +411,7 @@ class SCM:
             else:
                 self.u_np1[:] = self.u_np1_star[:]
                 self.v_np1[:] = self.v_np1_star[:]
+
             #==========================================================
             # Compute eddy-viscosity / eddy-diffusivity  (TKE scheme)
             #==========================================================
@@ -454,8 +453,6 @@ class SCM:
             self.u_n[:] = self.u_np1[:]; self.v_n[:] = self.v_np1[:];
             self.t_n[:,:] = self.t_np1[:,:]; self.tke_n[:] = self.tke_np1[:]
             self.eps_n [:] = self.eps_np1 [:]
-            if self.ED_scheme=='Keps':
-                self.varT_n[:] = self.varT_np1[:]
             #===================================================================
             if kt<self.nbsteps-1: self.wtke[:]  = 0.                            ## diagnostics : reset the array containing w'e
         if self.write_netcdf:
@@ -607,6 +604,27 @@ class SCM:
            tke_sfc,tke_bot, flux_sfc = scm_tke.compute_tke_bdy(
                                       self.ustr_sfc,  self.vstr_sfc, self.ED_tke_const,
                                       0.*self.bc_ap, 0.*self.wp0, tkemin)
+        #############
+        #test alternative conditions to correct WANG WTKE surface bias
+        # Dirichlet (not working)
+        # B0 = self.g*self.alpha*self.stflx[self.itemp]
+        # print('##################')
+        # print('g',self.g)
+        # print('alpha',self.alpha)
+        # print('rho0',self.rho0)
+        # print('cp',self.cp)
+        # print('stflx',self.stflx[self.itemp])
+        # print(B0)
+        # print('##################')
+        # wstar = (np.abs(B0*self.zinv))**(1/3)
+        # tke_sfc = 10*wstar**2
+        # tke_sfc=0.5e-3
+        # # Neumann
+        # flux_sfc=wstar**3
+        # flux_sfc = 0.5*self.bc_ap*self.wp0*(self.wp0**2 + (self.up[self.nz]-self.u_np1_star[self.nz-1])**2
+        #                                                 + (self.vp[self.nz]-self.v_np1_star[self.nz-1])**2)
+        # print('flx_sfc ', flux_sfc)
+        #############
         #=======================================
         # Compute TKE production by shear
         self.shear = scm_tke.compute_shear(
@@ -696,11 +714,32 @@ class SCM:
         tkepmin = self.min_Threshold[0]
         mxlpmin = self.min_Threshold[3]
         #
+        #####################
+        if self.trad_coriolis_mod:
+          # MODULATION due to traditional rotation terms
+          B0 = self.g*self.alpha*self.stflx[self.itemp]
+          Ro = np.minimum((np.abs(B0)/self.fcor)**(0.5)/(self.fcor*np.abs(self.zinv)) , (np.abs(B0)/self.fcor)**(0.5)/(self.fcor*1000.))
+          # cff= np.tanh(Ro**0.3) #modulation coefficient, Wang 2006
+          cff= np.tanh(Ro**0.37) #modulation coefficient, Wang 2006
+          # cff=1
+          # reduce integral lenth scale: L_int = cff*zinv (division by zinv is done in the fortran routine)
+          #self.mf_params  = np.array([Cent,Cdet,wp_a,wp_b,wp_bp,up_c,vp_c,bc_ap,delta_bkg])
+
+
+
+          self.mf_params[-1] = self.delta_bkg/cff
+          self.mf_params[4] =      self.wp_bp/cff
+          # # reduce lateral exchanges
+          self.mf_params[0] = self.Cent/cff
+          self.mf_params[1] = self.Cdet/cff
+          # self.mf_params[2] = self.wp_a*cff
+          # self.mf_params[3] = self.wp_b*cff
+        ######################
         if self.mass_flux_entr=='R10' or self.mass_flux_entr=='R10_HB09' or self.mass_flux_entr=='R10_Wi11':
-          self.ap,self.up,self.vp,self.wp,self.tp,self.Bp,self.ent,self.det, self.epsPlume = scm_mfc.mass_flux_r10(
+          self.ap,self.up,self.vp,self.wp,self.tp,self.Bp,self.ent,self.det, self.epsPlume, self.vortp = scm_mfc.mass_flux_r10(
                                     u_mean, v_mean, t_mean, self.tke_n, self.z_w, self.Hz,
                                     tp0   , up0   , vp0   , wp0     , self.mf_params,
-                                    self.eos_params, tkepmin, mxlpmin, self.MF_small_ap, self.lineos, self.triple_corr_opt, self.zinv,
+                                    self.eos_params, tkepmin, mxlpmin, self.MF_small_ap, self.lineos, self.triple_corr_opt, self.fcor, self.zinv,
                                     self.nz , self.ntraMF , len(self.mf_params), len(self.eos_params)   )
         if self.mass_flux_entr=='R10corNT':
           self.ap,self.up,self.vp,self.wp,self.tp,self.Bp,self.ent,self.det, self.vortp, self.epsPlume = scm_mfc.mass_flux_r10_cor(
@@ -741,20 +780,17 @@ class SCM:
         #=======================================================================
         # Compute TKE production by shear (Not multiplied by Akv !!)
         #=======================================================================
-        self.shear2 = scm_gls.compute_shear(
-                                  self.u_np1, self.v_np1, self.u_np1,
+        self.shear = scm_keps.compute_shear(
+                                  self.u_n, self.v_n, self.u_np1,
                                   self.v_np1, self.z_r  , self.nz  )
         #=======================================================================
         # Compute boundary conditions
         #=======================================================================
-        tke1 = 0.5*(self.tke_n[self.nz]+self.tke_n[self.nz-1])
-        tke2 = 0.5*(self.tke_n[      0]+self.tke_n[        1])
-        tkemin = self.min_Threshold[0]
-        epsmin = self.min_Threshold[4]
-        #
-        tke_sfc,tke_bot,ftke_sfc,ftke_bot,eps_sfc,eps_bot,feps_sfc,feps_bot = scm_gls.compute_tke_eps_bdy(
-            self.ustr_sfc, self.vstr_sfc, self.ustr_bot, self.vstr_bot,
-            self.z0b, tke1, self.Hz[-1], tke2, self.Hz[ 0], self.OneOverSig_psi, self.pnm, tkemin, epsmin)
+        tke1 = self.tke_n[self.nz-1]
+        tke2 = self.tke_n[        1]
+        tke_sfc,tke_bot,ftke_sfc,ftke_bot,eps_sfc,eps_bot,feps_sfc,feps_bot = scm_keps.compute_tke_eps_bdy(
+                    self.ustr_sfc, self.vstr_sfc, self.ustr_bot, self.vstr_bot,
+                    self.z0b, self.z0s, tke1, self.Hz[-1], tke2, self.Hz[0], self.OneOverSig_psi, self.tkemin, self.epsmin)
         #
         if self.bdy_tke_sfc[0] < 0.5: self.bdy_tke_sfc[1] = tke_sfc
         else: self.bdy_tke_sfc[1] = ftke_sfc
@@ -766,28 +802,31 @@ class SCM:
         if self.bdy_eps_bot[0] < 0.5: self.bdy_eps_bot[1] = eps_bot
         else: self.bdy_eps_bot[1] = feps_bot
         #
+        self.bdy_tke_sfc[2] = tke_sfc; self.bdy_tke_bot[2] = tke_bot
+        self.bdy_eps_sfc[2] = eps_sfc; self.bdy_eps_bot[2] = eps_bot
+        #
         #================================================
         #
-        self.tke_np1[:], self.wtke[:] = scm_gls.advance_turb_tke(self.tke_n, self.bvf, self.shear2,
-                            self.OneOverSig_k*self.akv,self.akv,self.akt,self.eps_n,self.Hz,
-                                   self.dt,tkemin,self.bdy_tke_sfc,self.bdy_tke_bot,self.nz)
+        self.tke_np1[:], self.wtke[:] = scm_keps.tkeeq(self.tke_n,self.bvf, self.shear,
+                           self.akv,self.akt, self.eps_n,
+                           self.Hz,self.dt,self.tkemin,
+                           self.bdy_tke_sfc,self.bdy_tke_bot,self.nz)
+
+        self.eps_np1[:] = scm_keps.dissipationeq(self.eps_n,self.bvf, self.shear,
+                           self.akv,self.akt, self.tke_n,
+                           self.Hz,self.dt,self.epsmin,
+                           self.bdy_eps_sfc,self.bdy_eps_bot,self.nz)
+        #=========================
+        #self.akv,self.akt,self.cmu,self.cmu_prim,self.lscale = scm_keps.compute_ev_ed_eq(
+        #                self.tke_np1, self.eps_np1, self.bvf,
+        #                self.min_Threshold[1], self.min_Threshold[2],  self.nz )
+        #=========================
+        #=========================
+        self.akv,self.akt,self.cmu,self.cmu_prim,self.lscale = scm_keps.compute_ev_ed_weak(
+                        self.tke_np1, self.eps_np1, self.shear, self.bvf,
+                        self.min_Threshold[1], self.min_Threshold[2],  self.nz )
+        #=========================
         #
-        self.eps_np1[:] = scm_gls.advance_turb_eps(self.eps_n, self.bvf, self.shear2,
-                                self.OneOverSig_psi*self.akv, self.cmu[:],
-                                self.cmu_prim[:], self.tke_n, self.tke_np1,
-                                self.Hz   ,self.dt         , self.betaCoef  ,
-                                epsmin, self.bdy_eps_sfc,self.bdy_eps_bot,  self.nz)
-        #=========================
-        akvmin = self.min_Threshold[1]; aktmin = self.min_Threshold[2]
-        self.akv,self.akt,self.cmu,self.cmu_prim, self.cmu_star = scm_gls.compute_ev_ed_filt_ng(
-                        self.tke_np1, self.eps_np1, self.bvf,
-                        self.shear2 , self.pnm, akvmin, aktmin, epsmin, self.nz )
-        #=========================
-        self.varT_np1[:] = scm_gls.advance_turb_vart(self.varT_n,self.akv,self.akt,self.t_np1[:,self.itemp],
-                                                     self.eps_np1,self.tke_np1,self.cmu_star,
-                                                     self.Hz, self.dt, self.alpha, 1.e-14, self.nz)
-#
-#
     def output_init(self):
         fh01 = Dataset(self.output, mode='w',format="NETCDF4")
         fh01.createDimension('z_r',self.nz)
@@ -801,6 +840,7 @@ class SCM:
         fh01.mass_flux_dyn   = str(self.MF_dyn)
         fh01.mass_flux_tke   = str(self.MF_tke)
         fh01.mass_flux_tke_trplCorr = str(self.MF_tke_trplCorr)
+        fh01.cp              = self.cp
         fh01.rho0            = self.eos_params[0]
         fh01.alpha           = self.eos_params[1]
         fh01.beta            = self.eos_params[2]
@@ -811,6 +851,7 @@ class SCM:
         fh01.akvmin          = self.min_Threshold[1]
         fh01.aktmin          = self.min_Threshold[2]
         fh01.mxlmin          = self.min_Threshold[3]
+
         #
         ocean_time = fh01.createVariable('ocean_time','f8',('time')); ocean_time[:] = 0.
         ocean_time.units = 'seconds'
@@ -835,6 +876,8 @@ class SCM:
         var  = fh01.createVariable('WT','f8',('time','z_w')); var[0,:] = self.wted[:]+self.wtmf[:]; var.units = 'K m s-1'; del var
         var  = fh01.createVariable('WU','f8',('time','z_w')); var[0,:] = self.wued[:]+self.wumf[:]; var.units = 'm2 s-2'; del var
         var  = fh01.createVariable('WV','f8',('time','z_w')); var[0,:] = self.wved[:]+self.wvmf[:]; var.units = 'm2 s-2'; del var
+        var  = fh01.createVariable('WTKE','f8',('time','z_r')); var[0,:] = self.wtke[:] ; var.units = 'm3 s-3'; del var
+
 
         if self.ED:
             var  = fh01.createVariable('tke','f8',('time','z_w')); var[0,:] = self.tke_n[:]; var.units = 'm2 s-2'; del var
@@ -848,8 +891,7 @@ class SCM:
             var  = fh01.createVariable('WV_ED','f8',('time','z_w')); var[0,:] = self.wved[:]; var.units = 'm2 s-2'; del var
             var  = fh01.createVariable('Prdtl','f8',('time','z_w')); var[0,:] = self.akv[:]/self.akt[:]; var.units = 'none'; del var
             var  = fh01.createVariable('epsil','f8',('time','z_w')); var[0,:] = self.eps_n[:]; var.units = 'm2 s-3'; del var
-            if self.ED_scheme=='Keps':
-                var = fh01.createVariable('varT','f8',('time','z_w')); var[0,:] = self.varT_n[:]; del var
+            var  = fh01.createVariable('Buoy_prod','f8',('time','z_w')); var[0,:] = self.Bprod[:]; var.units = 'm2 s-3'; del var
         if self.MF_tra:
             var = fh01.createVariable('a_p','f8',('time','z_w')); var[0,:] = self.ap[:]; del var
             var = fh01.createVariable('zinv','f8',('time')); var[0] = self.zinv
@@ -868,10 +910,9 @@ class SCM:
                 var = fh01.createVariable('buoyMF','f8',('time','z_w')); var[0,:] = self.buoyMF[:]; del var
                 var = fh01.createVariable('shearMF','f8',('time','z_w')); var[0,:] = self.shearMF[:]; del var
             if self.MF_tke_trplCorr:
-                var = fh01.createVariable('we','f8',('time','z_w')); var[0,:] = self.triple_corr[:]; del var
+                var = fh01.createVariable('d_we_dz_MF','f8',('time','z_w')); var[0,:] = self.triple_corr[:]; del var
                 var = fh01.createVariable('tke_p','f8',('time','z_w')); var[0,:] = self.tp[:,self.isalt+1]; del var
-            if self.mass_flux_entr=='R10corNT':
-                var = fh01.createVariable('vort_p','f8',('time','z_w')); var[0,:] = self.vortp[:]; del var
+            var = fh01.createVariable('vort_p','f8',('time','z_w')); var[0,:] = self.vortp[:]; del var
         fh01.close()
 #
 
@@ -908,7 +949,8 @@ class SCM:
         fh01.variables['WT'][kout,:]       = self.wted[:]+self.wtmf[:]
         fh01.variables['WU'][kout,:]       = self.wued[:]+self.wumf[:]
         fh01.variables['WV'][kout,:]       = self.wved[:]+self.wvmf[:]
-
+        fh01.variables['Buoy_prod'][kout,:]= self.Bprod[:]
+        fh01.variables['WTKE'][kout,:]= self.wtke[:]
 
         if self.ED:
             fh01.variables['tke'][kout,:] = self.tke_n[:]
@@ -922,8 +964,6 @@ class SCM:
             fh01.variables['WV_ED'][kout,:] = self.wved[:]
             fh01.variables['Prdtl'][kout,:] = self.akv[:]/self.akt[:]
             fh01.variables['epsil'][kout,:] = self.eps_n[:]
-            if self.ED_scheme=='Keps':
-                fh01.variables['varT'][kout,:] = self.varT_n[:]
         if self.MF_tra:
             fh01.variables['zinv'][kout]  = self.zinv
             fh01.variables['a_p'][kout,:] = self.ap[:]
@@ -941,9 +981,9 @@ class SCM:
             if self.MF_tke:
                 fh01.variables['buoyMF'][kout,:] = self.buoyMF[:]
                 fh01.variables['shearMF'][kout,:] = self.shearMF[:]
+                fh01.variables['Buoy_prod'][kout,:]= self.Bprod[:] + self.buoyMF[:] #ED+MF buoyancy production
             if self.MF_tke_trplCorr:
-                fh01.variables['we'][kout,:] = self.triple_corr[:]
+                fh01.variables['d_we_dz_MF'][kout,:] = self.triple_corr[:]
                 fh01.variables['tke_p'][kout,:] = self.tp[:,self.isalt+1]
-            if self.mass_flux_entr=='R10corNT':
-                fh01.variables['vort_p'][kout,:] = self.vortp[:]
+            fh01.variables['vort_p'][kout,:] = self.vortp[:]
         fh01.close()

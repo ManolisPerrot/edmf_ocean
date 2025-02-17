@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+      <meta name="description" content="Documentation for SCM-EDMF ocean">
+    <meta name="author" content="M. Perrot / F. Lemarié" >
+    <link rel="icon" href="../favicon.png">
+
+    <title>mass_flux_R10 &ndash; SCM-EDMF ocean</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+    <link href="../css/pygments.css" rel="stylesheet">
+    <link href="../css/font-awesome.min.css" rel="stylesheet">
+    <link href="../css/local.css" rel="stylesheet">
+      <link  href="../tipuesearch/tipuesearch.css" rel="stylesheet">
+
+    <script src="https://code.jquery.com/jquery-3.7.0.slim.min.js" integrity="sha256-tG5mcZUtJsZvyKAxYLVXrmjKBVLd6VpVccqz/r4ypFE=" crossorigin="anonymous"></script>
+  </head>
+
+  <body>
+
+    <!-- Fixed navbar -->
+    <div class="container-fluid mb-sm-4 mb-xl-2">
+      <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+        <div class="container">
+          <a class="navbar-brand" href="../index.html">SCM-EDMF ocean </a>
+          <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbar"
+                  aria-expanded="false" aria-controls="navbar" aria-label="Toggle navigation">
+                  <span class="navbar-toggler-icon">
+          </button>
+
+          <div id="navbar" class="navbar-collapse collapse">
+            <ul class="navbar-nav">
+                  <li class="nav-item">
+                    <a class="nav-link" href="../lists/files.html">Source Files</a>
+                  </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="../lists/modules.html">Modules</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="../lists/procedures.html">Procedures</a>
+                </li>
+            </ul>
+              <div class="d-flex align-items-end flex-grow-1">
+                <form action="../search.html" role="search" class="ms-auto">
+                  <input type="text" class="form-control" aria-label="Search" placeholder="Search" name="q" id="tipue_search_input" autocomplete="off" required>
+                </form>
+              </div>
+          </div><!--/.nav-collapse -->
+        </div>
+      </nav>
+    </div>
+
+    <div class="container">
+  <div class="row">
+    <h1>mass_flux_R10
+      <small>Subroutine</small>
+      
+    </h1>
+      <div class="container p-2 mb-4 bg-light border rounded-3">
+    <div class="row align-items-center justify-content-between" id="info-bar">
+      <div class="col">
+        <ul class="list-inline" style="margin-bottom:0px;display:inline">
+
+            <li class="list-inline-item" id="statements"><i class="fa fa-list-ol"></i>
+              <a data-bs-toggle="tooltip"
+                 data-bs-placement="bottom" data-html="true"
+                 title="11.0% of total for procedures.">137 statements</a>
+            </li>
+
+            <li class="list-inline-item" id="source-file">
+              <i class="fa fa-code"></i>
+              <a href="../src/scm_mfc.f90"> Source File</a>
+            </li>
+        </ul>
+      </div>
+      <div class="col">
+        <nav aria-label="breadcrumb">
+          <ol class="breadcrumb justify-content-end mb-0">
+                <li class="breadcrumb-item"><a href='../sourcefile/scm_mfc.f90.html'>scm_mfc.f90</a></li>
+                <li class="breadcrumb-item"><a href='../module/scm_mfc.html'>scm_mfc</a></li>
+            <li class="breadcrumb-item active" aria-current="page">mass_flux_R10</li>
+          </ol>
+        </nav>
+      </div>
+    </div>
+  </div>
+  <script>
+    $(function () {
+    $('[data-bs-toggle="tooltip"]').tooltip()
+    })
+  </script>
+
+  </div>
+  
+  <div class="row">
+    <div class="col-md-3 hidden-xs hidden-sm visible-md visible-lg">
+      <div id="sidebar">
+      <h3>Contents</h3>
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
+
+  </div>
+
+    </div>
+    
+    <div class="col-md-9" id='text'>
+    <h2>public  subroutine mass_flux_R10(u_m, v_m, t_m, tke_m, z_w, Hz, tp0, up0, vp0, wp0, mf_params, alpha, beta, small_ap, lin_eos, zinv, N, ntra, nparams, a_p, u_p, v_p, w_p, t_p, B_p, ent, det, eps)  
+</h2>
+        <div class="card mb-4">
+      <h3 class="card-header card-title bg-light">Uses</h3>
+      <div class="card-body">
+        <ul class="list-group list-group-flush">
+            <li class="list-group-item">
+              <ul class="list-inline">
+                  <li class="list-inline-item"><a href='../module/scm_par.html'>scm_par</a></li>
+              </ul>
+            </li>
+        </ul>
+      </div>
+    </div>
+
+
+    <p>==========================================================================<br />
+                  ***  ROUTINE mass_flux_R10  ***                         <br />
+ ** Purposes : solve mass-flux equations for Rio et al. (2010)
+                        entrainment/detrainement closure                  <br />
+ <script type="math/tex; mode=display">\begin{align*} E &= a^{\rm p} \beta_1 \max(0, \partial_z w^{\rm p}) \\
+                D &= - a^{\rm p} \beta_2 \min\left( 0 , \partial_z w^{\rm p} \right) -  a^{\rm p} w^{\rm p} \delta_0  \end{align*}</script> <br /></p>
+<div class="alert alert-info">
+<p class="alert-title h4">Note</p>
+<p>we must have <script type="math/tex"> \beta_1 < 1 </script> and <script type="math/tex"> 1 < \beta_2 < 2 </script> otherwise unphysical values of <script type="math/tex"> a^{\rm p} </script> are obtained</p>
+</div>
+<p><br />
+ <script type="math/tex; mode=display">\begin{align*}
+ \partial_z(a^{\rm p} w^{\rm p}) &= E-D  \\
+ \partial_z(a^{\rm p} w^{\rm p} \phi^{\rm p}) &= E \phi^{\rm e} - D \phi^{\rm p}
+ =   E \left\{ \overline{\phi} + \underbrace{\frac{a^{\rm p}}{1-a^{\rm p}} (\overline{\phi}-\phi^{\rm p})}_{\rm mass\_flux\_small\_ap=False} \right\} - D \phi^{\rm p} \\
+ w^{\rm p} \partial_z w^{\rm p} &= \left( 1 + \underbrace{\frac{a^{\rm p}}{1-a^{\rm p}}}_{\rm mass\_flux\_small\_ap=False} \right) \left[ b' + b \epsilon \right] (w^{\rm p})^2 + a B^{\rm p} \\
+ \partial_z(e^{\rm p}-e) &= \left( \frac{E}{-a^{\rm p} w^{\rm p}} \right) \left[ \left( 1 - \underbrace{\frac{a^{\rm p}}{1-a^{\rm p}}}_{\rm mass\_flux\_small\_ap=False}  \right) (e^{\rm p}-e) - \frac{1}{2} \left( 1 + \underbrace{\frac{a^{\rm p}}{1-a^{\rm p}}}_{\rm mass\_flux\_small\_ap=False}  \right) \| \mathbf{v}^{\rm p} - \mathbf{v} \|^2    \right] - \partial_z e - \frac{c_\epsilon}{w^{\rm p} l_{\epsilon}} e^{\rm p} \sqrt{e^{\rm p}} \\
+ \partial_z(a^{\rm p} w^{\rm p} [u^{\rm p}-C_u \overline{u}]) &=  E \left\{  (1-C_u) \overline{u} + \underbrace{\frac{a^{\rm p}}{1-a^{\rm p}}\left( (1-C_u) \overline{u} -[u^{\rm p}-C_u \overline{u}]   \right)}_{\rm mass\_flux\_small\_ap=False}  \right\} - D [u^{\rm p}-C_u \overline{u}]
+ \end{align*}</script><br /></p>
+<p>==========================================================================<br />
+ Compute <script type="math/tex"> B^{\rm p}_{k} </script>
+<script type="math/tex; mode=display"> B^{\rm p}_{k} = - \frac{g}{\rho_0} \left( \rho^{\rm p}_{k+1/2} - \overline{\rho}_k \right) </script>
+ If <script type="math/tex"> {\rm small\_ap = False} : (b',b) \rightarrow \frac{(b',b)}{1-a^{\rm p}_{k+1/2}} </script> <br />
+ Compute <script type="math/tex"> w^{\rm p}_{k-1/2} </script> :: call <script type="math/tex">  {\rm get\_w\_p\_R10}  </script>
+</p>
+<p>Compute <script type="math/tex"> a^{\rm p}_{k-1/2} </script> :: call <script type="math/tex">  {\rm get\_a\_p\_R10}  </script>
+</p>
+<p>Compute environment <script type="math/tex"> \phi^{\rm e}_k</script>
+<script type="math/tex; mode=display">\begin{align*}
+ \phi^{\rm e}_k &= \overline{\phi}_k  \hspace{7cm} \mbox{small_ap = True} \\
+ \phi^{\rm e}_k &= \overline{\phi}_k + \left( \frac{a^{\rm p}_{k+1/2}}{1-a^{\rm p}_{k+1/2}} \right) ( \overline{\phi}_k - \phi^{\rm p}_{k+1/2} ) \hspace{1cm} \mbox{small_ap = False}
+ \end{align*}</script>
+ Compute <script type="math/tex"> \phi^{\rm p}_{k-1/2}</script> :: call <script type="math/tex">  {\rm get\_t\_p\_R10}  </script>
+ Compute <script type="math/tex"> u^{\rm p}_{k-1/2}</script> :: call <script type="math/tex">  {\rm get\_t\_p\_R10}  </script>
+</p>
+<p>Compute <script type="math/tex"> v^{\rm p}_{k-1/2}</script> :: call <script type="math/tex">  {\rm get\_t\_p\_R10}  </script>
+</p>
+<p>Compute <script type="math/tex"> e^{\rm p}_{k-1/2}</script> :: call <script type="math/tex">  {\rm get\_dtke\_p\_R10}  </script>
+</p>
+
+
+    <h3>Arguments</h3>
+        <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-u_m~4"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>u_m</strong>(1:N)</td>
+            <td>
+                <p>mean zonal velocity [m/s]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-v_m~4"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>v_m</strong>(1:N)</td>
+            <td>
+                <p>mean meridional velocity [m/s]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-t_m~4"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>t_m</strong>(1:N,ntra)</td>
+            <td>
+                <p>mean tracer</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-tke_m"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>tke_m</strong>(0:N)</td>
+            <td>
+                <p>mean TKE [m2/s2]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-z_w~2"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>z_w</strong>(0:N)</td>
+            <td>
+                <p>depth at cell interfaces [m]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-hz~8"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>Hz</strong>(1:N)</td>
+            <td>
+                <p>layer thickness [m]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-tp0~3"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>tp0</strong>(1:ntra)</td>
+            <td>
+                <p>surface value for plume tracers</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-up0~3"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>up0</strong></td>
+            <td>
+                <p>surface value for plume zonal velocity [m/s]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-vp0~3"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>vp0</strong></td>
+            <td>
+                <p>surface value for plume meridional velocity [m/s]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-wp0~3"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>wp0</strong></td>
+            <td>
+                <p>surface value for plume vertical velocity [m/s]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-mf_params~2"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>mf_params</strong>(1:nparams)</td>
+            <td>
+                <p>parameters in the ODEs</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-alpha~3"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>alpha</strong></td>
+            <td>
+                <p>thermal expension coefficient [C-1]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-beta~3"></span>
+              real(kind=8),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>beta</strong></td>
+            <td>
+                <p>haline expension coefficient [psu-1]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-small_ap~2"></span>
+              logical,
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>small_ap</strong></td>
+            <td>
+                <p>(T) small area approximation (F) no approximation</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-lin_eos"></span>
+              logical,
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>lin_eos</strong></td>
+            <td>
+                
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-zinv~2"></span>
+              real(kind=8),
+            </td>
+<td>intent(inout)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>zinv</strong></td>
+            <td>
+                <p>depth at which w_p = wmin  [m]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-n~4"></span>
+              integer,
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>N</strong></td>
+            <td>
+                <p>number of vertical levels</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-ntra~4"></span>
+              integer,
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>ntra</strong></td>
+            <td>
+                <p>number of tracers</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-nparams~2"></span>
+              integer,
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>nparams</strong></td>
+            <td>
+                <p>number of parameters in the EDOs</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-a_p~2"></span>
+              real(kind=8),
+            </td>
+<td>intent(out)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>a_p</strong>(0:N)</td>
+            <td>
+                <p>fractional area occupied by the plume</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-u_p~3"></span>
+              real(kind=8),
+            </td>
+<td>intent(out)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>u_p</strong>(0:N)</td>
+            <td>
+                <p>zonal velocity in the plume [m/s]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-v_p~3"></span>
+              real(kind=8),
+            </td>
+<td>intent(out)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>v_p</strong>(0:N)</td>
+            <td>
+                <p>meridional velocity in the plume [m/s]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-w_p~3"></span>
+              real(kind=8),
+            </td>
+<td>intent(out)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>w_p</strong>(0:N)</td>
+            <td>
+                <p>vertical velocity in the plume [m/s]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-t_p~2"></span>
+              real(kind=8),
+            </td>
+<td>intent(out)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>t_p</strong>(0:N,ntra)</td>
+            <td>
+                <p>tracer values in the plume</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-b_p~2"></span>
+              real(kind=8),
+            </td>
+<td>intent(out)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>B_p</strong>(0:N)</td>
+            <td>
+                <p>buoyancy forcing  [m/s2]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-ent~2"></span>
+              real(kind=8),
+            </td>
+<td>intent(out)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>ent</strong>(1:N)</td>
+            <td>
+                <p>diagnostics : entrainment [m-1]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-det~2"></span>
+              real(kind=8),
+            </td>
+<td>intent(out)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>det</strong>(1:N)</td>
+            <td>
+                <p>diagnostics : detrainment [m-1]</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-eps"></span>
+              real(kind=8),
+            </td>
+<td>intent(out)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>eps</strong>(1:N)</td>
+            <td>
+                <p>diagnostics : TKE dissipation [m2 s-3]</p>
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+    <br>
+
+
+    
+    
+
+    
+    
+
+
+
+    
+    
+    </div>
+  </div>
+
+      <hr>
+    </div> <!-- /container -->
+    <footer>
+      <div class="container">
+        <div class="row justify-content-between">
+          <div class="col"><p>SCM-EDMF ocean was developed by M. Perrot / F. Lemarié<br>&copy; 2024 
+</p>
+          </div>
+          <div class="col">
+            <p class="text-end">
+              Documentation generated by
+              <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
+            </p>
+          </div>
+        </div>
+        <br>
+      </div> <!-- /container -->
+    </footer>
+
+    <!-- Bootstrap core JavaScript -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>    
+
+    <!-- MathJax JavaScript
+             ================================================== -->
+             <!-- Placed at the end of the document so the pages load faster -->
+        <script type="text/x-mathjax-config">
+          MathJax.Hub.Config({
+          TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } },
+          jax: ['input/TeX','input/MathML','output/HTML-CSS'],
+          extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']
+          });
+        </script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+          <script src="../tipuesearch/tipuesearch_content.js"></script>
+          <script src="../tipuesearch/tipuesearch_set.js"></script>
+          <script src="../tipuesearch/tipuesearch.js"></script>
+
+  </body>
+</html>

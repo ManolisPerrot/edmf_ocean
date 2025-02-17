@@ -220,7 +220,7 @@ marker_les='+'
 
 
 # run_label = [r'EDMF']
-plot_kpp=False
+plot_kpp=True
 #============================================ WC ===============================================
 if case == 'W005_C500_NO_COR':
     fig, axes = plt.subplots(nrows=2, ncols=3, sharex=False,
@@ -283,10 +283,17 @@ if case == 'W005_C500_NO_COR':
             else:
                 ax.plot(-(scm[i].wted + scm[i].wtmf), scm[i].z_w/mld, styles[i], color = colors[i],
                    alpha=alpha[i], linewidth=linewidth[i], label=label)
+        if i==1: #EDMF
+            ax.plot(-(scm[i].wtmf), scm[i].z_w/mld, linestyle='-.', color = colors[i],
+                   alpha=alpha[i], linewidth=linewidth[i], label=label)
     if plot_kpp:
         ax.plot(wt_kpp[-1,:], zw_kpp[1:nz-1]/mld,
             linestyle=styles[i], color = 'tab:purple',
                 alpha=alpha[i], linewidth=linewidth[i], label=r'KPP (CVMix)')
+        ax.plot(gam_kpp[-1,1:nz-1], zw_kpp[1:nz-1]/mld,
+            linestyle='-.', color = 'tab:purple',
+                alpha=alpha[i], linewidth=linewidth[i], label=r'KPP nonlocal')        
+        
     ax.ticklabel_format(style='sci', axis='x', scilimits=(0, 0))
 
     # for i, label in enumerate(run_label[1:]):
@@ -355,12 +362,19 @@ if case == 'W005_C500_NO_COR':
 
 
     for i, label in enumerate(run_label):
-        if True:             ax.plot((scm[i].wued + scm[i].wumf), scm[i].z_w/mld, linestyle=styles[i], color = colors[i],
+        if True:             
+            ax.plot((scm[i].wued + scm[i].wumf), scm[i].z_w/mld, linestyle=styles[i], color = colors[i],
                     alpha=alpha[i], linewidth=linewidth[i], label=label)
+        if i==1: #EDMF
+            ax.plot((scm[i].wumf), scm[i].z_w/mld, linestyle='-.', color = colors[i],
+                    alpha=alpha[i], linewidth=linewidth[i], label=label)       
     if plot_kpp:
         ax.plot(-wu_kpp[-1,:], zw_kpp[1:nz-1]/mld,
              linestyle=styles[i], color = 'tab:purple',
                 alpha=alpha[i], linewidth=linewidth[i], label=r'KPP (CVMix)')
+        # ax.plot(-gamu_kpp[-1,1:nz-1], zw_kpp[1:nz-1]/mld,
+            #  linestyle='-.', color = 'tab:purple',
+                # alpha=alpha[i], linewidth=linewidth[i], label=r'nonlocal KPP')        
     ax.ticklabel_format(style='sci', axis='x', scilimits=(0, 0))
 
     # ax.plot( scm[1].wued, scm[1].z_w/mld,  color ='tab:red'  , linestyle ='-.', alpha=1.0 , linewidth=2 ) 

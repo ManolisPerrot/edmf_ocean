@@ -601,8 +601,6 @@ class SCM:
         fh01.mass_flux_tke   = str(self.MF_tke)
         fh01.mass_flux_tke_trplCorr = str(self.MF_tke_trplCorr)
         fh01.rho0            = self.rho0
-        fh01.cp              = self.cp
-        fh01.g               = self.g
         #self.min_Threshold
         fh01.tkemin          = self.min_Threshold[0]
         fh01.akvmin          = self.min_Threshold[1]

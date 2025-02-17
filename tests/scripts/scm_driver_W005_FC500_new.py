@@ -31,7 +31,7 @@ end_time   = 72
 #===========================================================================
 compar_les = 1
 if compar_les==1:
-  les_dir    = "/mnt/c/Users/flori/OneDrive/Bureau/Codes/edmf_JAMES_2024/zenodo_edmf_energy/data/W005_C500_NO_COR/"
+  les_dir    = "../data/W005_C500_NO_COR/"
   les_file   = les_dir+"GN_01.1.OC_01.000_copy.nc"
   mean_var   =  '/LES_budgets/Mean/Cartesian/Not_time_averaged/Not_normalized/cart'
   subg_var   =  '/LES_budgets/Subgrid/Cartesian/Not_time_averaged/Not_normalized/cart'
@@ -102,6 +102,7 @@ runs = [
 scm = [0]*len(runs)
 # Run the SCM
 for i, run_params in enumerate(runs):
+    
     scm[i] = SCM(run_params, config_params)
     scm[i].run_direct()
     if scm[i].MF_tra or scm[i].MF_dyn: print("zinv =", scm[i].zinv)
