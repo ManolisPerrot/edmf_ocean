@@ -240,6 +240,7 @@ def initialize_output_and_averaging(self):
     self.t_history = np.zeros((self.nz,dimt), order='F')
     self.u_history = np.zeros((self.nz,dimt), order='F')
     self.v_history = np.zeros((self.nz,dimt), order='F')
+    self.tke_history = np.zeros((self.nz+1,dimt), order='F')
     if self.write_netcdf:
         self.wted   = np.zeros(self.nz+1); self.wtmf   = np.zeros(self.nz+1)
         self.wued   = np.zeros(self.nz+1); self.wumf   = np.zeros(self.nz+1)

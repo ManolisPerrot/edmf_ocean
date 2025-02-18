@@ -289,6 +289,7 @@ class SCM:
         self.t_history = np.zeros((self.nz,dimt), order='F')
         self.u_history = np.zeros((self.nz,dimt), order='F')
         self.v_history = np.zeros((self.nz,dimt), order='F')
+        self.tke_history = np.zeros((self.nz+1,dimt), order='F')
         ####################################
         # edmf_diags
         ####################################
@@ -338,6 +339,7 @@ class SCM:
         #save initial temperature and velocity
         self.t_history[:,kout] = self.t_n[:,self.itemp]
         self.u_history[:,kout] = self.u_n[:]; self.v_history[:,kout] = self.v_n[:]
+        self.tke_history[:,kout] = self.tke_n[:]
         #
         swr_frac = scm_oce.lmd_swfrac(self.Hz,self.nz)   ## Compute fraction of solar shortwave flux penetrating to specified depth
         if self.ED_scheme=='TKE': self.do_TKE( )                        ## Initialize eddy-diffusion scheme to compute eddy diffusivity/eddy viscosity for the first time-step
@@ -435,6 +437,7 @@ class SCM:
               self.t_history[:,kout-1] = self.t_np1[:,self.itemp]
               self.u_history[:,kout-1] = self.u_np1[:]
               self.v_history[:,kout-1] = self.v_np1[:]
+              self.tke_history[:,kout-1] = self.tke_np1[:]  
 
               if self.write_netcdf:
                 # compute diagnostics

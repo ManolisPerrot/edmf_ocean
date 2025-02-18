@@ -220,7 +220,7 @@ class SCM:
         self.t_history[:,kout] = self.t_np1[:,self.itemp]
         self.u_history[:,kout] = self.u_np1[:]
         self.v_history[:,kout] = self.v_np1[:]
-
+        self.tke_history[:,kout] = self.tke_np1[:]
     ############################################################################
     def _swap_arrays(self):
         self.u_n[:]    = self.u_np1[:]
