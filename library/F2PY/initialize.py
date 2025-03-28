@@ -1,4 +1,5 @@
 import numpy as np
+from netCDF4 import Dataset
 
 def validate_config(self):
     """Validate and normalize the configuration."""
@@ -39,14 +40,19 @@ def initialize_physical_constants(self):
     self.ecor   = 2.0 * omega * np.cos(rad * self.config["lat0"])
     self.rho0   = self.config["rho0"]
     self.cp     = self.config["cpoce"]
-    self.alpha  = self.config["alpha"]
-    self.beta   = self.config["beta"]
     self.g      = 9.81
     self.lineos = self.config["lin_eos"]
-    self.Tref   = self.config["Tref"]
-    self.Sref   = self.config["Sref"]
+    if self.lineos:
+        self.alpha  = self.config["alpha"]
+        self.beta   = self.config["beta"]
+        self.Tref   = self.config["Tref"]
+        self.Sref   = self.config["Sref"]
+    else:
+        self.alpha  = 0.
+        self.beta   = 0.
+        self.Tref   = 0.
+        self.Sref   = 0.
     self.eos_params  = np.array([self.rho0,self.alpha,self.beta,self.Tref,self.Sref])
-
 
 
 def initialize_boundary_conditions(self):
@@ -67,6 +73,19 @@ def initialize_boundary_conditions(self):
     self.bc_P09   = self.config["bc_P09"]
     self.beta_bc_P09 = self.config["beta_bc_P09"]
 
+
+def initialize_sfc_boundary_conditions(self):
+    """Initialize boundary boundary conditions."""
+    self.ustr_sfc = 0.     ## zonal wind stress       [m2/s2]
+    self.vstr_sfc = 0.     ## meridional wind stress  [m2/s2]
+    self.stflx    = np.zeros(2)
+    self.stflx[self.itemp] = 0.  # Heat flux
+    self.srflx             = 0.  # Solar radiation
+    self.stflx[self.isalt] = 0.   # Freshwater flux
+    self.btflx    = np.zeros(2)
+    self.ustr_bot = 0.
+    self.vstr_bot = 0.
+    self.z0b      = 1.e-14
 
 
 def initialize_eddy_diffusion(self):
@@ -125,7 +144,6 @@ def initialize_mass_flux(self):
     self.Cdet                = self.config["Cdet"]
     self.wp_a                = self.config["wp_a"]
     self.wp_b                = self.config["wp_b"]
-    self.trad_coriolis_mod   = self.config["trad_coriolis_mod"]
 
 
 def initialize_vertical_grid(self):
@@ -145,12 +163,9 @@ def initialize_vertical_grid(self):
         zsur = -3958.95137127683; za2  = 100.760928500000; za0  =  103.953009600000; za1  = 2.41595126900000
         zkth =  15.3510137000000; zkth2= 48.0298937200000; zacr =  7.00000000000000; zacr2= 13.0000000000000
         Sc_r = np.arange( self.nz-0.5, 0.5 , -1.); Sc_w = np.arange( self.nz    , 0.  , -1.)
-        z_w  = -( zsur + za0 * Sc_w + za1 * zacr * np.log(np.cosh((Sc_w-zkth )/zacr) ) + za2 * zacr2* np.log(np.cosh( (Sc_w-zkth2) / zacr2 ) )  )
-        z_r  = -( zsur + za0 * Sc_r + za1 * zacr * np.log(np.cosh((Sc_r-zkth )/zacr) ) + za2 * zacr2* np.log(np.cosh( (Sc_r-zkth2) / zacr2 ) )  )
-        nbot = np.argmin(z_w <= -h0)
-        self.z_w     = z_w[nbot-1:]; self.z_w[-1] = 0.
+        self.z_w  = -( zsur + za0 * Sc_w + za1 * zacr * np.log(np.cosh((Sc_w-zkth )/zacr) ) + za2 * zacr2* np.log(np.cosh( (Sc_w-zkth2) / zacr2 ) )  )
+        self.z_r  = -( zsur + za0 * Sc_r + za1 * zacr * np.log(np.cosh((Sc_r-zkth )/zacr) ) + za2 * zacr2* np.log(np.cosh( (Sc_r-zkth2) / zacr2 ) )  )
         self.nz      = len(self.z_w) - 1
-        self.z_r     = z_r[nbot-1:]
         #
     if gtype=='croco_new':
         Sc_r  = np.arange(-self.nz+0.5, 0.5, 1) / float(self.nz)
@@ -190,6 +205,29 @@ def initialize_initial_state(self):
     self.btflx[self.itemp]  = 0.
     if self.config["btflx"]=='linear_continuation': self.btflx[self.itemp] = self.aktmin * self.N0 / (self.g * self.alpha )
     self.btflx[self.isalt]  = 0.
+
+
+def initialize_model_from_file(self):
+    """Define the initial state."""
+    self.u_n = np.zeros(self.nz); self.u_np1 = np.zeros(self.nz)
+    self.v_n = np.zeros(self.nz); self.v_np1 = np.zeros(self.nz)
+    self.u_np1_star = np.zeros(self.nz)
+    self.v_np1_star = np.zeros(self.nz)
+    self.t_n        = np.zeros((self.nz,self.ntra), order='F')
+    self.t_np1      = np.zeros((self.nz,self.ntra), order='F')
+    self.t_np1_star = np.zeros((self.nz,self.ntra), order='F')
+    #
+    fh01    = Dataset(self.config["initial_filename"], mode='r',format="NETCDF4")
+    tini    = np.squeeze(fh01.variables['votemper'][0,:-1,0,0])
+    sini    = np.squeeze(fh01.variables['vosaline'][0,:-1,0,0])
+    fh01.close()
+    #
+    self.t_n  [:,self.isalt] = np.flip(sini)
+    self.t_np1[:,self.isalt] = np.flip(sini)
+    self.t_np1_star[:,self.isalt] = np.flip(sini)
+    self.t_n  [:,self.itemp] = np.flip(tini)
+    self.t_np1[:,self.itemp] = np.flip(tini)
+    self.t_np1_star[:,self.itemp] = np.flip(tini)
 
 
 
@@ -240,7 +278,6 @@ def initialize_output_and_averaging(self):
     self.t_history = np.zeros((self.nz,dimt), order='F')
     self.u_history = np.zeros((self.nz,dimt), order='F')
     self.v_history = np.zeros((self.nz,dimt), order='F')
-    self.tke_history = np.zeros((self.nz+1,dimt), order='F')
     if self.write_netcdf:
         self.wted   = np.zeros(self.nz+1); self.wtmf   = np.zeros(self.nz+1)
         self.wued   = np.zeros(self.nz+1); self.wumf   = np.zeros(self.nz+1)
@@ -257,6 +294,14 @@ def initialize_output_and_averaging(self):
         self.akt_avg    = np.zeros(self.nz+1)
         self.navg       = 0.
 
+def initialize_output(self):
+    self.output       = self.config["output_filename"]
+    self.wted   = np.zeros(self.nz+1); self.wtmf   = np.zeros(self.nz+1)
+    self.wued   = np.zeros(self.nz+1); self.wumf   = np.zeros(self.nz+1)
+    self.wved   = np.zeros(self.nz+1); self.wvmf   = np.zeros(self.nz+1)
+    self.wbed   = np.zeros(self.nz+1); self.wbmf   = np.zeros(self.nz+1)
+    self.wted[  self.nz] = self.stflx[self.itemp]
+
 def initialize_diagnostics(self):
     # MLD computation params
     self.rhoc      = 0.01    # density criterion for mixed layer depth (consistent with NEMO)
@@ -269,3 +314,14 @@ def initialize_diagnostics(self):
     self.vint_Epot = np.array(1e-14)
     self.vint_TKE  = np.array(1e-14)
     self.vint_Eps  = np.array(1e-14)
+
+def initialize_forcing_from_file(self):
+    self.kfrc = 0
+    frc01     = Dataset(self.frcname, mode='r',format="NETCDF4")
+    self.frc_time  = (frc01.variables['time'][self.kfrcStr:self.kfrcStr+self.kfrcEnd+1]-self.inifrctime)*3600.
+    self.taux1     = np.squeeze(frc01.variables['TAUX2'][self.kfrcStr+self.kfrc,0,0]); self.taux2     = self.taux1
+    self.tauy1     = np.squeeze(frc01.variables['TAUY2'][self.kfrcStr+self.kfrc,0,0]); self.tauy2     = self.tauy1
+    self.Qs1       = np.squeeze(frc01.variables['FSOL2'][self.kfrcStr+self.kfrc,0,0]); self.Qs2       = self.Qs1
+    self.Qnet1     = np.squeeze(frc01.variables['FNET2'][self.kfrcStr+self.kfrc,0,0]); self.Qnet2     = self.Qnet1
+    self.Emp1      = np.squeeze(frc01.variables['EMP2'][self.kfrcStr+self.kfrc,0,0]) * 1.e+6; self.Emp2 = self.Emp1
+    frc01.close()
