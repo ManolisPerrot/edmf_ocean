@@ -15,7 +15,8 @@ import time as TIME
 import xarray as xr
 from scipy.interpolate import interp1d
 import scipy.signal
-from scm_class import SCM
+# from scm_class import SCM
+from scm_class_oce import SCM
 from netCDF4 import Dataset
 import matplotlib.pyplot as plt
 import numpy as np
@@ -42,7 +43,7 @@ edmf_params = {
     'extrap_ak_surf': True,
     'tke_sfc_dirichlet': False,
     'eddy_diff_tke_const': 'NEMO',
-    'entr_scheme': 'R10corNT',
+    # 'entr_scheme': 'R10corNT',
     # 'entr_scheme': 'R10',
     'trad_coriolis_mod': True,
     'Cent': 0.99,    
@@ -100,7 +101,8 @@ for i, run_params in enumerate(runs):
     # !!!!!!!!!!!!!!!!!!! Modifying dt to speed up preliminary tests, to remove !!!!!!!!!!!!!!!!!!
     params.update({'dt':1000})
     # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    scm[i] = SCM(**params)
+    # scm[i] = SCM(**params)
+    scm[i] = SCM(params,cfg_params={})
     scm[i].run_direct()
     # test zinv
     # if scm[i].MF_tra or scm[i].MF_dyn: 

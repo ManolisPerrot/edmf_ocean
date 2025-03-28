@@ -250,5 +250,5 @@ ax.set_ylabel(r'$m$')
 ax.set_xlabel(r'time (hours)')
 fig.suptitle(r'Mixed Layer Depth')
 plt.savefig(saving_path+saving_name, bbox_inches='tight', dpi=300)
-
+print('fig saved at '+saving_path+saving_name)
 # plt.show()

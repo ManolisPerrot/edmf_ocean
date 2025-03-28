@@ -194,7 +194,8 @@ for i in range(len(runs)):
 #==============
 plt.tight_layout()
 plt.savefig('../figures/asicsmed_tra.pdf', bbox_inches='tight')
-plt.show()
+print('figure saved at ../figures/asicsmed_tra.pdf')
+# plt.show()
 #===============================
 #### create figure 2
 #======================================================
@@ -306,4 +307,6 @@ for i,ax in enumerate(axes.flat):
 
 plt.tight_layout()
 plt.savefig('../figures/asicsmed_hmxl.pdf', bbox_inches='tight')
-plt.show()
+print('figure saved at ../figures/asicsmed_hmxl.pdf')
+
+# plt.show()

@@ -203,6 +203,6 @@ for i in range(axs.size):
 
 
 plt.savefig(saving_path+'FC500_steady_plume.pdf')
-
+print('figure saved at '+saving_path+'FC500_steady_plume.pdf')
 
 # plt.show()

@@ -1,6 +1,6 @@
 import sys  # to put the SCM into the PYTHONPATH
 
-sys.path.append('../../library/F2PY')
+sys.path.append('../../library_old/F2PY')
 
 #!/usr/bin/env python
 # coding: utf-8
@@ -13,7 +13,10 @@ import time as TIME
 import xarray as xr
 from scipy.interpolate import interp1d
 import scipy.signal
-from scm_class_oce import SCM
+#old code
+from scm_class import SCM
+#new code
+# from scm_class_oce import SCM
 from netCDF4 import Dataset
 import matplotlib.pyplot as plt
 import numpy as np
@@ -140,7 +143,10 @@ scm = [0]*len(runs)
 for i, run_params in enumerate(runs):
     params = common_params.copy()  # Create a copy of common_params
     params.update(run_params)  # Update with run_params
-    scm[i] = SCM(params,cfg_params={}) #empty cfg_params because its is already contained in params...
+    #old code
+    scm[i] = SCM(params)
+    #new code
+    # scm[i] = SCM(params,cfg_params={}) #empty cfg_params because its is already contained in params...
     scm[i].run_direct()
 
     # do unit tests
@@ -190,6 +196,7 @@ ax.plot( (out[3]['Etot'] )[1:]  ,color='tab:green', linewidth=3 , alpha=1, lines
 ax.plot( (out[1]['Etot'] )[1:]  ,color='tab:green', linewidth=3 , alpha=1, linestyle = ':', label=run_label[1])
 
 ax.set_yscale('symlog',linthresh=1e-13)
+ax.axhline(y=0, color='k', linestyle='--', linewidth=1)
 ax.legend(fontsize=12)
 # plt.plot()
 fig.tight_layout()

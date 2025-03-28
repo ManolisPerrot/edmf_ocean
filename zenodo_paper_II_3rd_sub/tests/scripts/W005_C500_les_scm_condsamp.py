@@ -305,5 +305,6 @@ fig.legend(handles, labels, loc='upper center', bbox_to_anchor=(0.85, 0.3),
 fig.suptitle(r'Plume variables, '+case[:-7])
 # fig.legend()
 plt.savefig('../figures/W005_C500_les_scm_condsamp.pdf', bbox_inches='tight', dpi=600)
-plt.show()
+print('fig saved at '+'../figures/W005_C500_les_scm_condsamp.pdf')  
+# plt.show()
 

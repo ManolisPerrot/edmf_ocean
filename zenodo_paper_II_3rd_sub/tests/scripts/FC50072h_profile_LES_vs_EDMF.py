@@ -327,4 +327,4 @@ plt.savefig(saving_path+saving_name, bbox_inches='tight', dpi=300)
 
 print('figure saved at '+saving_path+saving_name)
 
-plt.show()
+# plt.show()
