@@ -25,9 +25,8 @@ plt.rcParams.update({
 #===========================================================================
 config_params = { 'nz': 75, 'dt':1200, 'lat0':42.04}
 
-run_label = ['TKE+EVD', 'EDMF', 'EDMF-Engy', 'Keps']
-out_files = ['run_asics_'+run_label[0]+'.nc', 'run_asics_'+run_label[1]+'.nc',
-             'run_asics_'+run_label[2]+'.nc', 'run_asics_'+run_label[3]+'.nc']
+run_label = ['TKE+EVD', 'EDMF', 'EDMF-Engy', 'Keps','EDMF-boundary',]
+out_files = ['run_asics_'+run_label[i]+'.nc' for i in range(len(run_label))]
 
 runs = [
     {
@@ -65,7 +64,20 @@ runs = [
         'evd': False,
         'eddy_diff_scheme' : 'Keps',
         'output_filename': out_files[3]
-    }
+    },
+        {
+        'eddy_diff': True,
+        'evd': False,
+        'mass_flux_tra': True,
+        'mass_flux_dyn': True,
+        'mass_flux_tke': True,
+        'mass_flux_tke_trplCorr': True,
+        'mass_flux_small_ap': True,
+        'entr_scheme': 'R10',
+        'eddy_diff_scheme' : 'TKE',
+        'output_filename': out_files[4],
+        'bc_P09': 'inconsistent',
+    },
         ]
 #
 scm = [0]*len(runs)

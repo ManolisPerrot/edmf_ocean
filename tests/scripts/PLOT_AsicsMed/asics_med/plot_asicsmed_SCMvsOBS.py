@@ -74,9 +74,9 @@ edmf_params = {'filename': '../data/run_asics_EDMF.nc', 'time_var_name': 'ocean_
 scm_edmf = Lion_data(edmf_params)
 scm_edmf.get_data()
 
-Keps_params = {'filename': '../data/run_asics_Keps.nc', 'time_var_name': 'ocean_time', 'data_title':'\textbf{k-epsilon}'}
-scm_Keps = Lion_data(Keps_params)
-scm_Keps.get_data()
+edmf_boundary_params = {'filename': '../data/run_asics_EDMF-boundary.nc', 'time_var_name': 'ocean_time', 'data_title':'\textbf{k-epsilon}'}
+scm_edmf_boundary = Lion_data(edmf_boundary_params)
+scm_edmf_boundary.get_data()
 
 data_params = {'filename': '../data/AsicsMed_data.nc', 'time_var_name': 'time_counter',
                'temp_var_name': 'votemper', 'salt_var_name': 'vosaline', 'zr_var_name': 'deptht',
@@ -135,7 +135,7 @@ time_b    = scm_evd.time[indices,:];     dpth_b    = scm_evd.dpth[indices,:]
 temp_evd  = scm_evd.temp[indices,:];     salt_evd  = scm_evd.salt[indices,:]
 temp_edmf = scm_edmf.temp[indices,:];    salt_edmf = scm_edmf.salt[indices,:]
 temp_edmf_energy = scm_edmf_energy.temp[indices,:];    salt_edmf_energy = scm_edmf_energy.salt[indices,:]
-temp_Keps = scm_Keps.temp[indices,:];    salt_Keps = scm_Keps.salt[indices,:]
+temp_edmf_boundary = scm_edmf_boundary.temp[indices,:];    salt_edmf_boundary = scm_edmf_boundary.salt[indices,:]
 #=============================================================
 # Step2: subsample the scm data in time to get a 12h frequency
 #==============================================================
@@ -171,12 +171,12 @@ im = ax.pcolormesh(time_b, dpth_b, temp_evd-temp_data, norm=normT, cmap=colorMap
 ax.set_ylabel(r'depth $[{\rm m}]$')
 #
 axindex +=1;ax = axes[axindex]
-ax.set_title(r"Temperature difference [ \textbf{k-epsilon} - OBS ]")
-im = ax.pcolormesh(time_b, dpth_b, temp_Keps-temp_data, norm=normT, cmap=colorMapE, shading='auto')
+ax.set_title(r"Temperature difference [ \textbf{EDMF-boundary-inconsistent} - OBS ]")
+im = ax.pcolormesh(time_b, dpth_b, temp_edmf_boundary-temp_data, norm=normT, cmap=colorMapE, shading='auto')
 ax.set_ylabel(r'depth $[{\rm m}]$')
 #
 axindex +=1;ax = axes[axindex]
-ax.set_title(r"Temperature difference [ (\textbf{EDMF-Inconsistent}) - OBS ]")
+ax.set_title(r"Temperature difference [ (\textbf{EDMF-bulk-inconsistent}) - OBS ]")
 im = ax.pcolormesh(time_b, dpth_b, temp_edmf-temp_data, norm=normT, cmap=colorMapE, shading='auto')
 ax.set_ylabel(r'depth $[{\rm m}]$')
 #
@@ -192,7 +192,7 @@ f.subplots_adjust(right=0.8)
 cbar_ax = f.add_axes([0.85, 0.15, 0.05, 0.7])
 cbar = f.colorbar(im, cax=cbar_ax)
 cbar.set_label("K")
-plt.savefig('../figures/ASICS_MED_temp_diff.png', dpi=500)
+plt.savefig('../figures/ASICS_MED_temp_diff.png', dpi=600)
 #-------------------- Salinity
 f, axes = plt.subplots(4, 1, sharex=True, sharey=True)
 f.set_figheight(10); f.set_figwidth(10)
@@ -205,7 +205,7 @@ ax.set_ylabel(r'depth $[{\rm m}]$')
 #
 axindex +=1;ax = axes[axindex]
 ax.set_title(r"Salinity difference [ \textbf{k-epsilon} - OBS ]")
-im = ax.pcolormesh(time_b, dpth_b, salt_Keps-salt_data, norm=normS, cmap=colorMapE, shading='auto')
+im = ax.pcolormesh(time_b, dpth_b, salt_edmf_boundary-salt_data, norm=normS, cmap=colorMapE, shading='auto')
 ax.set_ylabel(r'depth $[{\rm m}]$')
 #
 axindex +=1;ax = axes[axindex]

@@ -53,7 +53,9 @@ class SCM:
         self._initialize_model()
         self.hmxl10    = np.array(-self.Hz[-1])
         self.hmxl300   = np.array(-self.Hz[-1])
-        self.bc_P09    = 'false'
+        # self.bc_P09    = 'false'
+        self.bc_P09    = self.config["bc_P09"]
+        self.beta_bc_P09 = self.config["beta_bc_P09"]
         self.trad_coriolis_mod = False
 
     ############################################################################
@@ -89,7 +91,7 @@ class SCM:
             "mxlmin": 1.0, "Cent": 0.7, "Cdet": 1.99, "wp_a": 1.0,
             "wp_b": 1.0, "wp_bp": 0.125, "up_c": 0.25,
             "vp_c": 0.25, "bc_ap": 0.20, "delta_bkg": 0.0625,
-            "wp0":-1.0e-08, "entr_scheme": "R10"
+            "wp0":-1.0e-08, "entr_scheme": "R10", "bc_P09": "false","beta_bc_P09":0.3,
         }
         config = default_config.copy()
         config.update(run_params)
