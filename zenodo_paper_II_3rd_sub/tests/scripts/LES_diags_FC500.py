@@ -113,8 +113,8 @@ mask = 'DW'
 nz=70
 axs.flat[i].plot(variables[mask][i][instant, nz:], zadim[nz:],
                  linestyle='-', linewidth=linewidth[mask], color='#0db4c3')
-axs.flat[i].plot(2*variables[mask][i][instant, nz]-variables[mask][i][instant, :nz+1], zadim[:nz+1],
-                 linestyle='-', linewidth=linewidth[mask], color='#0db4c3')
+#axs.flat[i].plot(2*variables[mask][i][instant, nz]-variables[mask][i][instant, :nz+1], zadim[:nz+1],
+#                 linestyle='-', linewidth=linewidth[mask], color='#0db4c3')
 axs.flat[i].set_title(var_titles[i])
 axs.flat[i].grid(False)
 axs.flat[i].set_xlabel(units[i])
